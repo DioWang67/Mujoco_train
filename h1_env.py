@@ -296,8 +296,14 @@ class H1Env(MujocoEnv):
     # ── Core API ──────────────────────────────────────────────────────────
 
     def set_target_velocity(self, velocity: float) -> None:
-        """Set forward velocity command (for curriculum learning)."""
-        self._target_velocity = float(np.clip(velocity, _CMD_VX_RANGE[0], _CMD_VX_RANGE[1]))
+        """Set forward velocity command (for curriculum learning).
+
+        Deliberately NOT clipped to _CMD_VX_RANGE: curriculum stage 1 (0.2)
+        sits below the randomize-commands floor (0.3) and needs to pass
+        through untouched so early-stage training focuses on balance.
+        For randomize_commands, reset_model() re-clips as needed.
+        """
+        self._target_velocity = float(velocity)
         if not self._randomize_commands:
             self._command[0] = self._target_velocity
 
@@ -464,11 +470,14 @@ class H1Env(MujocoEnv):
 
         # ── Command Randomization ───────────────────────────────────
         if self._randomize_commands:
-            # When command randomization is enabled (e.g., DR training), still
-            # respect curriculum by shaping the sampled vx range around the
-            # current target velocity.
-            vx_hi = float(np.clip(self._target_velocity, _CMD_VX_RANGE[0], _CMD_VX_RANGE[1]))
-            vx_lo = max(_CMD_VX_RANGE[0], min(vx_hi, 0.4 * vx_hi))
+            # Respect curriculum: allow vx_hi below the usual _CMD_VX_RANGE[0]
+            # floor (e.g. 0.2 m/s in stage 1 for balance-focused training).
+            # Only the upper bound is enforced; a tiny lower bound (0.05)
+            # avoids sampling exactly zero.
+            vx_hi = float(
+                min(max(self._target_velocity, 0.05), _CMD_VX_RANGE[1]),
+            )
+            vx_lo = 0.4 * vx_hi
             self._command[0] = float(
                 self.np_random.uniform(vx_lo, vx_hi),
             )
@@ -501,16 +510,20 @@ class H1Env(MujocoEnv):
         self._episode_time = 0.0
         mujoco.mj_forward(self.model, self.data)
 
-        projected_gravity = (
-            _quat_to_rotation_matrix(self.data.qpos[3:7]).T
-            @ np.array([0.0, 0.0, -1.0])
-        )
+        # Rotate base velocities + gravity into body frame so reset-step obs
+        # matches the convention used in step() (see lines 350-355). Without
+        # this, the first obs of each episode is in world frame and creates
+        # a coordinate mismatch that destabilises training.
+        rot = _quat_to_rotation_matrix(self.data.qpos[3:7])
+        projected_gravity = rot.T @ np.array([0.0, 0.0, -1.0])
+        base_lin_vel = rot.T @ self.data.qvel[0:3]
+        base_ang_vel = rot.T @ self.data.qvel[3:6]
         phase_left = self._gait_phase
         phase_right = (self._gait_phase + 0.5) % 1.0
         return self._get_obs(
             projected_gravity,
-            self.data.qvel[0:3].copy(),
-            self.data.qvel[3:6].copy(),
+            base_lin_vel,
+            base_ang_vel,
             self.data.qpos[7:].copy(),
             self.data.qvel[6:].copy(),
             phase_left, phase_right,

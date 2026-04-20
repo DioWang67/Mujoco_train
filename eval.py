@@ -26,7 +26,12 @@ MODEL_DIR = os.path.join(HERE, "models")
 BEST_PATH = os.path.join(MODEL_DIR, "best_model")
 FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo")
 DR_FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo_dr")
+# DR best lives in a subdirectory so DR training cannot overwrite the base
+# best_model.zip / h1_vecnorm_best.pkl.
+DR_BEST_DIR = os.path.join(MODEL_DIR, "dr_best")
+DR_BEST_PATH = os.path.join(DR_BEST_DIR, "best_model")
 VECNORM_BEST_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_best.pkl")
+VECNORM_DR_BEST_PATH = os.path.join(DR_BEST_DIR, "h1_vecnorm_best.pkl")
 VECNORM_DR_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_dr.pkl")
 VECNORM_PATH = os.path.join(MODEL_DIR, "h1_vecnorm.pkl")
 
@@ -45,18 +50,23 @@ def main(episodes: int, do_log: bool, render: bool, record: bool,
         dr = (
             os.path.exists(VECNORM_DR_PATH)
             and (
-                os.path.exists(DR_FINAL_PATH + ".zip")
-                or os.path.exists(FINAL_PATH + ".zip")
+                os.path.exists(DR_BEST_PATH + ".zip")
+                or os.path.exists(DR_FINAL_PATH + ".zip")
             )
         )
         if dr:
             print("[auto] Detected DR artifacts, enabling DR eval mode.")
 
-    # DR eval uses the final finetuned model (h1_ppo.zip) + DR-adapted VecNorm
-    # (h1_vecnorm_dr.pkl). best_model.zip was selected by EvalCallback on a
-    # non-DR eval_env, so pairing it with a DR env causes observation mismatch.
+    # Model priority by mode:
+    #   DR  : dr_best/best_model.zip → h1_ppo_dr.zip → (last resort) base best
+    #   BASE: best_model.zip → h1_ppo.zip
+    # DR best is isolated in models/dr_best/ so it never overwrites the base
+    # best_model.zip. Using a base best_model.zip under DR env causes
+    # observation distribution mismatch — only used as last-resort fallback.
     if dr:
-        if os.path.exists(DR_FINAL_PATH + ".zip"):
+        if os.path.exists(DR_BEST_PATH + ".zip"):
+            ckpt = DR_BEST_PATH
+        elif os.path.exists(DR_FINAL_PATH + ".zip"):
             ckpt = DR_FINAL_PATH
         elif os.path.exists(FINAL_PATH + ".zip"):
             ckpt = FINAL_PATH
@@ -65,7 +75,9 @@ def main(episodes: int, do_log: bool, render: bool, record: bool,
         else:
             print("No trained model found. Run `python train.py` first.")
             return
-        vecnorm_candidates = [VECNORM_DR_PATH, VECNORM_PATH]
+        vecnorm_candidates = [
+            VECNORM_DR_BEST_PATH, VECNORM_DR_PATH, VECNORM_PATH,
+        ]
     else:
         if os.path.exists(BEST_PATH + ".zip"):
             ckpt = BEST_PATH
@@ -214,7 +226,8 @@ if __name__ == "__main__":
                    help="record mp4 (headless, no display needed)")
     p.add_argument("--dr", action="store_true",
                    help="enable domain randomization eval "
-                        "(prefers h1_ppo_dr.zip + h1_vecnorm_dr.pkl)")
+                        "(prefers dr_best/best_model.zip + dr_best/h1_vecnorm_best.pkl, "
+                        "then h1_ppo_dr.zip + h1_vecnorm_dr.pkl)")
     p.add_argument("--auto-dr", action="store_true",
                    help="auto-enable --dr when DR vecnorm/model artifacts exist")
     p.add_argument("--vel", type=float, default=1.0,

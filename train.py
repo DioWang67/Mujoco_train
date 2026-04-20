@@ -391,37 +391,57 @@ def make_env(
 
 
 def _find_latest_checkpoint(prefer_dr: bool) -> str | None:
-    """Return path to the latest checkpoint or final model, or None.
+    """Return the best resume candidate, or None.
 
-    ``prefer_dr`` biases tie-breaking when both base and DR artefacts exist.
+    Resume must pick a **chronologically latest** checkpoint of the matching
+    mode (DR vs base). Mixing modes or picking best_model.zip would resume
+    from the wrong training run.
+
+    Priority:
+      1. Highest-step ``h1_ppo_dr_*_steps.zip`` (if prefer_dr) or
+         ``h1_ppo_*_steps.zip`` (if not prefer_dr, excluding DR files).
+      2. Final model of matching mode: ``h1_ppo_dr.zip`` or ``h1_ppo.zip``.
+      3. best_model.zip only as a last resort (EvalCallback-selected, not
+         chronological — prints a warning).
     """
     import glob
-    patterns = (
-        ["h1_ppo_dr*.zip", "h1_ppo*.zip"]
-        if prefer_dr else
-        ["h1_ppo*.zip", "h1_ppo_dr*.zip"]
-    )
-    candidates = []
-    for pat in patterns:
-        candidates.extend(glob.glob(os.path.join(MODEL_DIR, pat)))
-    best = os.path.join(MODEL_DIR, "best_model.zip")
-    if os.path.exists(best) and best not in candidates:
-        candidates.append(best)
-    if not candidates:
-        return None
 
-    def sort_key(p):
-        name = os.path.basename(p)
-        is_dr = 1 if name.startswith("h1_ppo_dr") else 0
-        parts = name.replace(".zip", "").split("_steps")
+    def _is_dr(path: str) -> bool:
+        return os.path.basename(path).startswith("h1_ppo_dr")
+
+    def _step_of(path: str) -> int | None:
+        name = os.path.basename(path).replace(".zip", "")
+        parts = name.split("_steps")
+        if len(parts) < 2:
+            return None  # final model (no _steps suffix)
         try:
-            step = int(parts[0].split("_")[-1])
+            return int(parts[0].split("_")[-1])
         except ValueError:
-            step = 10**12  # final model has highest priority
-        # Prefer DR or base when step ties (or for final models).
-        dr_bias = is_dr if prefer_dr else (1 - is_dr)
-        return (step, dr_bias)
-    return max(candidates, key=sort_key)
+            return None
+
+    all_files = glob.glob(os.path.join(MODEL_DIR, "h1_ppo*.zip"))
+    matching = [p for p in all_files if _is_dr(p) == prefer_dr]
+
+    # 1) Highest-step checkpoint of matching mode.
+    step_ckpts = [(s, p) for p in matching if (s := _step_of(p)) is not None]
+    if step_ckpts:
+        return max(step_ckpts)[1]
+
+    # 2) Final model of matching mode.
+    final_name = "h1_ppo_dr.zip" if prefer_dr else "h1_ppo.zip"
+    final_path = os.path.join(MODEL_DIR, final_name)
+    if os.path.exists(final_path):
+        return final_path
+
+    # 3) Fallback to best_model.zip only when no matching artefact found.
+    best = os.path.join(MODEL_DIR, "best_model.zip")
+    if os.path.exists(best):
+        print("[warn] No step-numbered or final checkpoint of matching mode "
+              "found; falling back to best_model.zip "
+              "(may not be chronologically latest).")
+        return best
+
+    return None
 
 
 def build_vec_env(
@@ -537,7 +557,10 @@ def train(
 
     # Finetune writes DR stats to a separate file so base-training stats
     # (h1_vecnorm.pkl) are preserved for non-DR eval.
-    vecnorm_path = VECNORM_DR_PATH if finetune_from else VECNORM_PATH
+    # VecNorm path must follow the same DR/base split as the model artefact
+    # (save_model_path below). Previously only --finetune branched to
+    # VECNORM_DR_PATH, leaving fresh --dr runs overwriting the base VecNorm.
+    vecnorm_path = VECNORM_DR_PATH if domain_randomization else VECNORM_PATH
 
     resume_path = _find_latest_checkpoint(prefer_dr=domain_randomization) if resume else None
 
@@ -653,6 +676,21 @@ def train(
                 dr_start_level=dr_start_level,
             ),
         )
+    # Best artifacts must not leak between base and DR training runs:
+    # EvalCallback always names the file "best_model.zip", so without a
+    # per-mode save dir a DR run would overwrite the base best_model.zip
+    # (and BestVecNormCallback the base h1_vecnorm_best.pkl). Use a
+    # dedicated subdir for DR so base artefacts stay intact.
+    if domain_randomization:
+        best_artifact_dir = os.path.join(MODEL_DIR, "dr_best")
+        os.makedirs(best_artifact_dir, exist_ok=True)
+        vecnorm_best_path = os.path.join(
+            best_artifact_dir, "h1_vecnorm_best.pkl",
+        )
+    else:
+        best_artifact_dir = MODEL_DIR
+        vecnorm_best_path = VECNORM_BEST_PATH
+
     if not smoke:
         callbacks += [
             CheckpointCallback(
@@ -662,7 +700,7 @@ def train(
             ),
             EvalCallback(
                 eval_env,
-                best_model_save_path=MODEL_DIR,
+                best_model_save_path=best_artifact_dir,
                 log_path=LOG_DIR,
                 eval_freq=save_freq_steps,
                 n_eval_episodes=20,
@@ -672,27 +710,51 @@ def train(
             # BestVecNormCallback MUST come AFTER EvalCallback: EvalCallback
             # writes best_model.zip first, then this detects the new mtime
             # and snapshots eval_env.obs_rms (already synced from vec_env).
-            BestVecNormCallback(MODEL_DIR, VECNORM_BEST_PATH, eval_env),
+            BestVecNormCallback(
+                best_artifact_dir, vecnorm_best_path, eval_env,
+            ),
         ]
 
     save_model_path = MODEL_DR_PATH if domain_randomization else MODEL_PATH
 
-    model.learn(
-        total_timesteps=total_steps,
-        callback=callbacks,
-        reset_num_timesteps=(finetune_from is not None) or (not resume),
-    )
-    model.save(save_model_path)
-    vec_env.save(vecnorm_path)
-    manifest["finished_at"] = datetime.now().isoformat()
-    manifest["model_path"] = save_model_path + ".zip"
-    manifest["vecnorm_path"] = vecnorm_path
-    with open(manifest_path, "w") as f:
-        json.dump(manifest, f, indent=2, default=str)
-    print(f"\nSaved model -> {save_model_path}.zip")
-    print(f"VecNormalize -> {vecnorm_path}")
-    vec_env.close()
-    eval_env.close()
+    status = "completed"
+    try:
+        model.learn(
+            total_timesteps=total_steps,
+            callback=callbacks,
+            reset_num_timesteps=(finetune_from is not None) or (not resume),
+        )
+    except KeyboardInterrupt:
+        status = "interrupted_by_user"
+        print("\n[warn] Training interrupted — saving current state.")
+    except BaseException as e:
+        status = f"failed:{type(e).__name__}"
+        print(f"\n[error] Training crashed: {e} — attempting partial save.")
+        raise
+    finally:
+        # Best-effort save on any exit path. Checkpoints saved by callbacks
+        # are still intact even if these throw.
+        try:
+            model.save(save_model_path)
+            vec_env.save(vecnorm_path)
+            print(f"\nSaved model -> {save_model_path}.zip")
+            print(f"VecNormalize -> {vecnorm_path}")
+        except Exception as save_err:
+            print(f"[warn] Final save failed: {save_err}")
+
+        manifest["finished_at"] = datetime.now().isoformat()
+        manifest["status"] = status
+        manifest["num_timesteps"] = int(model.num_timesteps)
+        manifest["model_path"] = save_model_path + ".zip"
+        manifest["vecnorm_path"] = vecnorm_path
+        try:
+            with open(manifest_path, "w") as f:
+                json.dump(manifest, f, indent=2, default=str)
+        except Exception as mf_err:
+            print(f"[warn] Manifest update failed: {mf_err}")
+
+        vec_env.close()
+        eval_env.close()
 
 
 if __name__ == "__main__":

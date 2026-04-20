@@ -23,25 +23,33 @@ MODEL_DIR = os.path.join(HERE, "models")
 BEST_PATH = os.path.join(MODEL_DIR, "best_model")
 FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo")
 DR_FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo_dr")
+# DR best artifacts live in a subdirectory to avoid overwriting base best.
+DR_BEST_DIR = os.path.join(MODEL_DIR, "dr_best")
+DR_BEST_PATH = os.path.join(DR_BEST_DIR, "best_model")
 VECNORM_BEST_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_best.pkl")
+VECNORM_DR_BEST_PATH = os.path.join(DR_BEST_DIR, "h1_vecnorm_best.pkl")
 VECNORM_DR_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_dr.pkl")
 VECNORM_PATH = os.path.join(MODEL_DIR, "h1_vecnorm.pkl")
 
 
 def _resolve_model(dr: bool) -> str | None:
     if dr:
-        for p in [DR_FINAL_PATH, FINAL_PATH, BEST_PATH]:
+        for p in [DR_BEST_PATH, DR_FINAL_PATH, FINAL_PATH, BEST_PATH]:
             if os.path.exists(p + ".zip"):
                 return p
     else:
-        for p in [BEST_PATH, FINAL_PATH, DR_FINAL_PATH]:
+        for p in [BEST_PATH, FINAL_PATH, DR_BEST_PATH, DR_FINAL_PATH]:
             if os.path.exists(p + ".zip"):
                 return p
     return None
 
 
 def _load_vecnorm(dr: bool):
-    candidates = [VECNORM_DR_PATH, VECNORM_PATH] if dr else [VECNORM_BEST_PATH, VECNORM_PATH]
+    candidates = (
+        [VECNORM_DR_BEST_PATH, VECNORM_DR_PATH, VECNORM_PATH]
+        if dr
+        else [VECNORM_BEST_PATH, VECNORM_PATH]
+    )
     for c in candidates:
         if os.path.exists(c):
             dummy = DummyVecEnv([lambda: H1Env()])
