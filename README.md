@@ -53,6 +53,7 @@ python preflight_check.py
 
 若顯示 `Preflight PASSED` 再開始訓練，可避免路徑/依賴/環境問題卡在中途。
 
+
 ### 第一步：開始訓練
 
 ```cmd
