@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Large archives & extracted dirs
+*.tar.gz
+all_deps/
+cuda_deps/
+cusparselt_fix/
+h1_package/
+missing2/
+missing_deps/
+mujoco_deps/
+triton_fix/
+tmppip_cache/
+
+# MuJoCo Menagerie (434 MB — install separately from deepmind/mujoco_menagerie)
+mujoco_menagerie/
+
+# Training artefacts (models, logs, outputs)
+models/
+logs/
+
+# Eval outputs
+eval_ep*.csv
+eval_ep*.mp4
+*.png
+
+# Claude internal
+.claude/
+
+# Misc
+MUJOCO_LOG.TXT
