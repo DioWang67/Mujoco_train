@@ -12,6 +12,7 @@ import os
 import sys
 
 import numpy as np
+from gymnasium.wrappers import TimeLimit
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
@@ -20,36 +21,19 @@ from h1_env import H1Env
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(HERE, "models")
-BEST_PATH = os.path.join(MODEL_DIR, "best_model")
-FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo")
-DR_FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo_dr")
+BEST_PATH = os.path.join(MODEL_DIR, "best_model.zip")
+FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo.zip")
+DR_FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo_dr.zip")
 # DR best artifacts live in a subdirectory to avoid overwriting base best.
 DR_BEST_DIR = os.path.join(MODEL_DIR, "dr_best")
-DR_BEST_PATH = os.path.join(DR_BEST_DIR, "best_model")
+DR_BEST_PATH = os.path.join(DR_BEST_DIR, "best_model.zip")
 VECNORM_BEST_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_best.pkl")
 VECNORM_DR_BEST_PATH = os.path.join(DR_BEST_DIR, "h1_vecnorm_best.pkl")
 VECNORM_DR_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_dr.pkl")
 VECNORM_PATH = os.path.join(MODEL_DIR, "h1_vecnorm.pkl")
 
 
-def _resolve_model(dr: bool) -> str | None:
-    if dr:
-        for p in [DR_BEST_PATH, DR_FINAL_PATH, FINAL_PATH, BEST_PATH]:
-            if os.path.exists(p + ".zip"):
-                return p
-    else:
-        for p in [BEST_PATH, FINAL_PATH, DR_BEST_PATH, DR_FINAL_PATH]:
-            if os.path.exists(p + ".zip"):
-                return p
-    return None
-
-
-def _load_vecnorm(dr: bool):
-    candidates = (
-        [VECNORM_DR_BEST_PATH, VECNORM_DR_PATH, VECNORM_PATH]
-        if dr
-        else [VECNORM_BEST_PATH, VECNORM_PATH]
-    )
+def _load_vecnorm(candidates: list[str]):
     for c in candidates:
         if os.path.exists(c):
             dummy = DummyVecEnv([lambda: H1Env()])
@@ -60,8 +44,30 @@ def _load_vecnorm(dr: bool):
     return None, None
 
 
+def _resolve_model() -> str | None:
+    """Pick one policy artifact to compare under base vs DR environments."""
+    for model_path in [DR_BEST_PATH, DR_FINAL_PATH, BEST_PATH, FINAL_PATH]:
+        if os.path.exists(model_path):
+            return model_path
+    return None
+
+
+def _vecnorm_candidates_for(model_path: str) -> list[str]:
+    """Use the VecNorm that matches the chosen model artifact."""
+    if model_path == DR_BEST_PATH:
+        return [VECNORM_DR_BEST_PATH, VECNORM_DR_PATH, VECNORM_PATH]
+    if model_path == DR_FINAL_PATH:
+        return [VECNORM_DR_PATH, VECNORM_DR_BEST_PATH, VECNORM_PATH]
+    if model_path == BEST_PATH:
+        return [VECNORM_BEST_PATH, VECNORM_PATH]
+    return [VECNORM_PATH, VECNORM_BEST_PATH]
+
+
 def _run_setting(model: PPO, episodes: int, dr: bool, vel: float, vec_norm, seed: int | None):
-    env = H1Env(domain_randomization=dr, target_velocity=vel, render_mode=None)
+    env = TimeLimit(
+        H1Env(domain_randomization=dr, target_velocity=vel, render_mode=None),
+        max_episode_steps=1000,
+    )
     ep_rewards = []
     ep_lens = []
     ep_xvel = []
@@ -125,24 +131,23 @@ def _write_outputs(out_json: str | None, out_csv: str | None, payload: dict) -> 
 
 
 def run_compare(episodes: int, vel: float, seed: int | None = None) -> dict | None:
-    model_path = _resolve_model(dr=True) or _resolve_model(dr=False)
+    model_path = _resolve_model()
     if model_path is None:
         print("No model found under models/. Train first.")
         return None
 
-    print(f"Model: {model_path}.zip")
+    print(f"Model: {model_path}")
     model = PPO.load(model_path, custom_objects={"learning_rate": 3e-4, "clip_range": 0.2})
 
-    vn_base, base_vn_path = _load_vecnorm(dr=False)
-    vn_dr, dr_vn_path = _load_vecnorm(dr=True)
+    vecnorm_candidates = _vecnorm_candidates_for(model_path)
+    vec_norm, vecnorm_path = _load_vecnorm(vecnorm_candidates)
 
-    print(f"VecNorm(BASE): {base_vn_path or 'None'}")
-    print(f"VecNorm(DR)  : {dr_vn_path or 'None'}")
+    print(f"VecNorm(model): {vecnorm_path or 'None'}")
     print(f"Episodes={episodes}, target_vel={vel}")
     print("-" * 78)
 
-    base_m = _run_setting(model, episodes, dr=False, vel=vel, vec_norm=vn_base, seed=seed)
-    dr_m = _run_setting(model, episodes, dr=True, vel=vel, vec_norm=vn_dr, seed=seed)
+    base_m = _run_setting(model, episodes, dr=False, vel=vel, vec_norm=vec_norm, seed=seed)
+    dr_m = _run_setting(model, episodes, dr=True, vel=vel, vec_norm=vec_norm, seed=seed)
 
     _print_row("BASE", base_m)
     _print_row("DR", dr_m)
@@ -156,9 +161,8 @@ def run_compare(episodes: int, vel: float, seed: int | None = None) -> dict | No
     )
 
     payload = {
-        "model": model_path + ".zip",
-        "vecnorm_base": base_vn_path,
-        "vecnorm_dr": dr_vn_path,
+        "model": model_path,
+        "vecnorm": vecnorm_path,
         "episodes": episodes,
         "target_vel": vel,
         "seed": seed,

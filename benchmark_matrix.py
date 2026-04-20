@@ -12,6 +12,7 @@ import os
 from statistics import mean, stdev
 
 import numpy as np
+from gymnasium.wrappers import TimeLimit
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
@@ -19,12 +20,12 @@ from h1_env import H1Env
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(HERE, "models")
-BEST_PATH = os.path.join(MODEL_DIR, "best_model")
-FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo")
-DR_FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo_dr")
+BEST_PATH = os.path.join(MODEL_DIR, "best_model.zip")
+FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo.zip")
+DR_FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo_dr.zip")
 # DR best artifacts live in a subdirectory to avoid overwriting base best.
 DR_BEST_DIR = os.path.join(MODEL_DIR, "dr_best")
-DR_BEST_PATH = os.path.join(DR_BEST_DIR, "best_model")
+DR_BEST_PATH = os.path.join(DR_BEST_DIR, "best_model.zip")
 VECNORM_BEST_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_best.pkl")
 VECNORM_DR_BEST_PATH = os.path.join(DR_BEST_DIR, "h1_vecnorm_best.pkl")
 VECNORM_DR_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_dr.pkl")
@@ -34,17 +35,12 @@ VECNORM_PATH = os.path.join(MODEL_DIR, "h1_vecnorm.pkl")
 def _resolve_model() -> str | None:
     # DR-trained models handle both base and DR scenarios best, so prefer them.
     for p in [DR_BEST_PATH, DR_FINAL_PATH, BEST_PATH, FINAL_PATH]:
-        if os.path.exists(p + ".zip"):
+        if os.path.exists(p):
             return p
     return None
 
 
-def _load_vecnorm(dr: bool):
-    candidates = (
-        [VECNORM_DR_BEST_PATH, VECNORM_DR_PATH, VECNORM_PATH]
-        if dr
-        else [VECNORM_BEST_PATH, VECNORM_PATH]
-    )
+def _load_vecnorm(candidates: list[str]):
     for c in candidates:
         if os.path.exists(c):
             dummy = DummyVecEnv([lambda: H1Env()])
@@ -55,15 +51,44 @@ def _load_vecnorm(dr: bool):
     return None, None
 
 
-def _run_scenario(model: PPO, sc: dict) -> dict:
+def _vecnorm_candidates_for(model_path: str, dr: bool) -> list[str]:
+    """Pick VecNorm files that best match the chosen model artifact."""
+    if dr:
+        if model_path == DR_BEST_PATH:
+            return [VECNORM_DR_BEST_PATH, VECNORM_DR_PATH, VECNORM_PATH]
+        if model_path == DR_FINAL_PATH:
+            return [VECNORM_DR_PATH, VECNORM_DR_BEST_PATH, VECNORM_PATH]
+        if model_path == FINAL_PATH:
+            return [VECNORM_PATH, VECNORM_BEST_PATH]
+        return [VECNORM_BEST_PATH, VECNORM_PATH]
+
+    if model_path == BEST_PATH:
+        return [VECNORM_BEST_PATH, VECNORM_PATH]
+    if model_path == FINAL_PATH:
+        return [VECNORM_PATH, VECNORM_BEST_PATH]
+    if model_path == DR_BEST_PATH:
+        return [VECNORM_DR_BEST_PATH, VECNORM_DR_PATH, VECNORM_PATH]
+    return [VECNORM_DR_PATH, VECNORM_DR_BEST_PATH, VECNORM_PATH]
+
+
+def _run_scenario(model: PPO, model_path: str, sc: dict) -> dict:
     dr = bool(sc.get("dr", False))
     target_vel = float(sc.get("target_vel", 1.0))
     episodes = int(sc.get("episodes", 5))
     base_seed = sc.get("seed", None)
     dr_level = sc.get("dr_level", None)
 
-    vec_norm, vecnorm_path = _load_vecnorm(dr=dr)
-    env = H1Env(domain_randomization=dr, target_velocity=target_vel, render_mode=None)
+    vec_norm, vecnorm_path = _load_vecnorm(
+        _vecnorm_candidates_for(model_path, dr=dr),
+    )
+    env = TimeLimit(
+        H1Env(
+            domain_randomization=dr,
+            target_velocity=target_vel,
+            render_mode=None,
+        ),
+        max_episode_steps=1000,
+    )
     if dr and dr_level is not None:
         env.set_dr_level(float(np.clip(dr_level, 0.0, 1.0)))
 
@@ -126,13 +151,13 @@ def main(matrix_path: str, out_json: str | None, out_csv: str | None) -> int:
         print("No model found in models/. Train first.")
         return 1
 
-    print(f"Model: {model_path}.zip")
+    print(f"Model: {model_path}")
     model = PPO.load(model_path, custom_objects={"learning_rate": 3e-4, "clip_range": 0.2})
 
     rows = []
     for sc in scenarios:
         print(f"\n=== Scenario: {sc.get('name', 'unnamed')} ===")
-        row = _run_scenario(model, sc)
+        row = _run_scenario(model, model_path, sc)
         rows.append(row)
         print(
             f"R={row['reward_mean']:.1f}±{row['reward_std']:.1f} "
@@ -143,7 +168,7 @@ def main(matrix_path: str, out_json: str | None, out_csv: str | None) -> int:
     payload = {
         "matrix": matrix.get("description", ""),
         "matrix_path": matrix_path,
-        "model": model_path + ".zip",
+        "model": model_path,
         "rows": rows,
     }
 

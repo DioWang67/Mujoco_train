@@ -11,10 +11,13 @@ Usage:
 import argparse
 import csv
 import os
+import shutil
 import sys
+import tempfile
 import time
 
 import numpy as np
+from gymnasium.wrappers import TimeLimit
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
@@ -23,13 +26,13 @@ from h1_env import H1Env
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(HERE, "models")
-BEST_PATH = os.path.join(MODEL_DIR, "best_model")
-FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo")
-DR_FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo_dr")
+BEST_PATH = os.path.join(MODEL_DIR, "best_model.zip")
+FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo.zip")
+DR_FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo_dr.zip")
 # DR best lives in a subdirectory so DR training cannot overwrite the base
 # best_model.zip / h1_vecnorm_best.pkl.
 DR_BEST_DIR = os.path.join(MODEL_DIR, "dr_best")
-DR_BEST_PATH = os.path.join(DR_BEST_DIR, "best_model")
+DR_BEST_PATH = os.path.join(DR_BEST_DIR, "best_model.zip")
 VECNORM_BEST_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_best.pkl")
 VECNORM_DR_BEST_PATH = os.path.join(DR_BEST_DIR, "h1_vecnorm_best.pkl")
 VECNORM_DR_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_dr.pkl")
@@ -44,14 +47,47 @@ JOINT_NAMES = [
 ]
 
 
+def _load_model_with_retry(
+    model_path: str,
+    custom_objects: dict,
+    retries: int = 5,
+    delay_sec: float = 1.0,
+) -> PPO:
+    """Load an SB3 zip safely even if training is concurrently updating it."""
+    last_err = None
+    for attempt in range(1, retries + 1):
+        tmp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                suffix=".zip", delete=False,
+            ) as tmp_file:
+                tmp_path = tmp_file.name
+            shutil.copy2(model_path, tmp_path)
+            return PPO.load(tmp_path, custom_objects=custom_objects)
+        except Exception as e:
+            last_err = e
+            if attempt < retries:
+                print(
+                    f"[warn] Model load failed (attempt {attempt}/{retries}): {e}",
+                )
+                time.sleep(delay_sec)
+        finally:
+            if tmp_path and os.path.exists(tmp_path):
+                try:
+                    os.remove(tmp_path)
+                except OSError:
+                    pass
+    raise last_err
+
+
 def main(episodes: int, do_log: bool, render: bool, record: bool,
          dr: bool = False, target_vel: float = 1.0, auto_dr: bool = False):
     if auto_dr and not dr:
         dr = (
             os.path.exists(VECNORM_DR_PATH)
             and (
-                os.path.exists(DR_BEST_PATH + ".zip")
-                or os.path.exists(DR_FINAL_PATH + ".zip")
+                os.path.exists(DR_BEST_PATH)
+                or os.path.exists(DR_FINAL_PATH)
             )
         )
         if dr:
@@ -64,13 +100,13 @@ def main(episodes: int, do_log: bool, render: bool, record: bool,
     # best_model.zip. Using a base best_model.zip under DR env causes
     # observation distribution mismatch — only used as last-resort fallback.
     if dr:
-        if os.path.exists(DR_BEST_PATH + ".zip"):
+        if os.path.exists(DR_BEST_PATH):
             ckpt = DR_BEST_PATH
-        elif os.path.exists(DR_FINAL_PATH + ".zip"):
+        elif os.path.exists(DR_FINAL_PATH):
             ckpt = DR_FINAL_PATH
-        elif os.path.exists(FINAL_PATH + ".zip"):
+        elif os.path.exists(FINAL_PATH):
             ckpt = FINAL_PATH
-        elif os.path.exists(BEST_PATH + ".zip"):
+        elif os.path.exists(BEST_PATH):
             ckpt = BEST_PATH
         else:
             print("No trained model found. Run `python train.py` first.")
@@ -79,18 +115,21 @@ def main(episodes: int, do_log: bool, render: bool, record: bool,
             VECNORM_DR_BEST_PATH, VECNORM_DR_PATH, VECNORM_PATH,
         ]
     else:
-        if os.path.exists(BEST_PATH + ".zip"):
+        if os.path.exists(BEST_PATH):
             ckpt = BEST_PATH
-        elif os.path.exists(FINAL_PATH + ".zip"):
+        elif os.path.exists(FINAL_PATH):
             ckpt = FINAL_PATH
         else:
             print("No trained model found. Run `python train.py` first.")
             return
         vecnorm_candidates = [VECNORM_BEST_PATH, VECNORM_PATH]
 
-    print(f"Loading model: {ckpt}.zip")
+    print(f"Loading model: {ckpt}")
     print(f"Eval mode: {'DR' if dr else 'BASE'}")
-    model = PPO.load(ckpt, custom_objects={"learning_rate": 3e-4, "clip_range": 0.2})
+    model = _load_model_with_retry(
+        ckpt,
+        custom_objects={"learning_rate": 3e-4, "clip_range": 0.2},
+    )
 
     vecnorm_file = None
     for candidate in vecnorm_candidates:
@@ -117,8 +156,14 @@ def main(episodes: int, do_log: bool, render: bool, record: bool,
     else:
         render_mode = None
 
-    env = H1Env(render_mode=render_mode, domain_randomization=dr,
-                target_velocity=target_vel)
+    env = TimeLimit(
+        H1Env(
+            render_mode=render_mode,
+            domain_randomization=dr,
+            target_velocity=target_vel,
+        ),
+        max_episode_steps=1000,
+    )
     print(f"Target velocity: {target_vel} m/s")
 
     try:
