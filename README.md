@@ -53,8 +53,6 @@ python preflight_check.py
 
 若顯示 `Preflight PASSED` 再開始訓練，可避免路徑/依賴/環境問題卡在中途。
 
-完整建議順序可直接看：[TRAINING_RUNBOOK.md](TRAINING_RUNBOOK.md)。
-`H1_N_ENVS` 與階段說明可看：[ENV_TUNING_AND_PHASES.md](ENV_TUNING_AND_PHASES.md)。
 
 ### 第一步：開始訓練
 
