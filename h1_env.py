@@ -220,6 +220,9 @@ class H1Env(MujocoEnv):
 
         self._domain_randomization = domain_randomization
         self._randomize_commands = randomize_commands
+        # Progressive DR intensity in [0, 1]. 0 = almost no randomization,
+        # 1 = full configured ranges.
+        self._dr_level = 1.0 if domain_randomization else 0.0
 
         obs_dim = 73  # see docstring
         observation_space = Box(
@@ -294,9 +297,13 @@ class H1Env(MujocoEnv):
 
     def set_target_velocity(self, velocity: float) -> None:
         """Set forward velocity command (for curriculum learning)."""
-        self._target_velocity = velocity
+        self._target_velocity = float(np.clip(velocity, _CMD_VX_RANGE[0], _CMD_VX_RANGE[1]))
         if not self._randomize_commands:
-            self._command[0] = velocity
+            self._command[0] = self._target_velocity
+
+    def set_dr_level(self, level: float) -> None:
+        """Set domain-randomization intensity in [0, 1]."""
+        self._dr_level = float(np.clip(level, 0.0, 1.0))
 
     def step(self, action: np.ndarray):
         action = np.clip(action, -1.0, 1.0).astype(np.float64)
@@ -435,13 +442,17 @@ class H1Env(MujocoEnv):
         """Reset to home keyframe with small noise."""
         # ── Domain Randomization: physics parameters ────────────────
         if self._domain_randomization:
-            # Friction: uniform multiplier on baseline.
-            fric_mult = self.np_random.uniform(*_DR_FRICTION_RANGE)
+            # Friction: interpolate around 1.0 as curriculum progresses.
+            fric_lo = 1.0 - (1.0 - _DR_FRICTION_RANGE[0]) * self._dr_level
+            fric_hi = 1.0 + (_DR_FRICTION_RANGE[1] - 1.0) * self._dr_level
+            fric_mult = self.np_random.uniform(fric_lo, fric_hi)
             self.model.geom_friction[:] = self._base_friction * fric_mult
 
-            # Mass: per-body uniform multiplier.
+            # Mass: per-body uniform multiplier with progressive range.
+            mass_lo = 1.0 - (1.0 - _DR_MASS_RANGE[0]) * self._dr_level
+            mass_hi = 1.0 + (_DR_MASS_RANGE[1] - 1.0) * self._dr_level
             mass_mult = self.np_random.uniform(
-                *_DR_MASS_RANGE, size=self.model.nbody,
+                mass_lo, mass_hi, size=self.model.nbody,
             )
             self.model.body_mass[:] = self._base_mass * mass_mult
 
@@ -453,8 +464,13 @@ class H1Env(MujocoEnv):
 
         # ── Command Randomization ───────────────────────────────────
         if self._randomize_commands:
+            # When command randomization is enabled (e.g., DR training), still
+            # respect curriculum by shaping the sampled vx range around the
+            # current target velocity.
+            vx_hi = float(np.clip(self._target_velocity, _CMD_VX_RANGE[0], _CMD_VX_RANGE[1]))
+            vx_lo = max(_CMD_VX_RANGE[0], min(vx_hi, 0.4 * vx_hi))
             self._command[0] = float(
-                self.np_random.uniform(*_CMD_VX_RANGE),
+                self.np_random.uniform(vx_lo, vx_hi),
             )
             self._command[1] = float(
                 self.np_random.uniform(*_CMD_VY_RANGE),
@@ -532,7 +548,8 @@ class H1Env(MujocoEnv):
 
         # Domain Randomization: observation noise.
         if self._domain_randomization:
-            obs += self.np_random.normal(0.0, _DR_OBS_NOISE_STD, size=obs.shape)
+            obs_noise = _DR_OBS_NOISE_STD * self._dr_level
+            obs += self.np_random.normal(0.0, obs_noise, size=obs.shape)
 
         return obs
 
