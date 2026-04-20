@@ -25,6 +25,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(HERE, "models")
 BEST_PATH = os.path.join(MODEL_DIR, "best_model")
 FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo")
+DR_FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo_dr")
 VECNORM_BEST_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_best.pkl")
 VECNORM_DR_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_dr.pkl")
 VECNORM_PATH = os.path.join(MODEL_DIR, "h1_vecnorm.pkl")
@@ -39,12 +40,25 @@ JOINT_NAMES = [
 
 
 def main(episodes: int, do_log: bool, render: bool, record: bool,
-         dr: bool = False, target_vel: float = 1.0):
+         dr: bool = False, target_vel: float = 1.0, auto_dr: bool = False):
+    if auto_dr and not dr:
+        dr = (
+            os.path.exists(VECNORM_DR_PATH)
+            and (
+                os.path.exists(DR_FINAL_PATH + ".zip")
+                or os.path.exists(FINAL_PATH + ".zip")
+            )
+        )
+        if dr:
+            print("[auto] Detected DR artifacts, enabling DR eval mode.")
+
     # DR eval uses the final finetuned model (h1_ppo.zip) + DR-adapted VecNorm
     # (h1_vecnorm_dr.pkl). best_model.zip was selected by EvalCallback on a
     # non-DR eval_env, so pairing it with a DR env causes observation mismatch.
     if dr:
-        if os.path.exists(FINAL_PATH + ".zip"):
+        if os.path.exists(DR_FINAL_PATH + ".zip"):
+            ckpt = DR_FINAL_PATH
+        elif os.path.exists(FINAL_PATH + ".zip"):
             ckpt = FINAL_PATH
         elif os.path.exists(BEST_PATH + ".zip"):
             ckpt = BEST_PATH
@@ -63,6 +77,7 @@ def main(episodes: int, do_log: bool, render: bool, record: bool,
         vecnorm_candidates = [VECNORM_BEST_PATH, VECNORM_PATH]
 
     print(f"Loading model: {ckpt}.zip")
+    print(f"Eval mode: {'DR' if dr else 'BASE'}")
     model = PPO.load(ckpt, custom_objects={"learning_rate": 3e-4, "clip_range": 0.2})
 
     vecnorm_file = None
@@ -198,9 +213,12 @@ if __name__ == "__main__":
     p.add_argument("--record", action="store_true",
                    help="record mp4 (headless, no display needed)")
     p.add_argument("--dr", action="store_true",
-                   help="enable domain randomization (uses h1_vecnorm_dr.pkl)")
+                   help="enable domain randomization eval "
+                        "(prefers h1_ppo_dr.zip + h1_vecnorm_dr.pkl)")
+    p.add_argument("--auto-dr", action="store_true",
+                   help="auto-enable --dr when DR vecnorm/model artifacts exist")
     p.add_argument("--vel", type=float, default=1.0,
                    help="target velocity m/s (default 1.0, matches eval_env in training)")
     args = p.parse_args()
     render = not args.no_render and not args.record
-    main(args.episodes, args.log, render, args.record, args.dr, args.vel)
+    main(args.episodes, args.log, render, args.record, args.dr, args.vel, args.auto_dr)

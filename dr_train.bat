@@ -1,14 +1,14 @@
 @echo off
 cd /d %~dp0
 echo Starting H1 training with Domain Randomization...
-echo   - Friction randomization  : x0.5 ~ x1.5
-echo   - Mass randomization      : +-10%%
-echo   - Observation noise       : Gaussian sigma=0.02
-echo   - Motor delay             : 0 ~ 40ms
-echo   - Command randomization   : vx=[0.3,1.5] vy/vyaw=[-0.3,0.3]
-echo   - Curriculum Learning     : 0.3 m/s -> 1.0 m/s
+echo   - Friction randomization  : x0.5 ~ x1.5 (progressive by DR level)
+echo   - Mass randomization      : +-10%% (progressive by DR level)
+echo   - Observation noise       : sigma=0.02 * DR level
+echo   - Motor delay             : disabled by default (0 steps)
+echo   - Command randomization   : follows target velocity curriculum
+echo   - DR ramp                 : start=0.0, full at 35%% progress
 echo.
-echo Note: Expect slower convergence (25-30M steps)
+echo Note: DR checkpoints/models will use h1_ppo_dr naming.
 echo.
-python train.py --dr
+python train.py --dr --dr-start-level 0.0 --dr-ramp-end 0.35
 pause
