@@ -6,6 +6,7 @@ Usage:
     python train.py --smoke      # 5k-step sanity run
     python train.py --quick      # 300k-step quick run (4 envs)
     python train.py --dr         # enable Domain Randomization + curriculum
+    python train.py --dr --dr-ramp-end 0.6 --dr-start-level 0.1
     python train.py --finetune models/best_model.zip --dr  # DR finetune
 """
 
@@ -13,6 +14,8 @@ import argparse
 import hashlib
 import json
 import os
+import platform
+import subprocess
 import sys
 import time
 from collections import deque
@@ -47,6 +50,7 @@ MODEL_DIR = os.path.join(HERE, "models")
 LOG_DIR = os.path.join(HERE, "logs")
 TB_DIR = os.path.join(LOG_DIR, "tb")
 MODEL_PATH = os.path.join(MODEL_DIR, "h1_ppo")
+MODEL_DR_PATH = os.path.join(MODEL_DIR, "h1_ppo_dr")
 VECNORM_PATH = os.path.join(MODEL_DIR, "h1_vecnorm.pkl")
 VECNORM_BEST_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_best.pkl")
 VECNORM_DR_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_dr.pkl")
@@ -142,6 +146,18 @@ def config_hash(cfg: dict) -> str:
     """Short hash for identifying experiment configs."""
     raw = json.dumps(cfg, sort_keys=True, default=str)
     return hashlib.sha256(raw.encode()).hexdigest()[:8]
+
+
+def _git_commit_short() -> str:
+    try:
+        out = subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=HERE,
+            text=True,
+        ).strip()
+        return out or "unknown"
+    except Exception:
+        return "unknown"
 
 
 # ── Callbacks ────────────────────────────────────────────────────────────
@@ -245,15 +261,30 @@ class RewardBreakdownCallback(BaseCallback):
 
 
 class CurriculumCallback(BaseCallback):
-    """Adjust target velocity based on training progress."""
+    """Adjust target velocity and DR intensity based on training progress."""
 
     _UPDATE_FREQ = 1000  # throttle IPC; SubprocVecEnv env_method is expensive at scale
 
-    def __init__(self, total_timesteps: int, stages: list[tuple[float, float]]):
+    def __init__(
+        self,
+        total_timesteps: int,
+        stages: list[tuple[float, float]],
+        enable_dr_ramp: bool = False,
+        dr_ramp_end: float = 0.35,
+        dr_start_level: float = 0.0,
+    ):
         super().__init__(0)
         self._total = total_timesteps
         self._stages = sorted(stages, key=lambda s: s[0])
         self._last_update = 0
+        self._enable_dr_ramp = enable_dr_ramp
+        self._dr_ramp_end = max(dr_ramp_end, 1e-6)
+        self._dr_start_level = float(np.clip(dr_start_level, 0.0, 1.0))
+
+    def _on_training_start(self) -> None:
+        if self._enable_dr_ramp:
+            self.training_env.env_method("set_dr_level", self._dr_start_level)
+            self.logger.record("curriculum/dr_level", self._dr_start_level)
 
     def _interpolate_velocity(self, progress: float) -> float:
         if progress <= self._stages[0][0]:
@@ -276,6 +307,11 @@ class CurriculumCallback(BaseCallback):
         vel = self._interpolate_velocity(progress)
         self.training_env.env_method("set_target_velocity", vel)
         self.logger.record("curriculum/target_vel", vel)
+        if self._enable_dr_ramp:
+            span = max(1.0 - self._dr_start_level, 1e-6)
+            dr_level = min(self._dr_start_level + (progress / self._dr_ramp_end) * span, 1.0)
+            self.training_env.env_method("set_dr_level", dr_level)
+            self.logger.record("curriculum/dr_level", dr_level)
         return True
 
 
@@ -360,7 +396,14 @@ def _find_latest_checkpoint(prefer_dr: bool) -> str | None:
     ``prefer_dr`` biases tie-breaking when both base and DR artefacts exist.
     """
     import glob
-    candidates = glob.glob(os.path.join(MODEL_DIR, "h1_ppo*.zip"))
+    patterns = (
+        ["h1_ppo_dr*.zip", "h1_ppo*.zip"]
+        if prefer_dr else
+        ["h1_ppo*.zip", "h1_ppo_dr*.zip"]
+    )
+    candidates = []
+    for pat in patterns:
+        candidates.extend(glob.glob(os.path.join(MODEL_DIR, pat)))
     best = os.path.join(MODEL_DIR, "best_model.zip")
     if os.path.exists(best) and best not in candidates:
         candidates.append(best)
@@ -369,11 +412,15 @@ def _find_latest_checkpoint(prefer_dr: bool) -> str | None:
 
     def sort_key(p):
         name = os.path.basename(p)
+        is_dr = 1 if name.startswith("h1_ppo_dr") else 0
         parts = name.replace(".zip", "").split("_steps")
         try:
-            return int(parts[0].split("_")[-1])
+            step = int(parts[0].split("_")[-1])
         except ValueError:
-            return 10**12  # final model (h1_ppo.zip / best_model.zip) has highest priority
+            step = 10**12  # final model has highest priority
+        # Prefer DR or base when step ties (or for final models).
+        dr_bias = is_dr if prefer_dr else (1 - is_dr)
+        return (step, dr_bias)
     return max(candidates, key=sort_key)
 
 
@@ -413,6 +460,8 @@ def train(
     domain_randomization: bool = False,
     ablate: str | None = None,
     finetune_from: str | None = None,
+    dr_ramp_end: float = 0.35,
+    dr_start_level: float = 0.0,
 ):
     if smoke:
         total_steps, n_envs = 5_000, 2
@@ -450,7 +499,21 @@ def train(
     cfg_path = os.path.join(run_dir, "config.json")
     with open(cfg_path, "w") as f:
         json.dump(cfg, f, indent=2, default=str)
+
+    manifest = {
+        "run_id": run_id,
+        "created_at": datetime.now().isoformat(),
+        "git_commit": _git_commit_short(),
+        "python": sys.version,
+        "platform": platform.platform(),
+        "command": " ".join(sys.argv),
+        "config_path": cfg_path,
+    }
+    manifest_path = os.path.join(run_dir, "manifest.json")
+    with open(manifest_path, "w") as f:
+        json.dump(manifest, f, indent=2, default=str)
     print(f"Experiment config saved: {cfg_path}")
+    print(f"Run manifest saved: {manifest_path}")
     print(f"Run ID: {run_id}")
 
     # Training env: DR enables both physics and command randomization.
@@ -573,6 +636,7 @@ def train(
     # by n_envs so real save interval is SAVE_FREQ timesteps, matching
     # VecNormCheckpointCallback.
     save_freq_steps = max(SAVE_FREQ // n_envs, 1)
+    ckpt_prefix = "h1_ppo_dr" if domain_randomization else "h1_ppo"
 
     callbacks = [
         TrainingProgressCallback(total_steps),
@@ -580,13 +644,21 @@ def train(
         VecNormCheckpointCallback(SAVE_FREQ, vecnorm_path),
     ]
     if domain_randomization:
-        callbacks.append(CurriculumCallback(total_steps, CURRICULUM_STAGES))
+        callbacks.append(
+            CurriculumCallback(
+                total_steps,
+                CURRICULUM_STAGES,
+                enable_dr_ramp=True,
+                dr_ramp_end=dr_ramp_end,
+                dr_start_level=dr_start_level,
+            ),
+        )
     if not smoke:
         callbacks += [
             CheckpointCallback(
                 save_freq=save_freq_steps,
                 save_path=MODEL_DIR,
-                name_prefix="h1_ppo",
+                name_prefix=ckpt_prefix,
             ),
             EvalCallback(
                 eval_env,
@@ -603,14 +675,21 @@ def train(
             BestVecNormCallback(MODEL_DIR, VECNORM_BEST_PATH, eval_env),
         ]
 
+    save_model_path = MODEL_DR_PATH if domain_randomization else MODEL_PATH
+
     model.learn(
         total_timesteps=total_steps,
         callback=callbacks,
         reset_num_timesteps=(finetune_from is not None) or (not resume),
     )
-    model.save(MODEL_PATH)
+    model.save(save_model_path)
     vec_env.save(vecnorm_path)
-    print(f"\nSaved model -> {MODEL_PATH}.zip")
+    manifest["finished_at"] = datetime.now().isoformat()
+    manifest["model_path"] = save_model_path + ".zip"
+    manifest["vecnorm_path"] = vecnorm_path
+    with open(manifest_path, "w") as f:
+        json.dump(manifest, f, indent=2, default=str)
+    print(f"\nSaved model -> {save_model_path}.zip")
     print(f"VecNormalize -> {vecnorm_path}")
     vec_env.close()
     eval_env.close()
@@ -628,6 +707,12 @@ if __name__ == "__main__":
     p.add_argument("--finetune", type=str, default=None, metavar="MODEL_PATH",
                    help="Fine-tune from a pre-trained model "
                         "(e.g. --finetune models/best_model.zip)")
+    p.add_argument("--dr-ramp-end", type=float, default=0.35,
+                   help="Progress ratio where DR reaches full strength "
+                        "(only used with --dr, default 0.35)")
+    p.add_argument("--dr-start-level", type=float, default=0.0,
+                   help="Initial DR level in [0,1] when training starts "
+                        "(only used with --dr, default 0.0)")
     args = p.parse_args()
     train(
         resume=args.resume,
@@ -636,4 +721,6 @@ if __name__ == "__main__":
         domain_randomization=args.dr,
         ablate=args.ablate,
         finetune_from=args.finetune,
+        dr_ramp_end=args.dr_ramp_end,
+        dr_start_level=args.dr_start_level,
     )

@@ -1,0 +1,9 @@
+{
+  "description": "Default benchmark matrix (flat-scene stress buckets)",
+  "scenarios": [
+    {"name": "flat_base_v1.0", "dr": false, "target_vel": 1.0, "episodes": 5, "seed": 100},
+    {"name": "flat_dr_v1.0", "dr": true, "target_vel": 1.0, "episodes": 5, "seed": 100},
+    {"name": "stress_dr_v0.8_lvl0.7", "dr": true, "target_vel": 0.8, "dr_level": 0.7, "episodes": 5, "seed": 200},
+    {"name": "stress_dr_v1.2_lvl1.0", "dr": true, "target_vel": 1.2, "dr_level": 1.0, "episodes": 5, "seed": 300}
+  ]
+}
