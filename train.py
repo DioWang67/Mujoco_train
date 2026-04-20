@@ -14,6 +14,8 @@ import argparse
 import hashlib
 import json
 import os
+import platform
+import subprocess
 import sys
 import time
 from collections import deque
@@ -48,6 +50,7 @@ MODEL_DIR = os.path.join(HERE, "models")
 LOG_DIR = os.path.join(HERE, "logs")
 TB_DIR = os.path.join(LOG_DIR, "tb")
 MODEL_PATH = os.path.join(MODEL_DIR, "h1_ppo")
+MODEL_DR_PATH = os.path.join(MODEL_DIR, "h1_ppo_dr")
 VECNORM_PATH = os.path.join(MODEL_DIR, "h1_vecnorm.pkl")
 VECNORM_BEST_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_best.pkl")
 VECNORM_DR_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_dr.pkl")
@@ -143,6 +146,18 @@ def config_hash(cfg: dict) -> str:
     """Short hash for identifying experiment configs."""
     raw = json.dumps(cfg, sort_keys=True, default=str)
     return hashlib.sha256(raw.encode()).hexdigest()[:8]
+
+
+def _git_commit_short() -> str:
+    try:
+        out = subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=HERE,
+            text=True,
+        ).strip()
+        return out or "unknown"
+    except Exception:
+        return "unknown"
 
 
 # ── Callbacks ────────────────────────────────────────────────────────────
@@ -381,7 +396,14 @@ def _find_latest_checkpoint(prefer_dr: bool) -> str | None:
     ``prefer_dr`` biases tie-breaking when both base and DR artefacts exist.
     """
     import glob
-    candidates = glob.glob(os.path.join(MODEL_DIR, "h1_ppo*.zip"))
+    patterns = (
+        ["h1_ppo_dr*.zip", "h1_ppo*.zip"]
+        if prefer_dr else
+        ["h1_ppo*.zip", "h1_ppo_dr*.zip"]
+    )
+    candidates = []
+    for pat in patterns:
+        candidates.extend(glob.glob(os.path.join(MODEL_DIR, pat)))
     best = os.path.join(MODEL_DIR, "best_model.zip")
     if os.path.exists(best) and best not in candidates:
         candidates.append(best)
@@ -390,11 +412,15 @@ def _find_latest_checkpoint(prefer_dr: bool) -> str | None:
 
     def sort_key(p):
         name = os.path.basename(p)
+        is_dr = 1 if name.startswith("h1_ppo_dr") else 0
         parts = name.replace(".zip", "").split("_steps")
         try:
-            return int(parts[0].split("_")[-1])
+            step = int(parts[0].split("_")[-1])
         except ValueError:
-            return 10**12  # final model (h1_ppo.zip / best_model.zip) has highest priority
+            step = 10**12  # final model has highest priority
+        # Prefer DR or base when step ties (or for final models).
+        dr_bias = is_dr if prefer_dr else (1 - is_dr)
+        return (step, dr_bias)
     return max(candidates, key=sort_key)
 
 
@@ -473,7 +499,21 @@ def train(
     cfg_path = os.path.join(run_dir, "config.json")
     with open(cfg_path, "w") as f:
         json.dump(cfg, f, indent=2, default=str)
+
+    manifest = {
+        "run_id": run_id,
+        "created_at": datetime.now().isoformat(),
+        "git_commit": _git_commit_short(),
+        "python": sys.version,
+        "platform": platform.platform(),
+        "command": " ".join(sys.argv),
+        "config_path": cfg_path,
+    }
+    manifest_path = os.path.join(run_dir, "manifest.json")
+    with open(manifest_path, "w") as f:
+        json.dump(manifest, f, indent=2, default=str)
     print(f"Experiment config saved: {cfg_path}")
+    print(f"Run manifest saved: {manifest_path}")
     print(f"Run ID: {run_id}")
 
     # Training env: DR enables both physics and command randomization.
@@ -596,6 +636,7 @@ def train(
     # by n_envs so real save interval is SAVE_FREQ timesteps, matching
     # VecNormCheckpointCallback.
     save_freq_steps = max(SAVE_FREQ // n_envs, 1)
+    ckpt_prefix = "h1_ppo_dr" if domain_randomization else "h1_ppo"
 
     callbacks = [
         TrainingProgressCallback(total_steps),
@@ -617,7 +658,7 @@ def train(
             CheckpointCallback(
                 save_freq=save_freq_steps,
                 save_path=MODEL_DIR,
-                name_prefix="h1_ppo",
+                name_prefix=ckpt_prefix,
             ),
             EvalCallback(
                 eval_env,
@@ -634,14 +675,21 @@ def train(
             BestVecNormCallback(MODEL_DIR, VECNORM_BEST_PATH, eval_env),
         ]
 
+    save_model_path = MODEL_DR_PATH if domain_randomization else MODEL_PATH
+
     model.learn(
         total_timesteps=total_steps,
         callback=callbacks,
         reset_num_timesteps=(finetune_from is not None) or (not resume),
     )
-    model.save(MODEL_PATH)
+    model.save(save_model_path)
     vec_env.save(vecnorm_path)
-    print(f"\nSaved model -> {MODEL_PATH}.zip")
+    manifest["finished_at"] = datetime.now().isoformat()
+    manifest["model_path"] = save_model_path + ".zip"
+    manifest["vecnorm_path"] = vecnorm_path
+    with open(manifest_path, "w") as f:
+        json.dump(manifest, f, indent=2, default=str)
+    print(f"\nSaved model -> {save_model_path}.zip")
     print(f"VecNormalize -> {vecnorm_path}")
     vec_env.close()
     eval_env.close()

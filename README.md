@@ -45,6 +45,14 @@ pip install -r requirements.txt
 
 ## 快速開始
 
+### 第零步：先做 preflight（推薦）
+
+```cmd
+python preflight_check.py
+```
+
+若顯示 `Preflight PASSED` 再開始訓練，可避免路徑/依賴/環境問題卡在中途。
+
 ### 第一步：開始訓練
 
 ```cmd
@@ -91,7 +99,7 @@ tensorboard --logdir logs\tb
 ## 使用方式
 
 ```cmd
-fresh_train.bat              # 全新訓練 (20M steps)
+fresh_train.bat              # 全新訓練 (40M steps)
 resume_train.bat             # 從上次中斷點繼續
 
 python train.py --smoke      # 快速測試（5k steps，確認環境沒壞）
@@ -101,6 +109,10 @@ python eval.py               # 看機器人走路
 python eval.py --log         # 走一集並記錄每步數據到 CSV
 python eval.py --episodes 10 # 跑 10 集評估
 python plot_eval.py --save   # 把 eval 數據畫成圖
+python compare_eval.py --episodes 8 --out-json compare_report.json --out-csv compare_report.csv
+python aggregate_compare.py --seeds 3 --episodes 5 --out-json aggregate_compare.json --out-csv aggregate_compare.csv
+python gate_check.py --report aggregate_compare.json --gates gate_profiles.json --mode aggregate --profile preprod
+python benchmark_matrix.py --matrix benchmark_matrix.json --out-json benchmark_report.json --out-csv benchmark_report.csv
 python sweep.py              # Optuna 超參數搜索（進階）
 ```
 
@@ -171,7 +183,7 @@ python sweep.py              # Optuna 超參數搜索（進階）
 | 地面摩擦力 | baseline × 0.5~1.5 | 適應不同地板材質 |
 | 肢體質量 | baseline × 0.9~1.1 | 適應製造公差 |
 | 觀測噪聲 | Gaussian σ=0.02 | 適應感測器噪聲 |
-| 馬達延遲 | 0~2 步 (0~40ms) | 適應通訊延遲 |
+| 馬達延遲 | 預設關閉（0 步） | 可自行擴充做延遲壓力測試 |
 | 速度指令 | vx=[0.3,1.5], vy=[-0.3,0.3], vyaw=[-0.3,0.3] | 學會多種速度和方向 |
 
 `--dr` 同時啟用 **Curriculum Learning**：目標速度從 0.3 m/s 漸進到 1.0 m/s，讓機器人先學會慢走再加速。
@@ -208,6 +220,12 @@ h1_mujoco/
 ├── eval.py              # 評估 + CSV 數據輸出
 ├── plot_eval.py         # 視覺化 eval 數據（6 面板圖）
 ├── sweep.py             # Optuna 超參數自動搜索
+├── preflight_check.py   # 訓練前環境健康檢查
+├── compare_eval.py      # BASE vs DR 單次數值比較
+├── aggregate_compare.py # 多 seed 比較 + 95% CI
+├── benchmark_matrix.py  # Benchmark matrix 統一報告
+├── gate_check.py        # 依 gate 規則自動 PASS/FAIL
+├── gate_profiles.json   # research/preprod/release 門檻
 ├── fresh_train.bat      # 全新訓練捷徑
 ├── resume_train.bat     # 繼續訓練捷徑
 ├── HOW_TO_READ_RESULTS.md  # 給機構/馬達工程師的結果判讀指南
@@ -215,6 +233,7 @@ h1_mujoco/
 ├── mujoco_menagerie/    # H1 機器人 3D 模型檔
 ├── models/              # 儲存的模型
 │   ├── h1_ppo.zip       # 最終模型
+│   ├── h1_ppo_dr.zip    # DR 最終模型
 │   ├── best_model.zip   # eval 分數最高的模型
 │   └── h1_ppo_*_steps.zip  # 中途 checkpoint
 └── logs/
