@@ -6,6 +6,7 @@ Usage:
     python train.py --smoke      # 5k-step sanity run
     python train.py --quick      # 300k-step quick run (4 envs)
     python train.py --dr         # enable Domain Randomization + curriculum
+    python train.py --dr --dr-ramp-end 0.6 --dr-start-level 0.1
     python train.py --finetune models/best_model.zip --dr  # DR finetune
 """
 
@@ -245,15 +246,30 @@ class RewardBreakdownCallback(BaseCallback):
 
 
 class CurriculumCallback(BaseCallback):
-    """Adjust target velocity based on training progress."""
+    """Adjust target velocity and DR intensity based on training progress."""
 
     _UPDATE_FREQ = 1000  # throttle IPC; SubprocVecEnv env_method is expensive at scale
 
-    def __init__(self, total_timesteps: int, stages: list[tuple[float, float]]):
+    def __init__(
+        self,
+        total_timesteps: int,
+        stages: list[tuple[float, float]],
+        enable_dr_ramp: bool = False,
+        dr_ramp_end: float = 0.35,
+        dr_start_level: float = 0.0,
+    ):
         super().__init__(0)
         self._total = total_timesteps
         self._stages = sorted(stages, key=lambda s: s[0])
         self._last_update = 0
+        self._enable_dr_ramp = enable_dr_ramp
+        self._dr_ramp_end = max(dr_ramp_end, 1e-6)
+        self._dr_start_level = float(np.clip(dr_start_level, 0.0, 1.0))
+
+    def _on_training_start(self) -> None:
+        if self._enable_dr_ramp:
+            self.training_env.env_method("set_dr_level", self._dr_start_level)
+            self.logger.record("curriculum/dr_level", self._dr_start_level)
 
     def _interpolate_velocity(self, progress: float) -> float:
         if progress <= self._stages[0][0]:
@@ -276,6 +292,11 @@ class CurriculumCallback(BaseCallback):
         vel = self._interpolate_velocity(progress)
         self.training_env.env_method("set_target_velocity", vel)
         self.logger.record("curriculum/target_vel", vel)
+        if self._enable_dr_ramp:
+            span = max(1.0 - self._dr_start_level, 1e-6)
+            dr_level = min(self._dr_start_level + (progress / self._dr_ramp_end) * span, 1.0)
+            self.training_env.env_method("set_dr_level", dr_level)
+            self.logger.record("curriculum/dr_level", dr_level)
         return True
 
 
@@ -413,6 +434,8 @@ def train(
     domain_randomization: bool = False,
     ablate: str | None = None,
     finetune_from: str | None = None,
+    dr_ramp_end: float = 0.35,
+    dr_start_level: float = 0.0,
 ):
     if smoke:
         total_steps, n_envs = 5_000, 2
@@ -580,7 +603,15 @@ def train(
         VecNormCheckpointCallback(SAVE_FREQ, vecnorm_path),
     ]
     if domain_randomization:
-        callbacks.append(CurriculumCallback(total_steps, CURRICULUM_STAGES))
+        callbacks.append(
+            CurriculumCallback(
+                total_steps,
+                CURRICULUM_STAGES,
+                enable_dr_ramp=True,
+                dr_ramp_end=dr_ramp_end,
+                dr_start_level=dr_start_level,
+            ),
+        )
     if not smoke:
         callbacks += [
             CheckpointCallback(
@@ -628,6 +659,12 @@ if __name__ == "__main__":
     p.add_argument("--finetune", type=str, default=None, metavar="MODEL_PATH",
                    help="Fine-tune from a pre-trained model "
                         "(e.g. --finetune models/best_model.zip)")
+    p.add_argument("--dr-ramp-end", type=float, default=0.35,
+                   help="Progress ratio where DR reaches full strength "
+                        "(only used with --dr, default 0.35)")
+    p.add_argument("--dr-start-level", type=float, default=0.0,
+                   help="Initial DR level in [0,1] when training starts "
+                        "(only used with --dr, default 0.0)")
     args = p.parse_args()
     train(
         resume=args.resume,
@@ -636,4 +673,6 @@ if __name__ == "__main__":
         domain_randomization=args.dr,
         ablate=args.ablate,
         finetune_from=args.finetune,
+        dr_ramp_end=args.dr_ramp_end,
+        dr_start_level=args.dr_start_level,
     )
