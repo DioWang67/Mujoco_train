@@ -1,0 +1,138 @@
+<mujoco model="fixed_base_grasp_baseline">
+  <compiler angle="radian" autolimits="true" inertiafromgeom="true" />
+  <option timestep="0.002" integrator="implicitfast" gravity="0 0 -9.81" />
+
+  <visual>
+    <headlight ambient="0.45 0.45 0.45" diffuse="0.7 0.7 0.7" specular="0.15 0.15 0.15" />
+    <rgba haze="0.15 0.2 0.25 1" />
+  </visual>
+
+  <default>
+    <joint damping="1.0" armature="0.01" />
+    <geom friction="1.0 0.05 0.01" condim="4" solref="0.01 1" solimp="0.95 0.99 0.001" />
+    <position kp="220" dampratio="1.0" />
+  </default>
+
+  <worldbody>
+    <light pos="0 0 2.0" dir="0 0 -1" diffuse="0.9 0.9 0.9" />
+    <geom name="floor" type="plane" pos="0 0 0" size="0 0 0.05" rgba="0.92 0.94 0.97 1" />
+
+    <body name="table" pos="0.42 0 0.18">
+      <geom
+        name="table_geom"
+        type="box"
+        size="0.24 0.20 0.18"
+        rgba="0.54 0.40 0.31 1"
+        friction="1.2 0.06 0.01"
+      />
+    </body>
+
+    <body name="robot_base" pos="0 0 0.55">
+      <geom name="base_geom" type="box" size="0.08 0.10 0.08" rgba="0.22 0.25 0.31 1" />
+
+      <body name="shoulder_yaw_link" pos="0.04 0 0.05">
+        <joint name="shoulder_yaw" type="hinge" axis="0 0 1" range="-1.0 1.0" />
+        <geom name="shoulder_geom" type="sphere" size="0.03" rgba="0.24 0.29 0.38 1" />
+
+        <body name="upper_arm_link">
+          <joint name="shoulder_pitch" type="hinge" axis="0 1 0" range="-0.7 1.3" />
+          <geom
+            name="upper_arm_geom"
+            type="capsule"
+            fromto="0 0 0 0.22 0 0"
+            size="0.03"
+            rgba="0.18 0.42 0.64 1"
+          />
+
+          <body name="forearm_link" pos="0.22 0 0">
+            <joint name="elbow_pitch" type="hinge" axis="0 1 0" range="0.0 2.1" />
+            <geom
+              name="forearm_geom"
+              type="capsule"
+              fromto="0 0 0 0.20 0 0"
+              size="0.025"
+              rgba="0.15 0.34 0.52 1"
+            />
+
+            <body name="wrist_link" pos="0.20 0 0">
+              <geom
+                name="palm_geom"
+                type="box"
+                pos="0.04 0 0"
+                size="0.04 0.03 0.02"
+                rgba="0.16 0.26 0.40 1"
+              />
+              <site name="gripper_center" pos="0.10 0 0" size="0.008" rgba="0.1 0.8 0.3 1" />
+
+              <body name="left_finger" pos="0.08 0.022 0">
+                <joint
+                  name="left_finger_slide"
+                  type="slide"
+                  axis="0 1 0"
+                  range="0.0 0.02"
+                  damping="2.0"
+                />
+                <geom
+                  name="left_finger_geom"
+                  type="box"
+                  pos="0.045 0 0"
+                  size="0.045 0.005 0.015"
+                  rgba="0.87 0.63 0.18 1"
+                  friction="2.2 0.08 0.02"
+                />
+              </body>
+
+              <body name="right_finger" pos="0.08 -0.022 0">
+                <joint
+                  name="right_finger_slide"
+                  type="slide"
+                  axis="0 -1 0"
+                  range="0.0 0.02"
+                  damping="2.0"
+                />
+                <geom
+                  name="right_finger_geom"
+                  type="box"
+                  pos="0.045 0 0"
+                  size="0.045 0.005 0.015"
+                  rgba="0.87 0.63 0.18 1"
+                  friction="2.2 0.08 0.02"
+                />
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+
+    <body name="cube" pos="0.39 0 0.375">
+      <freejoint name="cube_free" />
+      <geom
+        name="cube_geom"
+        type="box"
+        size="0.015 0.015 0.015"
+        mass="0.08"
+        rgba="0.78 0.21 0.24 1"
+        friction="1.5 0.08 0.02"
+      />
+    </body>
+  </worldbody>
+
+  <actuator>
+    <position name="shoulder_yaw_act" joint="shoulder_yaw" ctrlrange="-1.0 1.0" kp="180" />
+    <position name="shoulder_pitch_act" joint="shoulder_pitch" ctrlrange="-0.7 1.3" kp="220" />
+    <position name="elbow_pitch_act" joint="elbow_pitch" ctrlrange="0.0 2.1" kp="200" />
+    <position
+      name="left_finger_act"
+      joint="left_finger_slide"
+      ctrlrange="0.0 0.02"
+      kp="260"
+    />
+    <position
+      name="right_finger_act"
+      joint="right_finger_slide"
+      ctrlrange="0.0 0.02"
+      kp="260"
+    />
+  </actuator>
+</mujoco>

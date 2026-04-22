@@ -13,7 +13,7 @@
 
 如果你要一份可以從頭走到尾的完整手冊，請直接看：
 
-- [TRAINING_RUNBOOK.md](./TRAINING_RUNBOOK.md)
+- [docs/TRAINING_RUNBOOK.md](./docs/TRAINING_RUNBOOK.md)
 
 這份是目前唯一正式維護的操作文件，內容包含：
 
@@ -33,7 +33,7 @@
 ## 最短開始流程
 
 ```bash
-python preflight_check.py
+python -m tools.preflight_check
 python train.py --smoke
 python train.py
 ```
@@ -42,8 +42,8 @@ base 跑完後：
 
 ```bash
 python eval.py
-python compare_eval.py --episodes 8 --vel 1.0 --out-json compare_report.json --out-csv compare_report.csv
-python gate_check.py --report compare_report.json --gates gate_profiles.json --profile preprod
+python -m tools.compare_eval --episodes 8 --vel 1.0 --out-json reports/compare_report.json --out-csv reports/compare_report.csv
+python -m tools.gate_check --report reports/compare_report.json --gates configs/gate_profiles.json --profile preprod
 ```
 
 base 穩定後做 DR finetune：
@@ -57,7 +57,7 @@ python train.py --finetune models/best_model.zip --dr
 ## 常用指令
 
 ```bash
-python preflight_check.py
+python -m tools.preflight_check
 python train.py --smoke
 python train.py
 python train.py --resume
@@ -69,10 +69,10 @@ python eval.py --auto-dr
 python eval.py --record
 python eval.py --record --dr
 
-python compare_eval.py --episodes 8 --vel 1.0 --out-json compare_report.json --out-csv compare_report.csv
-python aggregate_compare.py --seeds 3 --seed-start 42 --episodes 5 --vel 1.0 --out-json aggregate_compare.json --out-csv aggregate_compare.csv
-python gate_check.py --report compare_report.json --gates gate_profiles.json --profile preprod
-python benchmark_matrix.py --matrix benchmark_matrix.json --out-json benchmark_report.json --out-csv benchmark_report.csv
+python -m tools.compare_eval --episodes 8 --vel 1.0 --out-json reports/compare_report.json --out-csv reports/compare_report.csv
+python -m tools.aggregate_compare --seeds 3 --seed-start 42 --episodes 5 --vel 1.0 --out-json reports/aggregate_compare.json --out-csv reports/aggregate_compare.csv
+python -m tools.gate_check --report reports/compare_report.json --gates configs/gate_profiles.json --profile preprod
+python -m tools.benchmark_matrix --matrix configs/benchmark_matrix.json --out-json reports/benchmark_report.json --out-csv reports/benchmark_report.csv
 ```
 
 ---
@@ -82,13 +82,13 @@ python benchmark_matrix.py --matrix benchmark_matrix.json --out-json benchmark_r
 - 不要在 base 還沒穩時直接切 DR。
 - 不要混用 model 與 VecNorm。
 - `best_model.zip` 是 base best；DR best 在 `models/dr_best/`。
-- 如果你要做正式判斷，以 `TRAINING_RUNBOOK.md` 的流程與判讀規則為準。
+- 如果你要做正式判斷，以 `docs/TRAINING_RUNBOOK.md` 的流程與判讀規則為準。
 
 ---
 
 ## 相關文件
 
-- [TRAINING_RUNBOOK.md](./TRAINING_RUNBOOK.md): 完整操作手冊
-- [ENV_TUNING_AND_PHASES.md](./ENV_TUNING_AND_PHASES.md): env 數量與訓練階段建議
-- [PROJECT_STATUS.md](./PROJECT_STATUS.md): 專案狀態摘要
-- [CODE_REVIEW.md](./CODE_REVIEW.md): review 記錄
+- [docs/TRAINING_RUNBOOK.md](./docs/TRAINING_RUNBOOK.md): 完整操作手冊
+- [docs/ENV_TUNING_AND_PHASES.md](./docs/ENV_TUNING_AND_PHASES.md): env 數量與訓練階段建議
+- [docs/PROJECT_STATUS.md](./docs/PROJECT_STATUS.md): 專案狀態摘要
+- [docs/CODE_REVIEW.md](./docs/CODE_REVIEW.md): review 記錄

@@ -1,0 +1,107 @@
+{
+  "num_seeds": 3,
+  "seed_start": 42,
+  "episodes_per_seed": 5,
+  "target_vel": 1.0,
+  "delta_reward": {
+    "mean": -179.43611744265004,
+    "std": 0.9680211801192121,
+    "ci95": 1.0954190862892492
+  },
+  "delta_len": {
+    "mean": 0.0,
+    "std": 0.0,
+    "ci95": 0.0
+  },
+  "delta_xvel": {
+    "mean": 0.03597101848564932,
+    "std": 0.0011328992196677822,
+    "ci95": 0.0012819961521022257
+  },
+  "runs": [
+    {
+      "model": "D:\\Git\\robotlearning\\h1_mujoco\\models\\dr_best\\best_model.zip",
+      "vecnorm": "D:\\Git\\robotlearning\\h1_mujoco\\models\\dr_best\\h1_vecnorm_best.pkl",
+      "episodes": 5,
+      "target_vel": 1.0,
+      "seed": 42,
+      "base": {
+        "reward_mean": 2917.4235724739,
+        "reward_std": 1.263943137060027,
+        "len_mean": 1000.0,
+        "len_std": 0.0,
+        "xvel_mean": 0.9277685424767297,
+        "xvel_std": 0.0001019833910913944
+      },
+      "dr": {
+        "reward_mean": 2737.961153850226,
+        "reward_std": 19.404053701708847,
+        "len_mean": 1000.0,
+        "len_std": 0.0,
+        "xvel_mean": 0.9637524714850866,
+        "xvel_std": 0.02817175187547819
+      },
+      "delta": {
+        "reward_mean": -179.46241862367424,
+        "len_mean": 0.0,
+        "xvel_mean": 0.035983929008356896
+      }
+    },
+    {
+      "model": "D:\\Git\\robotlearning\\h1_mujoco\\models\\dr_best\\best_model.zip",
+      "vecnorm": "D:\\Git\\robotlearning\\h1_mujoco\\models\\dr_best\\h1_vecnorm_best.pkl",
+      "episodes": 5,
+      "target_vel": 1.0,
+      "seed": 43,
+      "base": {
+        "reward_mean": 2918.2384725603492,
+        "reward_std": 1.4623210312865336,
+        "len_mean": 1000.0,
+        "len_std": 0.0,
+        "xvel_mean": 0.9277867346818193,
+        "xvel_std": 0.00013771755886789118
+      },
+      "dr": {
+        "reward_mean": 2739.783258874606,
+        "reward_std": 20.779467802528544,
+        "len_mean": 1000.0,
+        "len_std": 0.0,
+        "xvel_mean": 0.9648841419513066,
+        "xvel_std": 0.02724224666848626
+      },
+      "delta": {
+        "reward_mean": -178.45521368574327,
+        "len_mean": 0.0,
+        "xvel_mean": 0.03709740726948729
+      }
+    },
+    {
+      "model": "D:\\Git\\robotlearning\\h1_mujoco\\models\\dr_best\\best_model.zip",
+      "vecnorm": "D:\\Git\\robotlearning\\h1_mujoco\\models\\dr_best\\h1_vecnorm_best.pkl",
+      "episodes": 5,
+      "target_vel": 1.0,
+      "seed": 44,
+      "base": {
+        "reward_mean": 2918.804034652597,
+        "reward_std": 0.9098372703329262,
+        "len_mean": 1000.0,
+        "len_std": 0.0,
+        "xvel_mean": 0.9277555028598492,
+        "xvel_std": 0.00016492823849696952
+      },
+      "dr": {
+        "reward_mean": 2738.413314634064,
+        "reward_std": 19.16738383263132,
+        "len_mean": 1000.0,
+        "len_std": 0.0,
+        "xvel_mean": 0.962587222038953,
+        "xvel_std": 0.026622952416089803
+      },
+      "delta": {
+        "reward_mean": -180.39072001853265,
+        "len_mean": 0.0,
+        "xvel_mean": 0.03483171917910377
+      }
+    }
+  ]
+}

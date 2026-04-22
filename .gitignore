@@ -12,15 +12,7 @@ env/
 
 # Large archives & extracted dirs
 *.tar.gz
-all_deps/
-cuda_deps/
-cusparselt_fix/
-h1_package/
-missing2/
-missing_deps/
-mujoco_deps/
-triton_fix/
-tmppip_cache/
+artifacts/offline/
 
 # MuJoCo Menagerie (434 MB — install separately from deepmind/mujoco_menagerie)
 mujoco_menagerie/
