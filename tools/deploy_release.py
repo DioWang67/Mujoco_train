@@ -192,6 +192,17 @@ def build_remote_deploy_script(layout: RemoteLayout, *, activate: bool) -> str:
     return " && ".join(lines)
 
 
+def build_remote_prepare_script(layout: RemoteLayout) -> str:
+    """Return the remote shell script that prepares upload staging paths."""
+    incoming_dir = shlex.quote(layout.incoming_dir)
+    return " && ".join(
+        [
+            "set -e",
+            f"mkdir -p {incoming_dir}",
+        ],
+    )
+
+
 def build_scp_command(local_archive: Path, layout: RemoteLayout, remote_host: str) -> str:
     """Return a human-readable scp command for upload."""
     target = f"{remote_host}:{layout.incoming_archive}"
@@ -206,6 +217,7 @@ def upload_release(
     activate: bool,
 ) -> None:
     """Upload the release archive and run the remote extraction script."""
+    run_command(["ssh", remote_host, build_remote_prepare_script(layout)])
     run_command(
         [
             "scp",
@@ -242,8 +254,15 @@ def main() -> int:
     print()
     print("Remote commands:")
     if args.remote_host:
+        print(
+            "ssh "
+            + args.remote_host
+            + " "
+            + shlex.quote(build_remote_prepare_script(layout)),
+        )
         print(build_scp_command(archive_path, layout, args.remote_host))
     else:
+        print("ssh <user@host> " + shlex.quote(build_remote_prepare_script(layout)))
         print("scp <archive> <user@host>:" + layout.incoming_archive)
     print(
         "ssh "
