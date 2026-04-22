@@ -89,6 +89,7 @@ python -m tools.benchmark_matrix --matrix configs/benchmark_matrix.json --out-js
 ## 相關文件
 
 - [docs/TRAINING_RUNBOOK.md](./docs/TRAINING_RUNBOOK.md): 完整操作手冊
+- [docs/REMOTE_LAYOUT.md](./docs/REMOTE_LAYOUT.md): SSH/remote 目錄結構建議
 - [docs/ENV_TUNING_AND_PHASES.md](./docs/ENV_TUNING_AND_PHASES.md): env 數量與訓練階段建議
 - [docs/PROJECT_STATUS.md](./docs/PROJECT_STATUS.md): 專案狀態摘要
 - [docs/CODE_REVIEW.md](./docs/CODE_REVIEW.md): review 記錄

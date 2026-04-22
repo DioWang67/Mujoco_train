@@ -22,21 +22,23 @@ PLATFORM = "manylinux2014_x86_64"
 TORCH_IDX = f"https://download.pytorch.org/whl/{CUDA_VER}"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT_ROOT = REPO_ROOT / "artifacts" / "offline"
-PKG_DIR = ARTIFACT_ROOT / "h1_package"
+PKG_DIR = ARTIFACT_ROOT / "mujoco_train_system_bundle"
 WHEELS = PKG_DIR / "wheels"
 CODE = PKG_DIR / "code"
 HERE = REPO_ROOT
+REMOTE_ROOT_HINT = "/root/mujoco-train-system"
+PROJECT_SLUG_HINT = "h1"
 # ──────────────────────────────────────────────────────────────────────────
 
 SETUP_SH = textwrap.dedent("""\
     #!/bin/bash
-    # H1 MuJoCo offline setup script
+    # MuJoCo Train System offline setup script
     set -e
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     WHEELS="$SCRIPT_DIR/wheels"
     CODE="$SCRIPT_DIR/code"
 
-    echo "=== H1 MuJoCo Setup ==="
+    echo "=== MuJoCo Train System Setup ==="
     echo "Python : $(python3 --version)"
     echo "Wheels : $WHEELS"
     echo ""
@@ -192,12 +194,12 @@ def main() -> None:
     print(f"  Written: {setup_path}")
 
     # ── Pack ─────────────────────────────────────────────────────────────
-    archive = ARTIFACT_ROOT / "h1_package.tar.gz"
+    archive = ARTIFACT_ROOT / "mujoco_train_system_bundle.tar.gz"
     print(f"\nPacking into {archive} ...")
     ARTIFACT_ROOT.mkdir(parents=True, exist_ok=True)
     rc = run(["tar", "-czf", str(archive), str(PKG_DIR)])
     if rc != 0:
-        print("  tar not available — please zip h1_package/ manually.")
+        print("  tar not available — please zip mujoco_train_system_bundle/ manually.")
     else:
         size_mb = archive.stat().st_size / 1024 / 1024
         print(f"  {archive}  ({size_mb:.0f} MB)")
@@ -206,12 +208,19 @@ def main() -> None:
     print(f"  Package ready: {archive}")
     print()
     print("  Transfer:")
-    print("    scp artifacts/offline/h1_package.tar.gz user@remote:~")
+    print("    scp artifacts/offline/mujoco_train_system_bundle.tar.gz user@remote:~/mujoco-train-system/shared/incoming/")
     print()
     print("  On remote:")
-    print("    tar xzf h1_package.tar.gz")
-    print("    cd h1_package && bash setup.sh")
-    print("    cd code && H1_N_ENVS=64 python3 train.py")
+    print(f"    mkdir -p {REMOTE_ROOT_HINT}/shared/incoming")
+    print(f"    cd {REMOTE_ROOT_HINT}/shared/incoming")
+    print("    tar xzf mujoco_train_system_bundle.tar.gz")
+    print("    cd mujoco_train_system_bundle && bash setup.sh")
+    print(
+        f"    mkdir -p {REMOTE_ROOT_HINT}/projects/{PROJECT_SLUG_HINT}/releases",
+    )
+    print(
+        f"    cp -r code {REMOTE_ROOT_HINT}/projects/{PROJECT_SLUG_HINT}/releases/<commit>",
+    )
     print("=" * 56 + "\n")
 
 
