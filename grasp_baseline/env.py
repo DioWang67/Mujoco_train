@@ -205,6 +205,8 @@ class FixedBaseGraspEnv(MujocoEnv):
         self._reward_config = reward_config or GraspRewardConfig()
         self._arm_action_scale = np.array([0.45, 0.45, 0.55], dtype=np.float64)
         self._default_arm_targets = np.array([0.0, 0.60, 1.05], dtype=np.float64)
+        self._max_arm_target_step = np.array([0.12, 0.12, 0.14], dtype=np.float64)
+        self._max_finger_target_step = 0.004
         self._min_finger_opening = 0.001
         self._max_finger_opening = 0.020
         self._prev_action = np.zeros(4, dtype=np.float64)
@@ -290,11 +292,31 @@ class FixedBaseGraspEnv(MujocoEnv):
         finger_target = self._max_finger_opening - closing_command * (
             self._max_finger_opening - self._min_finger_opening
         )
+        current_arm_targets = np.array(
+            [self._joint_qpos(joint_id) for joint_id in self._arm_joint_ids],
+            dtype=np.float64,
+        )
+        desired_arm_targets = self._default_arm_targets + arm_action * self._arm_action_scale
+        arm_target_delta = np.clip(
+            desired_arm_targets - current_arm_targets,
+            -self._max_arm_target_step,
+            self._max_arm_target_step,
+        )
+        safe_arm_targets = current_arm_targets + arm_target_delta
+        current_finger_opening = self._finger_opening()
+        safe_finger_target = np.clip(
+            finger_target,
+            current_finger_opening - self._max_finger_target_step,
+            current_finger_opening + self._max_finger_target_step,
+        )
+        safe_finger_target = float(
+            np.clip(safe_finger_target, self._min_finger_opening, self._max_finger_opening)
+        )
 
         ctrl = np.empty(5, dtype=np.float64)
-        ctrl[:3] = self._default_arm_targets + arm_action * self._arm_action_scale
-        ctrl[3] = finger_target
-        ctrl[4] = finger_target
+        ctrl[:3] = safe_arm_targets
+        ctrl[3] = safe_finger_target
+        ctrl[4] = safe_finger_target
 
         self.do_simulation(ctrl, self.frame_skip)
         self._episode_steps += 1
