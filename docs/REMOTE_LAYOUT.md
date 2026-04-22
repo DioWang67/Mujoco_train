@@ -55,3 +55,25 @@ PROJECT_ROOT=/root/mujoco-train-system/projects/h1/current
 
 That keeps the naming generic at the system level while still allowing each
 robot project to have its own short slug.
+
+## Deployment workflow
+
+Create a clean archive from the current committed source:
+
+```bash
+python -m tools.deploy_release --project-slug h1
+```
+
+That writes a tarball into `artifacts/sync/` and prints the `scp` / `ssh`
+commands needed to extract it into:
+
+```text
+/root/mujoco-train-system/projects/h1/releases/<commit>
+```
+
+If local SSH access is already configured, the same tool can upload and switch
+`current` in one step:
+
+```bash
+python -m tools.deploy_release --project-slug h1 --remote-host root@10.6.243.55 --upload
+```
