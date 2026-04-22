@@ -33,7 +33,7 @@ if result.returncode == 0:
     size = archive.stat().st_size / 1024 / 1024
     print(f"\nPacked: {archive} ({size:.1f} MB)")
     print("\nTransfer:")
-    print("  scp -C artifacts/offline/missing_deps.tar.gz root@<IP>:~/mujoco-train-system/shared/offline/archives/")
+    print("  scp -C artifacts/offline/missing_deps.tar.gz root@<IP>:~/anaconda3/mujoco-train-system/shared/offline/archives/")
     print("\nOn remote:")
     print("  tar xzf missing_deps.tar.gz")
     print("  pip install --no-deps missing_deps/*.whl")

@@ -3,7 +3,7 @@
 This tool keeps the local repository layout unchanged. It builds a clean
 archive from a git ref, then targets the generic remote layout:
 
-    /root/mujoco-train-system/projects/<slug>/releases/<commit>
+    /root/anaconda3/mujoco-train-system/projects/<slug>/releases/<commit>
 
 The default mode is safe and local-only: create the archive and print the
 commands needed for upload and activation. Pass ``--upload`` to run ``scp`` and
@@ -22,7 +22,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ARTIFACT_DIR = REPO_ROOT / "artifacts" / "sync"
-DEFAULT_REMOTE_ROOT = "/root/mujoco-train-system"
+DEFAULT_REMOTE_ROOT = "/root/anaconda3/mujoco-train-system"
 DEFAULT_PROJECT_SLUG = "h1"
 VALID_PROJECT_SLUG = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
 

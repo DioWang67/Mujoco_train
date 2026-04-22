@@ -26,7 +26,7 @@ PKG_DIR = ARTIFACT_ROOT / "mujoco_train_system_bundle"
 WHEELS = PKG_DIR / "wheels"
 CODE = PKG_DIR / "code"
 HERE = REPO_ROOT
-REMOTE_ROOT_HINT = "/root/mujoco-train-system"
+REMOTE_ROOT_HINT = "/root/anaconda3/mujoco-train-system"
 PROJECT_SLUG_HINT = "h1"
 # ──────────────────────────────────────────────────────────────────────────
 
@@ -208,7 +208,7 @@ def main() -> None:
     print(f"  Package ready: {archive}")
     print()
     print("  Transfer:")
-    print("    scp artifacts/offline/mujoco_train_system_bundle.tar.gz user@remote:~/mujoco-train-system/shared/incoming/")
+    print("    scp artifacts/offline/mujoco_train_system_bundle.tar.gz user@remote:~/anaconda3/mujoco-train-system/shared/incoming/")
     print()
     print("  On remote:")
     print(f"    mkdir -p {REMOTE_ROOT_HINT}/shared/incoming")

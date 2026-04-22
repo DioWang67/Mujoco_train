@@ -45,9 +45,9 @@ if wheels:
         size = archive.stat().st_size / 1024
         print(f"Packed: {archive} ({size:.0f} KB)")
         print("\nTransfer:")
-        print("  scp -C artifacts/offline/cusparselt_fix.tar.gz root@<IP>:~/mujoco-train-system/shared/offline/archives/")
+        print("  scp -C artifacts/offline/cusparselt_fix.tar.gz root@<IP>:~/anaconda3/mujoco-train-system/shared/offline/archives/")
         print("\nOn remote:")
-        print("  cd ~/mujoco-train-system/shared/offline")
+        print("  cd ~/anaconda3/mujoco-train-system/shared/offline")
         print("  tar xzf cusparselt_fix.tar.gz")
         print("  pip uninstall nvidia-cusparselt-cu12 -y")
         print("  pip install --no-deps cusparselt_fix/*.whl")
