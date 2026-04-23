@@ -14,10 +14,9 @@ if "%PORT%"=="" (
     set "PORT=6006"
   )
 )
-set "LOGDIR=%REMOTE_ROOT%/runs/%PROJECT_SLUG%/logs/tb/%JOB_NAME%"
 set "REMOTE_LOG=/tmp/tb_%PROJECT_SLUG%_%JOB_NAME%_%PORT%.log"
 echo Starting TensorBoard on remote for project=%PROJECT_SLUG% job=%JOB_NAME%...
-ssh %REMOTE_HOST% "bash -lc 'mkdir -p %LOGDIR%; pkill -f \"tensorboard.*--port %PORT%\" >/dev/null 2>&1 || true; nohup /root/anaconda3/bin/tensorboard --logdir %LOGDIR% --port %PORT% --host 127.0.0.1 > %REMOTE_LOG% 2>&1 < /dev/null & sleep 2; (echo > /dev/tcp/127.0.0.1/%PORT%) >/dev/null 2>&1 || { echo TensorBoard failed on remote. >&2; tail -n 20 %REMOTE_LOG% >&2; exit 1; }'"
+ssh %REMOTE_HOST% "bash %REMOTE_ROOT%/code/current/scripts/start_remote_tensorboard.sh %REMOTE_ROOT% %PROJECT_SLUG% %JOB_NAME% %PORT%"
 if errorlevel 1 (
   echo Remote TensorBoard failed to start.
   pause
