@@ -3,7 +3,7 @@
 This tool keeps the local repository layout unchanged. It builds a clean
 archive from a git ref, then targets the generic remote layout:
 
-    /root/anaconda3/mujoco-train-system/projects/<slug>/code/releases/<commit>
+    /root/anaconda3/mujoco-train-system/code/releases/<commit>
 
 The default mode is safe and local-only: create the archive and print the
 commands needed for upload and activation. Pass ``--upload`` to run ``scp`` and
@@ -53,8 +53,8 @@ class RemoteLayout:
 
     @property
     def code_root(self) -> str:
-        """Return the per-project code root directory."""
-        return f"{self.project_root}/code"
+        """Return the shared code root directory."""
+        return f"{self.remote_root}/code"
 
     @property
     def release_dir(self) -> str:
@@ -69,7 +69,7 @@ class RemoteLayout:
     @property
     def runs_dir(self) -> str:
         """Return the project-specific run output root."""
-        return f"{self.project_root}/runs"
+        return f"{self.remote_root}/runs/{self.project_slug}"
 
 
 def parse_args() -> argparse.Namespace:

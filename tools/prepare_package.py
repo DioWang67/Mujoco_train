@@ -216,10 +216,10 @@ def main() -> None:
     print("    tar xzf mujoco_train_system_bundle.tar.gz")
     print("    cd mujoco_train_system_bundle && bash setup.sh")
     print(
-        f"    mkdir -p {REMOTE_ROOT_HINT}/projects/{PROJECT_SLUG_HINT}/code/releases",
+        f"    mkdir -p {REMOTE_ROOT_HINT}/code/releases",
     )
     print(
-        f"    cp -r code {REMOTE_ROOT_HINT}/projects/{PROJECT_SLUG_HINT}/code/releases/<commit>",
+        f"    cp -r code {REMOTE_ROOT_HINT}/code/releases/<commit>",
     )
     print("=" * 56 + "\n")
 

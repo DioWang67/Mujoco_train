@@ -7,22 +7,20 @@ projects without centering everything around H1.
 
 ```text
 /root/anaconda3/mujoco-train-system/
-  projects/
+  code/
+    releases/
+      05cdde4/
+      0a458bf/
+    current -> /root/anaconda3/mujoco-train-system/code/releases/0a458bf
+  runs/
     h1/
-      code/
-        releases/
-          05cdde4/
-          0a458bf/
-        current -> /root/anaconda3/mujoco-train-system/projects/h1/code/releases/0a458bf
-      runs/
-        models/
-        logs/
-        reports/
-    quadruped_grasper/
-      code/
-        releases/
-        current
-      runs/
+      models/
+      logs/
+      reports/
+    grasp/
+      models/
+      logs/
+      reports/
   shared/
     offline/
       wheels/
@@ -37,10 +35,10 @@ projects without centering everything around H1.
 
 ## Meaning
 
-- `projects/<slug>/code/releases/`: immutable source snapshots extracted from a
+- `code/releases/`: immutable source snapshots extracted from a
   committed archive.
-- `projects/<slug>/code/current`: symlink or agreed pointer to the active release.
-- `projects/<slug>/runs/`: training outputs for that project only.
+- `code/current`: symlink or agreed pointer to the active release.
+- `runs/<slug>/`: training outputs for one robot / task only.
 - `shared/offline/`: reusable wheels and dependency repair bundles.
 - `shared/incoming/`: uploaded tarballs before extraction.
 - `scripts/`: host-side helpers that are not specific to one robot.
@@ -51,9 +49,9 @@ For this repository, use:
 
 ```text
 REMOTE_ROOT=/root/anaconda3/mujoco-train-system
-PROJECT_SLUG=h1
-PROJECT_ROOT=/root/anaconda3/mujoco-train-system/projects/h1
-CODE_ROOT=/root/anaconda3/mujoco-train-system/projects/h1/code/current
+PROJECT_SLUG=grasp
+CODE_ROOT=/root/anaconda3/mujoco-train-system/code/current
+RUN_ROOT=/root/anaconda3/mujoco-train-system/runs/grasp
 ```
 
 That keeps the naming generic at the system level while still allowing each
@@ -71,7 +69,7 @@ That writes a tarball into `artifacts/sync/` and prints the `scp` / `ssh`
 commands needed to extract it into:
 
 ```text
-/root/anaconda3/mujoco-train-system/projects/h1/code/releases/<commit>
+/root/anaconda3/mujoco-train-system/code/releases/<commit>
 ```
 
 If local SSH access is already configured, the same tool can upload and switch
