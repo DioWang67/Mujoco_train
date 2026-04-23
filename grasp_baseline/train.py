@@ -12,6 +12,7 @@ from datetime import datetime
 from pathlib import Path
 
 import numpy as np
+from gymnasium.wrappers import TimeLimit
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import BaseCallback, CheckpointCallback, EvalCallback
 from stable_baselines3.common.monitor import Monitor
@@ -51,6 +52,7 @@ ENT_COEF = 0.005
 VF_COEF = 0.5
 MAX_GRAD_NORM = 1.0
 NET_ARCH = [256, 256]
+MAX_EPISODE_STEPS = 300
 
 
 def _git_commit_short() -> str:
@@ -166,6 +168,7 @@ def _make_env(
             task_phase=task_phase,
             randomize_cube_pose=randomize_cube_pose,
         )
+        env = TimeLimit(env, max_episode_steps=MAX_EPISODE_STEPS)
         env.reset(seed=seed + rank)
         return Monitor(env)
 
@@ -264,6 +267,7 @@ def _save_config(args: argparse.Namespace, n_envs: int, batch_size: int) -> None
         "task_phase": args.phase,
         "randomize_cube_pose": not args.fixed_cube,
         "reward_config": asdict(GraspRewardConfig()),
+        "max_episode_steps": MAX_EPISODE_STEPS,
     }
     with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(cfg, f, indent=2, sort_keys=True)
