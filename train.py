@@ -20,6 +20,7 @@ import sys
 import time
 from collections import deque
 from datetime import datetime
+from pathlib import Path
 
 # N_ENVS can be overridden via H1_N_ENVS env var so the same code runs on
 # a 4-core laptop (default 32 is too many there; set H1_N_ENVS=4) and on
@@ -43,12 +44,20 @@ from stable_baselines3.common.vec_env import (
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from h1_env import H1Env, _DEFAULT_REWARD_SCALES
+from training_paths import resolve_training_paths
 
 # ── Paths ────────────────────────────────────────────────────────────────
-HERE = os.path.dirname(os.path.abspath(__file__))
-MODEL_DIR = os.path.join(HERE, "models")
-LOG_DIR = os.path.join(HERE, "logs")
-TB_DIR = os.path.join(LOG_DIR, "tb")
+HERE = Path(__file__).resolve().parent
+PATHS = resolve_training_paths(
+    HERE,
+    "h1",
+    legacy_model_dir="models",
+    legacy_log_dir="logs",
+    legacy_tb_dir=os.path.join("logs", "tb", "h1"),
+)
+MODEL_DIR = str(PATHS.models_root)
+LOG_DIR = str(PATHS.logs_root)
+TB_DIR = str(PATHS.tb_root)
 MODEL_PATH = os.path.join(MODEL_DIR, "h1_ppo")
 MODEL_DR_PATH = os.path.join(MODEL_DIR, "h1_ppo_dr")
 VECNORM_PATH = os.path.join(MODEL_DIR, "h1_vecnorm.pkl")
@@ -56,6 +65,7 @@ VECNORM_BEST_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_best.pkl")
 VECNORM_DR_PATH = os.path.join(MODEL_DIR, "h1_vecnorm_dr.pkl")
 os.makedirs(MODEL_DIR, exist_ok=True)
 os.makedirs(LOG_DIR, exist_ok=True)
+os.makedirs(TB_DIR, exist_ok=True)
 
 # ── Hyperparameters ──────────────────────────────────────────────────────
 N_ENVS = _N_ENVS_DEFAULT
@@ -152,7 +162,7 @@ def _git_commit_short() -> str:
     try:
         out = subprocess.check_output(
             ["git", "rev-parse", "--short", "HEAD"],
-            cwd=HERE,
+            cwd=str(HERE),
             text=True,
         ).strip()
         return out or "unknown"
@@ -535,6 +545,7 @@ def train(
     print(f"Experiment config saved: {cfg_path}")
     print(f"Run manifest saved: {manifest_path}")
     print(f"Run ID: {run_id}")
+    print(f"Artifacts: models={MODEL_DIR} logs={LOG_DIR} tb={TB_DIR}")
 
     # Training env: DR enables both physics and command randomization.
     vec_env = build_vec_env(
