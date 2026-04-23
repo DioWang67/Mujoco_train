@@ -19,10 +19,12 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecNormalize
 
 from grasp_baseline.env import FixedBaseGraspEnv, GraspRewardConfig
+from training_config import load_grasp_train_config
 from training_paths import resolve_training_paths
 
 HERE = Path(__file__).resolve().parent
 REPO_ROOT = HERE.parent
+GRASP_CONFIG = load_grasp_train_config(REPO_ROOT)
 PATHS = resolve_training_paths(
     REPO_ROOT,
     "grasp",
@@ -39,20 +41,20 @@ LATEST_MODEL_PATH = os.path.join(MODEL_ROOT, "latest_model")
 CONFIG_PATH = os.path.join(LOG_ROOT, "train_config.json")
 MANIFEST_PATH = os.path.join(LOG_ROOT, "run_manifest.json")
 
-N_ENVS_DEFAULT = int(os.environ.get("GRASP_N_ENVS", "8"))
-TOTAL_TIMESTEPS = 2_000_000
-SMOKE_TIMESTEPS = 20_000
-N_STEPS = 512
-N_EPOCHS = 10
-GAMMA = 0.99
-GAE_LAMBDA = 0.95
-LEARNING_RATE = 3e-4
-CLIP_RANGE = 0.2
-ENT_COEF = 0.005
-VF_COEF = 0.5
-MAX_GRAD_NORM = 1.0
-NET_ARCH = [256, 256]
-MAX_EPISODE_STEPS = 300
+N_ENVS_DEFAULT = int(os.environ.get("GRASP_N_ENVS", str(GRASP_CONFIG.n_envs_default)))
+TOTAL_TIMESTEPS = GRASP_CONFIG.total_timesteps
+SMOKE_TIMESTEPS = GRASP_CONFIG.smoke_timesteps
+N_STEPS = GRASP_CONFIG.n_steps
+N_EPOCHS = GRASP_CONFIG.n_epochs
+GAMMA = GRASP_CONFIG.gamma
+GAE_LAMBDA = GRASP_CONFIG.gae_lambda
+LEARNING_RATE = GRASP_CONFIG.learning_rate
+CLIP_RANGE = GRASP_CONFIG.clip_range
+ENT_COEF = GRASP_CONFIG.ent_coef
+VF_COEF = GRASP_CONFIG.vf_coef
+MAX_GRAD_NORM = GRASP_CONFIG.max_grad_norm
+NET_ARCH = GRASP_CONFIG.net_arch
+MAX_EPISODE_STEPS = GRASP_CONFIG.max_episode_steps
 
 
 def _git_commit_short() -> str:
@@ -353,7 +355,7 @@ def main(argv: list[str] | None = None) -> None:
             total_timesteps=SMOKE_TIMESTEPS if args.smoke else TOTAL_TIMESTEPS,
         ),
         CheckpointCallback(
-            save_freq=max(1, 100_000 // args.n_envs),
+            save_freq=max(1, GRASP_CONFIG.checkpoint_freq_steps // args.n_envs),
             save_path=MODEL_ROOT,
             name_prefix="grasp_ppo",
         ),
@@ -361,10 +363,10 @@ def main(argv: list[str] | None = None) -> None:
             eval_env,
             best_model_save_path=BEST_MODEL_DIR,
             log_path=LOG_ROOT,
-            eval_freq=max(1, 50_000 // args.n_envs),
+            eval_freq=max(1, GRASP_CONFIG.eval_freq_steps // args.n_envs),
             deterministic=True,
             render=False,
-            n_eval_episodes=5,
+            n_eval_episodes=GRASP_CONFIG.eval_episodes,
         ),
     ]
 

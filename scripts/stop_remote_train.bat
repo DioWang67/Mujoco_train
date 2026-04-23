@@ -5,9 +5,9 @@ set "TARGET=%~1"
 if "%TARGET%"=="" set "TARGET=grasp"
 
 if /I "%TARGET%"=="grasp" (
-  set "PATTERN=grasp_baseline.train"
+  set "PATTERN=train.py --project grasp"
 ) else (
-  set "PATTERN=train.py --h1"
+  set "PATTERN=train.py --project h1"
 )
 
 echo Stopping remote training processes matching: %PATTERN%

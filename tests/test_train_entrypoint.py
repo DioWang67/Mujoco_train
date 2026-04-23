@@ -23,3 +23,20 @@ def test_split_mode_args_rejects_conflicting_modes() -> None:
         return
 
     raise AssertionError("Expected ValueError for conflicting mode flags.")
+
+
+def test_split_mode_args_supports_project_flag() -> None:
+    mode, forwarded = split_mode_args(["--project", "grasp", "--smoke"])
+
+    assert mode == "grasp"
+    assert forwarded == ["--smoke"]
+
+
+def test_split_mode_args_rejects_conflicting_project_and_mode() -> None:
+    try:
+        split_mode_args(["--project", "h1", "--grasp"])
+    except ValueError as exc:
+        assert "multiple training targets" in str(exc)
+        return
+
+    raise AssertionError("Expected ValueError for conflicting project selection.")

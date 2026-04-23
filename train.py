@@ -1,14 +1,14 @@
 """PPO training for H1 walking.
 
 Usage:
-    python train.py              # fresh training
-    python train.py --resume     # resume from latest checkpoint
-    python train.py --smoke      # 5k-step sanity run
-    python train.py --quick      # 300k-step quick run (4 envs)
-    python train.py --dr         # enable Domain Randomization + curriculum
+    python train.py --project h1              # fresh H1 training
+    python train.py --project h1 --resume     # resume latest H1 checkpoint
+    python train.py --project h1 --smoke      # short H1 sanity run
+    python train.py --project h1 --quick      # quick H1 run
+    python train.py --project h1 --dr         # H1 with DR + curriculum
     python train.py --dr --dr-ramp-end 0.6 --dr-start-level 0.1
     python train.py --finetune models/best_model.zip --dr  # DR finetune
-    python train.py --grasp --phase full --n-envs 32       # grasp baseline
+    python train.py --project grasp --phase full --n-envs 32
 """
 
 import argparse
@@ -22,11 +22,6 @@ import time
 from collections import deque
 from datetime import datetime
 from pathlib import Path
-
-# N_ENVS can be overridden via H1_N_ENVS env var so the same code runs on
-# a 4-core laptop (default 32 is too many there; set H1_N_ENVS=4) and on
-# a multi-GPU server.
-_N_ENVS_DEFAULT = int(os.environ.get("H1_N_ENVS", 32))
 
 import numpy as np
 from stable_baselines3 import PPO
@@ -45,11 +40,13 @@ from stable_baselines3.common.vec_env import (
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from h1_env import H1Env, _DEFAULT_REWARD_SCALES
+from training_config import load_h1_train_config
 from train_entrypoint import split_mode_args
 from training_paths import resolve_training_paths
 
 # ── Paths ────────────────────────────────────────────────────────────────
 HERE = Path(__file__).resolve().parent
+H1_CONFIG = load_h1_train_config(HERE)
 PATHS = resolve_training_paths(
     HERE,
     "h1",
@@ -70,54 +67,53 @@ os.makedirs(LOG_DIR, exist_ok=True)
 os.makedirs(TB_DIR, exist_ok=True)
 
 # ── Hyperparameters ──────────────────────────────────────────────────────
-N_ENVS = _N_ENVS_DEFAULT
-TOTAL_TIMESTEPS = 40_000_000
-N_STEPS = 1024
-N_EPOCHS = 10
-GAMMA = 0.99
-GAE_LAMBDA = 0.95
-ENT_COEF = 0.01
-VF_COEF = 0.5
-MAX_GRAD_NORM = 1.0
-NET_ARCH = [256, 256]
-SAVE_FREQ = 500_000   # in timesteps; converted to callback-call count per callback
+N_ENVS = int(os.environ.get("H1_N_ENVS", str(H1_CONFIG.n_envs_default)))
+TOTAL_TIMESTEPS = H1_CONFIG.total_timesteps
+SMOKE_TIMESTEPS = H1_CONFIG.smoke_timesteps
+QUICK_TIMESTEPS = H1_CONFIG.quick_timesteps
+QUICK_N_ENVS = H1_CONFIG.quick_n_envs
+N_STEPS = H1_CONFIG.n_steps
+N_EPOCHS = H1_CONFIG.n_epochs
+GAMMA = H1_CONFIG.gamma
+GAE_LAMBDA = H1_CONFIG.gae_lambda
+ENT_COEF = H1_CONFIG.ent_coef
+VF_COEF = H1_CONFIG.vf_coef
+MAX_GRAD_NORM = H1_CONFIG.max_grad_norm
+NET_ARCH = H1_CONFIG.net_arch
+SAVE_FREQ = H1_CONFIG.save_freq
 
-LR_FLOOR = 3e-5       # ~10% of peak; prevents stagnation at end of training
-CLIP_FLOOR = 0.05     # keep some update budget even at end
+LR_FLOOR = H1_CONFIG.learning_rate_floor
+CLIP_FLOOR = H1_CONFIG.clip_range_floor
 
 
 def LEARNING_RATE(progress: float) -> float:
     """Linear decay with floor: 3e-4 → LR_FLOOR over training."""
-    return max(3e-4 * progress, LR_FLOOR)
+    return max(H1_CONFIG.learning_rate_initial * progress, LR_FLOOR)
 
 
 def CLIP_RANGE(progress: float) -> float:
     """Sync clip_range decay with LR so update magnitude scales down together."""
-    return max(0.2 * progress, CLIP_FLOOR)
+    return max(H1_CONFIG.clip_range_initial * progress, CLIP_FLOOR)
 
 
 # ── Fine-tune hyperparameters (used when --finetune is specified) ─────────
-FINETUNE_ENT_COEF = 0.02
-FINETUNE_LR_FLOOR = 1e-5
-FINETUNE_CLIP_FLOOR = 0.03
+FINETUNE_ENT_COEF = H1_CONFIG.finetune_ent_coef
+FINETUNE_LR_FLOOR = H1_CONFIG.finetune_learning_rate_floor
+FINETUNE_CLIP_FLOOR = H1_CONFIG.finetune_clip_range_floor
 
 
 def FINETUNE_LEARNING_RATE(progress: float) -> float:
     """Linear decay with floor: 1e-4 → FINETUNE_LR_FLOOR over DR finetune."""
-    return max(1e-4 * progress, FINETUNE_LR_FLOOR)
+    return max(H1_CONFIG.finetune_learning_rate_initial * progress, FINETUNE_LR_FLOOR)
 
 
 def FINETUNE_CLIP_RANGE(progress: float) -> float:
     """Sync clip_range for DR finetune."""
-    return max(0.15 * progress, FINETUNE_CLIP_FLOOR)
+    return max(H1_CONFIG.finetune_clip_range_initial * progress, FINETUNE_CLIP_FLOOR)
 
 
 # ── Curriculum Learning ─────────────────────────────────────────────────
-CURRICULUM_STAGES = [
-    (0.0,  0.2),    # start: very slow, focus on balance
-    (0.5,  0.5),    # mid: ramp up after policy is stable
-    (0.8,  0.8),    # end: near full speed
-]
+CURRICULUM_STAGES = H1_CONFIG.curriculum_stages
 
 
 def _compute_batch_size(n_envs: int) -> int:
@@ -396,7 +392,7 @@ def make_env(
             randomize_commands=randomize_commands,
             reward_scales=reward_scales,
         )
-        env = TimeLimit(env, max_episode_steps=1000)
+        env = TimeLimit(env, max_episode_steps=H1_CONFIG.max_episode_steps)
         env = Monitor(env)
         env.reset(seed=seed + rank)
         return env
@@ -497,9 +493,9 @@ def train(
     dr_start_level: float = 0.0,
 ):
     if smoke:
-        total_steps, n_envs = 5_000, 2
+        total_steps, n_envs = SMOKE_TIMESTEPS, 2
     elif quick:
-        total_steps, n_envs = 300_000, 4
+        total_steps, n_envs = QUICK_TIMESTEPS, QUICK_N_ENVS
     else:
         total_steps, n_envs = TOTAL_TIMESTEPS, N_ENVS
 
