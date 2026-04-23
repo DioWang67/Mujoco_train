@@ -4,6 +4,7 @@ from tools.deploy_release import (
     build_remote_deploy_script,
     build_remote_layout,
     build_remote_prepare_script,
+    iter_existing_extra_release_paths,
     validate_project_slug,
 )
 
@@ -43,3 +44,9 @@ def test_build_remote_prepare_script_creates_incoming_dir() -> None:
     script = build_remote_prepare_script(layout)
 
     assert "mkdir -p /root/mujoco-train-system/shared/incoming" in script
+
+
+def test_iter_existing_extra_release_paths_includes_local_menagerie() -> None:
+    extra_paths = iter_existing_extra_release_paths()
+
+    assert any(path.name == "mujoco_menagerie" for path in extra_paths)

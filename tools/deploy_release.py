@@ -13,11 +13,15 @@ commands needed for upload and activation. Pass ``--upload`` to run ``scp`` and
 from __future__ import annotations
 
 import argparse
+import io
 import re
 import shlex
 import subprocess
+import tarfile
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+from shutil import copy2, copytree
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -25,6 +29,7 @@ DEFAULT_ARTIFACT_DIR = REPO_ROOT / "artifacts" / "sync"
 DEFAULT_REMOTE_ROOT = "/root/anaconda3/mujoco-train-system"
 DEFAULT_PROJECT_SLUG = "h1"
 VALID_PROJECT_SLUG = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
+EXTRA_RELEASE_PATHS = ("mujoco_menagerie",)
 
 
 @dataclass(frozen=True)
@@ -142,18 +147,39 @@ def resolve_commit(ref: str) -> str:
     return result.stdout.strip()
 
 
+def iter_existing_extra_release_paths() -> list[Path]:
+    """Return non-git release assets that should be bundled when present."""
+    return [REPO_ROOT / relative for relative in EXTRA_RELEASE_PATHS if (REPO_ROOT / relative).exists()]
+
+
+def _copy_path(source: Path, destination: Path) -> None:
+    """Copy one file or directory into the staging tree."""
+    if source.is_dir():
+        copytree(source, destination, dirs_exist_ok=True)
+    else:
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        copy2(source, destination)
+
+
 def build_archive(ref: str, archive_path: Path) -> Path:
-    """Build a clean git archive for the given ref."""
+    """Build a clean release archive and include required local assets."""
     archive_path.parent.mkdir(parents=True, exist_ok=True)
-    run_command(
-        [
-            "git",
-            "archive",
-            "--format=tar.gz",
-            f"--output={archive_path}",
-            ref,
-        ],
-    )
+    with tempfile.TemporaryDirectory(prefix="deploy_release_") as temp_dir:
+        staging_root = Path(temp_dir) / "staging"
+        staging_root.mkdir(parents=True, exist_ok=True)
+
+        archive_bytes = subprocess.check_output(
+            ["git", "archive", "--format=tar", ref],
+            cwd=REPO_ROOT,
+        )
+        with tarfile.open(fileobj=io.BytesIO(archive_bytes), mode="r:") as tar:
+            tar.extractall(staging_root)
+
+        for extra_path in iter_existing_extra_release_paths():
+            _copy_path(extra_path, staging_root / extra_path.name)
+
+        with tarfile.open(archive_path, mode="w:gz") as tar:
+            tar.add(staging_root, arcname=".")
     return archive_path
 
 
