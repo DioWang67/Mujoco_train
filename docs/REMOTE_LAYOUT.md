@@ -9,17 +9,19 @@ projects without centering everything around H1.
 /root/anaconda3/mujoco-train-system/
   projects/
     h1/
-      releases/
-        05cdde4/
-        0a458bf/
-      current -> /root/anaconda3/mujoco-train-system/projects/h1/releases/0a458bf
+      code/
+        releases/
+          05cdde4/
+          0a458bf/
+        current -> /root/anaconda3/mujoco-train-system/projects/h1/code/releases/0a458bf
       runs/
         models/
         logs/
         reports/
     quadruped_grasper/
-      releases/
-      current
+      code/
+        releases/
+        current
       runs/
   shared/
     offline/
@@ -35,9 +37,9 @@ projects without centering everything around H1.
 
 ## Meaning
 
-- `projects/<slug>/releases/`: immutable source snapshots extracted from a
+- `projects/<slug>/code/releases/`: immutable source snapshots extracted from a
   committed archive.
-- `projects/<slug>/current`: symlink or agreed pointer to the active release.
+- `projects/<slug>/code/current`: symlink or agreed pointer to the active release.
 - `projects/<slug>/runs/`: training outputs for that project only.
 - `shared/offline/`: reusable wheels and dependency repair bundles.
 - `shared/incoming/`: uploaded tarballs before extraction.
@@ -50,7 +52,8 @@ For this repository, use:
 ```text
 REMOTE_ROOT=/root/anaconda3/mujoco-train-system
 PROJECT_SLUG=h1
-PROJECT_ROOT=/root/anaconda3/mujoco-train-system/projects/h1/current
+PROJECT_ROOT=/root/anaconda3/mujoco-train-system/projects/h1
+CODE_ROOT=/root/anaconda3/mujoco-train-system/projects/h1/code/current
 ```
 
 That keeps the naming generic at the system level while still allowing each
@@ -68,7 +71,7 @@ That writes a tarball into `artifacts/sync/` and prints the `scp` / `ssh`
 commands needed to extract it into:
 
 ```text
-/root/anaconda3/mujoco-train-system/projects/h1/releases/<commit>
+/root/anaconda3/mujoco-train-system/projects/h1/code/releases/<commit>
 ```
 
 If local SSH access is already configured, the same tool can upload and switch

@@ -8,4 +8,4 @@ set "LOG_FILE=%REMOTE_ROOT%/projects/%PROJECT_SLUG%/runs/logs/h1/foreground_trai
 echo Starting remote H1 training in foreground...
 echo Log file: %LOG_FILE%
 echo.
-ssh -t %REMOTE_HOST% "bash -lc 'mkdir -p %REMOTE_ROOT%/projects/%PROJECT_SLUG%/runs/logs/h1 && cd %REMOTE_ROOT%/projects/%PROJECT_SLUG%/current && /root/anaconda3/bin/python -u train.py --h1 %* 2>&1 | tee %LOG_FILE%'"
+ssh -t %REMOTE_HOST% "bash -lc 'mkdir -p %REMOTE_ROOT%/projects/%PROJECT_SLUG%/runs/logs/h1 && cd %REMOTE_ROOT%/projects/%PROJECT_SLUG%/code/current && /root/anaconda3/bin/python -u train.py --h1 %* 2>&1 | tee %LOG_FILE%'"

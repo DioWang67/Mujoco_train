@@ -27,9 +27,9 @@ def test_build_remote_deploy_script_contains_release_and_current_paths() -> None
 
     script = build_remote_deploy_script(layout, activate=True)
 
-    assert "/root/mujoco-train-system/projects/h1/releases/abc1234" in script
+    assert "/root/mujoco-train-system/projects/h1/code/releases/abc1234" in script
     assert "ln -sfn" in script
-    assert "/root/mujoco-train-system/projects/h1/current" in script
+    assert "/root/mujoco-train-system/projects/h1/code/current" in script
 
 
 def test_build_remote_prepare_script_creates_incoming_dir() -> None:

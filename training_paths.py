@@ -25,6 +25,20 @@ def _detect_managed_project_root(code_root: Path) -> Path | None:
     if (code_root.parent / "runs").is_dir():
         return code_root.parent.resolve()
 
+    # New deployed release layout:
+    #   <project_root>/code/current
+    if code_root.name == "current" and code_root.parent.name == "code":
+        candidate = code_root.parent.parent
+        if (candidate / "runs").is_dir():
+            return candidate.resolve()
+
+    # New deployed release layout:
+    #   <project_root>/code/releases/<commit>
+    if code_root.parent.name == "releases" and code_root.parent.parent.name == "code":
+        candidate = code_root.parent.parent.parent
+        if (candidate / "runs").is_dir():
+            return candidate.resolve()
+
     # Deployed release layout:
     #   <project_root>/releases/<commit>
     if code_root.parent.name == "releases" and (code_root.parent.parent / "runs").is_dir():
@@ -44,9 +58,10 @@ def resolve_training_paths(
 ) -> TrainingPaths:
     """Resolve artifact paths for local repo runs or deployed release runs.
 
-    If ``MUJOCO_TRAIN_PROJECT_ROOT`` is set, or if the code root has a sibling
-    ``runs/`` directory, artifacts are written into ``project_root/runs``.
-    Otherwise the local repo's historical directories are preserved.
+    If ``MUJOCO_TRAIN_PROJECT_ROOT`` is set, or if the code root matches a
+    known deployed layout with a sibling ``runs/`` directory, artifacts are
+    written into ``project_root/runs``. Otherwise the local repo's historical
+    directories are preserved.
     """
     code_root_path = Path(code_root).resolve()
     project_root_override = os.environ.get("MUJOCO_TRAIN_PROJECT_ROOT")

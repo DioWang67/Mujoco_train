@@ -3,7 +3,7 @@
 This tool keeps the local repository layout unchanged. It builds a clean
 archive from a git ref, then targets the generic remote layout:
 
-    /root/anaconda3/mujoco-train-system/projects/<slug>/releases/<commit>
+    /root/anaconda3/mujoco-train-system/projects/<slug>/code/releases/<commit>
 
 The default mode is safe and local-only: create the archive and print the
 commands needed for upload and activation. Pass ``--upload`` to run ``scp`` and
@@ -52,14 +52,19 @@ class RemoteLayout:
         return f"{self.remote_root}/projects/{self.project_slug}"
 
     @property
+    def code_root(self) -> str:
+        """Return the per-project code root directory."""
+        return f"{self.project_root}/code"
+
+    @property
     def release_dir(self) -> str:
         """Return the immutable release directory."""
-        return f"{self.project_root}/releases/{self.commit}"
+        return f"{self.code_root}/releases/{self.commit}"
 
     @property
     def current_link(self) -> str:
         """Return the current symlink path."""
-        return f"{self.project_root}/current"
+        return f"{self.code_root}/current"
 
     @property
     def runs_dir(self) -> str:
@@ -179,6 +184,7 @@ def build_remote_deploy_script(layout: RemoteLayout, *, activate: bool) -> str:
     lines = [
         "set -e",
         f"mkdir -p {incoming_dir}",
+        f"mkdir -p {layout.code_root}/releases",
         f"mkdir -p {runs_dir}/models {runs_dir}/logs {runs_dir}/reports",
         (
             f'if [ -d {release_dir} ] && [ "$(ls -A {release_dir} 2>/dev/null)" ]; then '
