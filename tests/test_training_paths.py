@@ -37,3 +37,23 @@ def test_resolve_training_paths_uses_project_runs_when_available(tmp_path: Path)
     assert paths.models_root == project_root / "runs" / "models" / "h1"
     assert paths.logs_root == project_root / "runs" / "logs" / "h1"
     assert paths.tb_root == project_root / "runs" / "logs" / "tb" / "h1"
+
+
+def test_resolve_training_paths_handles_release_checkout_layout(tmp_path: Path) -> None:
+    project_root = tmp_path / "projects" / "h1"
+    release_root = project_root / "releases" / "e3d86bf"
+    (project_root / "runs").mkdir(parents=True)
+    release_root.mkdir(parents=True)
+
+    paths = resolve_training_paths(
+        release_root,
+        "grasp",
+        legacy_model_dir="models/grasp",
+        legacy_log_dir="logs/grasp",
+        legacy_tb_dir="logs/tb/grasp",
+    )
+
+    assert paths.managed_layout
+    assert paths.project_root == project_root
+    assert paths.models_root == project_root / "runs" / "models" / "grasp"
+    assert paths.logs_root == project_root / "runs" / "logs" / "grasp"

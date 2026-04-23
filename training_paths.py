@@ -20,6 +20,19 @@ class TrainingPaths:
     reports_root: Path
 
 
+def _detect_managed_project_root(code_root: Path) -> Path | None:
+    """Infer the deployed project root from common remote release layouts."""
+    if (code_root.parent / "runs").is_dir():
+        return code_root.parent.resolve()
+
+    # Deployed release layout:
+    #   <project_root>/releases/<commit>
+    if code_root.parent.name == "releases" and (code_root.parent.parent / "runs").is_dir():
+        return code_root.parent.parent.resolve()
+
+    return None
+
+
 def resolve_training_paths(
     code_root: str | Path,
     job_name: str,
@@ -41,12 +54,14 @@ def resolve_training_paths(
     if project_root_override:
         project_root = Path(project_root_override).resolve()
         managed_layout = True
-    elif (code_root_path.parent / "runs").is_dir():
-        project_root = code_root_path.parent.resolve()
-        managed_layout = True
     else:
-        project_root = code_root_path
-        managed_layout = False
+        detected_project_root = _detect_managed_project_root(code_root_path)
+        if detected_project_root is not None:
+            project_root = detected_project_root
+            managed_layout = True
+        else:
+            project_root = code_root_path
+            managed_layout = False
 
     if managed_layout:
         runs_root = project_root / "runs"

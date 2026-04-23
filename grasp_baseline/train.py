@@ -62,6 +62,7 @@ def _git_commit_short() -> str:
             ["git", "rev-parse", "--short", "HEAD"],
             cwd=str(REPO_ROOT),
             text=True,
+            stderr=subprocess.DEVNULL,
         ).strip()
         return out or "unknown"
     except Exception:
