@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -eu
+set -o pipefail
 
 REMOTE_ROOT="${1:-/root/anaconda3/mujoco-train-system}"
 PROJECT_SLUG="${2:-h1}"
