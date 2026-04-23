@@ -269,7 +269,7 @@ def _save_config(args: argparse.Namespace, n_envs: int, batch_size: int) -> None
         json.dump(cfg, f, indent=2, sort_keys=True)
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     """Parse command-line options for grasp training."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--smoke", action="store_true", help="Run a short sanity training.")
@@ -297,12 +297,12 @@ def parse_args() -> argparse.Namespace:
         default=N_ENVS_DEFAULT,
         help="Number of parallel environments.",
     )
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     """Train the standalone grasp baseline with PPO."""
-    args = parse_args()
+    args = parse_args(argv)
     if args.n_envs <= 0:
         raise ValueError("--n-envs must be positive.")
 

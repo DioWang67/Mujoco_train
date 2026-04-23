@@ -8,6 +8,7 @@ Usage:
     python train.py --dr         # enable Domain Randomization + curriculum
     python train.py --dr --dr-ramp-end 0.6 --dr-start-level 0.1
     python train.py --finetune models/best_model.zip --dr  # DR finetune
+    python train.py --grasp --phase full --n-envs 32       # grasp baseline
 """
 
 import argparse
@@ -44,6 +45,7 @@ from stable_baselines3.common.vec_env import (
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from h1_env import H1Env, _DEFAULT_REWARD_SCALES
+from train_entrypoint import split_mode_args
 from training_paths import resolve_training_paths
 
 # ── Paths ────────────────────────────────────────────────────────────────
@@ -769,7 +771,21 @@ def train(
         eval_env.close()
 
 
-if __name__ == "__main__":
+def main(argv: list[str] | None = None) -> int:
+    """Dispatch to H1 walking or grasp training from one entrypoint."""
+    raw_argv = list(sys.argv[1:] if argv is None else argv)
+    try:
+        mode, forwarded = split_mode_args(raw_argv)
+    except ValueError as exc:
+        print(f"[error] {exc}")
+        return 2
+
+    if mode == "grasp":
+        from grasp_baseline.train import main as grasp_main
+
+        grasp_main(forwarded)
+        return 0
+
     p = argparse.ArgumentParser()
     p.add_argument("--resume", action="store_true")
     p.add_argument("--smoke", action="store_true")
@@ -787,7 +803,7 @@ if __name__ == "__main__":
     p.add_argument("--dr-start-level", type=float, default=0.0,
                    help="Initial DR level in [0,1] when training starts "
                         "(only used with --dr, default 0.0)")
-    args = p.parse_args()
+    args = p.parse_args(forwarded)
     train(
         resume=args.resume,
         smoke=args.smoke,
@@ -798,3 +814,8 @@ if __name__ == "__main__":
         dr_ramp_end=args.dr_ramp_end,
         dr_start_level=args.dr_start_level,
     )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
