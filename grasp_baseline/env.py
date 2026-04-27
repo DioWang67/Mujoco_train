@@ -18,10 +18,22 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
-import mujoco
 import numpy as np
-from gymnasium.envs.mujoco.mujoco_env import MujocoEnv
-from gymnasium.spaces import Box
+
+try:
+    import mujoco
+    from gymnasium.envs.mujoco.mujoco_env import MujocoEnv
+    from gymnasium.spaces import Box
+    _MUJOCO_IMPORT_ERROR: ModuleNotFoundError | None = None
+except ModuleNotFoundError as exc:
+    mujoco = None
+    Box = None
+    _MUJOCO_IMPORT_ERROR = exc
+
+    class MujocoEnv:  # type: ignore[no-redef]
+        """Placeholder so pure reward helpers remain importable without MuJoCo."""
+
+        pass
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _XML_PATH = os.path.join(_HERE, "assets", "scene.xml")
@@ -191,6 +203,12 @@ class FixedBaseGraspEnv(MujocoEnv):
         reward_config: GraspRewardConfig | None = None,
         **kwargs,
     ) -> None:
+        if _MUJOCO_IMPORT_ERROR is not None:
+            raise ModuleNotFoundError(
+                "FixedBaseGraspEnv requires the 'mujoco' and Gymnasium MuJoCo "
+                "dependencies. Install project requirements before creating "
+                "the simulator environment."
+            ) from _MUJOCO_IMPORT_ERROR
         if task_phase not in _TASK_PHASES:
             raise ValueError(
                 f"Unsupported task_phase '{task_phase}'. Expected one of "
@@ -204,7 +222,11 @@ class FixedBaseGraspEnv(MujocoEnv):
         self._cube_xy_range = cube_xy_range
         self._reward_config = reward_config or GraspRewardConfig()
         self._arm_action_scale = np.array([0.45, 0.45, 0.55], dtype=np.float64)
-        self._default_arm_targets = np.array([0.0, 0.60, 1.05], dtype=np.float64)
+        # Start with the gripper hovering near the cube instead of hanging
+        # beside the table. This keeps early exploration inside a learnable
+        # reach region instead of spending most episodes recovering from a bad
+        # default posture.
+        self._default_arm_targets = np.array([0.0, 0.15, 0.85], dtype=np.float64)
         self._max_arm_target_step = np.array([0.12, 0.12, 0.14], dtype=np.float64)
         self._max_finger_target_step = 0.004
         self._min_finger_opening = 0.001

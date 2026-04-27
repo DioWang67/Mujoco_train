@@ -1,0 +1,7 @@
+{
+  "slug": "h1",
+  "display_name": "H1 walking",
+  "train_module": "h1_train",
+  "eval_module": "eval",
+  "job_name": "h1"
+}

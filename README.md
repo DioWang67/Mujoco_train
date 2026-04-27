@@ -1,44 +1,104 @@
-# H1 MuJoCo Walking
+# H1 MuJoCo Robot Learning
 
-這個 repo 用 PPO 在 MuJoCo 中訓練 Unitree H1 walking policy，包含：
+This repository contains MuJoCo reinforcement-learning experiments for:
 
-- base training
-- DR finetune
-- eval / compare / benchmark
-- gate check
+- H1 walking with PPO
+- fixed-base grasping baseline
+- evaluation, comparison, benchmark, and release-gate tools
+- remote training/deployment helpers
 
----
+The project is intentionally kept as a research/tooling codebase. Keep changes
+simple, testable, and focused on training correctness before adding larger
+architecture.
 
-## 文件入口
+## Repository Layout
 
-如果你要一份可以從頭走到尾的完整手冊，請直接看：
-
-- [docs/TRAINING_RUNBOOK.md](./docs/TRAINING_RUNBOOK.md)
-
-這份是目前唯一正式維護的操作文件，內容包含：
-
-- 環境建立
-- preflight / smoke
-- base training
-- DR finetune
-- model / VecNorm / artifact 配對
-- eval / compare / gate / benchmark 指令
-- 結果判讀與決策規則
-- 常見錯誤與排查方式
-
-其餘文件偏補充用途，不應該拿來取代 runbook。
-
----
-
-## 最短開始流程
-
-```bash
-python -m tools.preflight_check
-python train.py --smoke
-python train.py
+```text
+configs/          Training, benchmark, and release-gate configs
+docs/             Runbooks, remote layout notes, and project status
+grasp_baseline/   Fixed-base grasp environment, training, assets, and tests
+scripts/          Operator wrappers for Windows/Linux remote workflows
+tests/            Lightweight unit tests that should run without MuJoCo
+tools/            Evaluation, deployment, benchmark, and maintenance CLIs
+train.py          Unified training entrypoint, defaults to H1
+h1_train.py       H1-specific PPO training implementation
+eval.py           H1 evaluation entrypoint
+h1_env.py         H1 MuJoCo walking environment
 ```
 
-base 跑完後：
+Generated runtime outputs should stay out of Git unless they are deliberate
+fixtures:
+
+```text
+models/
+logs/
+reports/
+artifacts/
+```
+
+## Setup
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+MuJoCo assets are expected under `mujoco_menagerie/`. That directory is ignored
+because it is large; install or sync it separately.
+
+## Common Commands
+
+Run quick checks:
+
+```bash
+python -m pytest
+python -m tools.preflight_check
+```
+
+List available Python tools:
+
+```bash
+python -m tools
+```
+
+Train H1:
+
+```bash
+python train.py --project h1 --smoke
+python train.py --project h1
+python train.py --project h1 --resume
+python train.py --project h1 --dr
+python train.py --project h1 --finetune models/best_model.zip --dr
+```
+
+Train grasp:
+
+```bash
+python train.py --project grasp --smoke
+python train.py --project grasp --phase full --n-envs 32
+```
+
+Add a new robot by creating `configs/<slug>/project.json` and a train module
+with `main(argv)`. The shared entrypoint will then accept:
+
+```bash
+python train.py --project <slug> [project args...]
+```
+
+Example `project.json`:
+
+```json
+{
+  "slug": "quadruped",
+  "display_name": "Quadruped walking",
+  "train_module": "robots.quadruped.train",
+  "eval_module": "robots.quadruped.eval",
+  "job_name": "quadruped"
+}
+```
+
+Evaluate and gate H1 results:
 
 ```bash
 python eval.py
@@ -46,50 +106,52 @@ python -m tools.compare_eval --episodes 8 --vel 1.0 --out-json reports/compare_r
 python -m tools.gate_check --report reports/compare_report.json --gates configs/gate_profiles.json --profile preprod
 ```
 
-base 穩定後做 DR finetune：
+Evaluate grasp:
 
 ```bash
-python train.py --finetune models/best_model.zip --dr
+python -m tools.eval_grasp --episodes 10 --no-render
+python -m tools.grasp_sanity_check
 ```
 
----
+## Testing
 
-## 常用指令
+Default tests are lightweight and avoid MuJoCo runtime dependencies:
 
 ```bash
-python -m tools.preflight_check
-python train.py --smoke
-python train.py
-python train.py --resume
-python train.py --finetune models/best_model.zip --dr
-
-python eval.py
-python eval.py --dr
-python eval.py --auto-dr
-python eval.py --record
-python eval.py --record --dr
-
-python -m tools.compare_eval --episodes 8 --vel 1.0 --out-json reports/compare_report.json --out-csv reports/compare_report.csv
-python -m tools.aggregate_compare --seeds 3 --seed-start 42 --episodes 5 --vel 1.0 --out-json reports/aggregate_compare.json --out-csv reports/aggregate_compare.csv
-python -m tools.gate_check --report reports/compare_report.json --gates configs/gate_profiles.json --profile preprod
-python -m tools.benchmark_matrix --matrix configs/benchmark_matrix.json --out-json reports/benchmark_report.json --out-csv reports/benchmark_report.csv
+python -m pytest
 ```
 
----
+Tests that construct MuJoCo environments are marked separately:
 
-## 重要原則
+```bash
+python -m pytest -m mujoco
+```
 
-- 不要在 base 還沒穩時直接切 DR。
-- 不要混用 model 與 VecNorm。
-- `best_model.zip` 是 base best；DR best 在 `models/dr_best/`。
-- 如果你要做正式判斷，以 `docs/TRAINING_RUNBOOK.md` 的流程與判讀規則為準。
+If `mujoco` is not installed, MuJoCo-marked tests are skipped.
 
----
+## Remote Training
 
-## 相關文件
+Remote deployment uses the generic layout described in
+`docs/REMOTE_LAYOUT.md`.
+For wrapper script details, see `scripts/README.md`; for Python tool details,
+see `tools/README.md`.
 
-- [docs/TRAINING_RUNBOOK.md](./docs/TRAINING_RUNBOOK.md): 完整操作手冊
-- [docs/REMOTE_LAYOUT.md](./docs/REMOTE_LAYOUT.md): SSH/remote 目錄結構建議
-- [docs/ENV_TUNING_AND_PHASES.md](./docs/ENV_TUNING_AND_PHASES.md): env 數量與訓練階段建議
-- [docs/PROJECT_STATUS.md](./docs/PROJECT_STATUS.md): 專案狀態摘要
-- [docs/CODE_REVIEW.md](./docs/CODE_REVIEW.md): review 記錄
+Create a clean source archive from the current commit:
+
+```bash
+python -m tools.deploy_release --project-slug h1
+```
+
+Upload and switch the remote `current` release when SSH is configured:
+
+```bash
+python -m tools.deploy_release --project-slug h1 --remote-host root@10.6.243.55 --upload
+```
+
+## Current Cleanup Rules
+
+- Keep root entrypoints thin when possible.
+- Put repeatable parameters in `configs/`, not hardcoded scripts.
+- Keep generated outputs ignored unless they are intentional fixtures.
+- Keep pure logic tests separate from simulator-dependent tests.
+- Avoid adding abstractions unless a second real use case exists.

@@ -1,6 +1,6 @@
 @echo off
 setlocal
-set "REMOTE_HOST=root@10.6.243.55"
+if "%REMOTE_HOST%"=="" set "REMOTE_HOST=root@10.6.243.55"
 set "TARGET=%~1"
 if "%TARGET%"=="" set "TARGET=grasp"
 

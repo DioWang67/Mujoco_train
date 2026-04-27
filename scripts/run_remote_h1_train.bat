@@ -1,7 +1,7 @@
 @echo off
 setlocal
-set "REMOTE_HOST=root@10.6.243.55"
-set "REMOTE_ROOT=/root/anaconda3/mujoco-train-system"
+if "%REMOTE_HOST%"=="" set "REMOTE_HOST=root@10.6.243.55"
+if "%REMOTE_ROOT%"=="" set "REMOTE_ROOT=/root/anaconda3/mujoco-train-system"
 set "PROJECT_SLUG=h1"
 set "RUN_ROOT=%REMOTE_ROOT%/runs/%PROJECT_SLUG%"
 set "LOG_FILE=%RUN_ROOT%/logs/h1/foreground_train.log"

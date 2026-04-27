@@ -20,6 +20,8 @@ mujoco_menagerie/
 # Training artefacts (models, logs, outputs)
 models/
 logs/
+reports/
+artifacts/sync/
 
 # Eval outputs
 eval_ep*.csv
