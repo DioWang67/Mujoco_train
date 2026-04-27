@@ -49,18 +49,31 @@ nohup "${PYTHON_BIN}" -m tensorboard.main \
   --port "${PORT}" \
   --host 127.0.0.1 \
   > "${REMOTE_LOG}" 2>&1 < /dev/null &
+TB_PID="$!"
 
-sleep 2
-
-if ! bash -lc "echo > /dev/tcp/127.0.0.1/${PORT}" >/dev/null 2>&1; then
-  echo "TensorBoard failed on remote." >&2
-  if [[ -f "${REMOTE_LOG}" ]]; then
-    tail -n 20 "${REMOTE_LOG}" >&2
-  else
-    echo "Remote log not created: ${REMOTE_LOG}" >&2
+for _ in $(seq 1 30); do
+  if bash -lc "echo > /dev/tcp/127.0.0.1/${PORT}" >/dev/null 2>&1; then
+    echo "TensorBoard ready at 127.0.0.1:${PORT}"
+    echo "Remote log: ${REMOTE_LOG}"
+    exit 0
   fi
-  exit 1
-fi
 
-echo "TensorBoard ready at 127.0.0.1:${PORT}"
-echo "Remote log: ${REMOTE_LOG}"
+  if ! kill -0 "${TB_PID}" >/dev/null 2>&1; then
+    break
+  fi
+  sleep 1
+done
+
+echo "TensorBoard failed on remote." >&2
+echo "TensorBoard PID: ${TB_PID}" >&2
+if ps -p "${TB_PID}" >/dev/null 2>&1; then
+  echo "TensorBoard process is still running but port ${PORT} did not become reachable." >&2
+else
+  echo "TensorBoard process exited before port ${PORT} became reachable." >&2
+fi
+if [[ -f "${REMOTE_LOG}" ]]; then
+  tail -n 80 "${REMOTE_LOG}" >&2
+else
+  echo "Remote log not created: ${REMOTE_LOG}" >&2
+fi
+exit 1
