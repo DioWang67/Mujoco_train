@@ -112,6 +112,12 @@ TOOLS: tuple[ToolEntry, ...] = (
         example="python -m tools.smoke_sedon_env --steps 20",
     ),
     ToolEntry(
+        module="sedon_eval",
+        category="sedon",
+        summary="Evaluate a trained Sedon standing checkpoint.",
+        example="python -m tools.sedon_eval --episodes 5",
+    ),
+    ToolEntry(
         module="deploy_release",
         category="release",
         summary="Create and optionally upload a clean source release archive.",
