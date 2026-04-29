@@ -23,7 +23,12 @@ echo   11. Local grasp eval with viewer (5 eps)
 echo   12. Local grasp eval headless (10 eps)
 echo   13. Remote grasp eval headless (10 eps)
 echo.
-set /p choice="Select (1-13): "
+echo Sedon:
+echo   14. Local Sedon eval with viewer (best checkpoint)
+echo   15. Local Sedon eval record GIF (best checkpoint)
+echo   16. Local Sedon eval headless (5 eps)
+echo.
+set /p choice="Select (1-16): "
 
 if "%choice%"=="1" %PYTHON% -m h1_baseline.eval
 if "%choice%"=="2" %PYTHON% -m h1_baseline.eval --dr
@@ -49,4 +54,7 @@ if "%choice%"=="10" %PYTHON% -m tools.benchmark_matrix --matrix configs/benchmar
 if "%choice%"=="11" %PYTHON% -m tools.eval_grasp --episodes 5
 if "%choice%"=="12" %PYTHON% -m tools.eval_grasp --episodes 10 --no-render
 if "%choice%"=="13" call "%~dp0grasp_remote_eval.bat"
+if "%choice%"=="14" %PYTHON% eval.py --project sedon --episodes 1 --render
+if "%choice%"=="15" %PYTHON% eval.py --project sedon --episodes 1 --record
+if "%choice%"=="16" %PYTHON% eval.py --project sedon --episodes 5
 pause

@@ -81,8 +81,8 @@ def _load_model_with_retry(
     raise last_err
 
 
-def main(episodes: int, do_log: bool, render: bool, record: bool,
-         dr: bool = False, target_vel: float = 1.0, auto_dr: bool = False):
+def run_eval(episodes: int, do_log: bool, render: bool, record: bool,
+             dr: bool = False, target_vel: float = 1.0, auto_dr: bool = False):
     if auto_dr and not dr:
         dr = (
             os.path.exists(VECNORM_DR_PATH)
@@ -263,7 +263,8 @@ def main(episodes: int, do_log: bool, render: bool, record: bool,
             vec_norm.venv.close()
 
 
-if __name__ == "__main__":
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse H1 evaluation CLI arguments."""
     p = argparse.ArgumentParser()
     p.add_argument("--episodes", type=int, default=1)
     p.add_argument("--log", action="store_true", help="save per-step CSV")
@@ -278,6 +279,16 @@ if __name__ == "__main__":
                    help="auto-enable --dr when DR vecnorm/model artifacts exist")
     p.add_argument("--vel", type=float, default=1.0,
                    help="target velocity m/s (default 1.0, matches eval_env in training)")
-    args = p.parse_args()
+    return p.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Evaluate a trained H1 policy from CLI-style arguments."""
+    args = parse_args(argv)
     render = not args.no_render and not args.record
-    main(args.episodes, args.log, render, args.record, args.dr, args.vel, args.auto_dr)
+    run_eval(args.episodes, args.log, render, args.record, args.dr, args.vel, args.auto_dr)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

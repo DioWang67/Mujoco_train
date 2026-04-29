@@ -25,6 +25,7 @@ scripts/          Operator wrappers for Windows/Linux remote workflows
 tests/            Lightweight unit tests that should run without MuJoCo
 tools/            Evaluation, deployment, benchmark, and maintenance CLIs
 train.py          Unified training entrypoint, defaults to H1
+eval.py           Unified evaluation entrypoint, defaults to H1
 ```
 
 Generated runtime outputs should stay out of Git unless they are deliberate
@@ -90,11 +91,20 @@ python -m tools.smoke_sedon_env --steps 20
 python train.py --project sedon --smoke --n-envs 1
 ```
 
+Evaluate Sedon:
+
+```bash
+python eval.py --project sedon --episodes 1 --render
+python eval.py --project sedon --episodes 1 --record
+scripts\sedon_eval.bat
+```
+
 Add a new robot by creating `configs/<slug>/project.json` and a train module
 with `main(argv)`. The shared entrypoint will then accept:
 
 ```bash
 python train.py --project <slug> [project args...]
+python eval.py --project <slug> [project args...]
 ```
 
 Example `project.json`:

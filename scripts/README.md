@@ -18,7 +18,9 @@ manual Windows/Linux operation.
 ## Local Evaluation
 
 - `eval.bat`  
-  Interactive H1 and grasp evaluation menu.
+  Interactive H1, grasp, and Sedon evaluation menu.
+- `sedon_eval.bat`
+  Interactive Sedon eval menu; accepts extra args for `eval.py --project sedon`.
 - `tensorboard.bat`  
   Start local TensorBoard against `logs/tb`.
 
