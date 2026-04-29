@@ -48,23 +48,27 @@ class SedonStandingConfig:
         target_base_height: Desired base height in meters.
         min_base_height: Episode terminates below this height.
         max_base_height: Episode terminates above this height.
+        min_upright: Episode terminates below this base upright alignment.
         torque_scale: Normalized action multiplier before clipping to motor limits.
         alive_reward: Reward granted each non-terminal step.
         height_weight: Weight for matching target height.
+        height_sharpness: Exponential penalty sharpness for base-height error.
         upright_weight: Weight for keeping the base z-axis upright.
         action_penalty_weight: Penalty coefficient for squared normalized action.
         velocity_penalty_weight: Penalty coefficient for joint velocity.
     """
 
-    target_base_height: float = 0.55
-    min_base_height: float = 0.18
-    max_base_height: float = 0.80
+    target_base_height: float = 0.46
+    min_base_height: float = 0.34
+    max_base_height: float = 0.65
+    min_upright: float = 0.45
     torque_scale: float = 45.0
-    alive_reward: float = 0.75
-    height_weight: float = 1.0
-    upright_weight: float = 0.5
-    action_penalty_weight: float = 0.01
-    velocity_penalty_weight: float = 0.002
+    alive_reward: float = 0.2
+    height_weight: float = 3.0
+    height_sharpness: float = 40.0
+    upright_weight: float = 1.0
+    action_penalty_weight: float = 0.005
+    velocity_penalty_weight: float = 0.001
 
 
 def compute_standing_reward(
@@ -87,7 +91,7 @@ def compute_standing_reward(
         Reward component mapping including ``total``.
     """
     height_error = base_height - config.target_base_height
-    height = float(np.exp(-12.0 * height_error * height_error))
+    height = float(np.exp(-config.height_sharpness * height_error * height_error))
     upright_clipped = float(np.clip(upright, -1.0, 1.0))
     components = {
         "alive": config.alive_reward,
@@ -290,7 +294,7 @@ class SedonStandingEnv(MujocoEnv):
             return True
         if base_height > self._reward_config.max_base_height:
             return True
-        return bool(upright < 0.2)
+        return bool(upright < self._reward_config.min_upright)
 
     def _base_height(self) -> float:
         """Return the floating base body height."""

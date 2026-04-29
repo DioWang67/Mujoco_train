@@ -14,11 +14,11 @@ def test_build_base_body_wraps_existing_children_with_freejoint() -> None:
     leg_body = ET.Element("body", {"name": "R_link_hip_yaw"})
     inertial = ET.Element("inertial", {"mass": "1", "pos": "0 0 0"})
 
-    base_body = _build_base_body([base_geom, leg_body], inertial, base_height=0.55)
+    base_body = _build_base_body([base_geom, leg_body], inertial, base_height=0.46)
 
     assert base_body.tag == "body"
     assert base_body.attrib["name"] == "base_link"
-    assert base_body.attrib["pos"] == "0 0 0.55"
+    assert base_body.attrib["pos"] == "0 0 0.46"
     assert base_body.find("freejoint").attrib["name"] == "floating_base"
     assert base_body.find("geom").attrib["mesh"] == "base_link"
     assert base_body.find("body").attrib["name"] == "R_link_hip_yaw"

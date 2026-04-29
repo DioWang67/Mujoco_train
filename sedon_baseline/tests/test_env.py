@@ -38,6 +38,27 @@ def test_compute_standing_reward_prefers_target_height_and_upright_pose() -> Non
     assert good["total"] > bad["total"]
 
 
+def test_compute_standing_reward_penalizes_low_crouch() -> None:
+    config = SedonStandingConfig()
+
+    target_pose = compute_standing_reward(
+        base_height=config.target_base_height,
+        upright=1.0,
+        joint_velocity_l2=0.0,
+        action_l2=0.0,
+        config=config,
+    )
+    low_crouch = compute_standing_reward(
+        base_height=0.27,
+        upright=0.95,
+        joint_velocity_l2=0.0,
+        action_l2=0.0,
+        config=config,
+    )
+
+    assert low_crouch["total"] < target_pose["total"] * 0.5
+
+
 @pytest.fixture
 def sedon_env_class() -> type[SedonStandingEnv]:
     """Return the Sedon env class, skipping when private assets are unavailable."""

@@ -10,7 +10,7 @@ from pathlib import Path
 import mujoco
 
 BASE_LINK_NAME = "base_link"
-DEFAULT_BASE_HEIGHT = 0.55
+DEFAULT_BASE_HEIGHT = 0.46
 DEFAULT_MOTOR_CTRL_RANGE = "-100 100"
 
 
