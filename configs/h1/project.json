@@ -3,5 +3,6 @@
   "display_name": "H1 walking",
   "train_module": "h1_train",
   "eval_module": "eval",
-  "job_name": "h1"
+  "job_name": "h1",
+  "smoke_args": ["--smoke"]
 }

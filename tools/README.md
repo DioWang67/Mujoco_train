@@ -31,6 +31,15 @@ python -m tools
 - `python -m tools.grasp_sanity_check`  
   Run a scripted grasp rollout to verify reset/controller setup.
 
+## Sedon
+
+- `python -m tools.convert_urdf_to_mjcf`  
+  Convert the private Sedon URDF/STL package into a MuJoCo MJCF scene.
+- `python -m tools.build_sedon_training_scene`  
+  Build the floating-base Sedon training scene from converted MJCF.
+- `python -m tools.smoke_sedon_env --steps 20`  
+  Run a short Sedon standing environment smoke test.
+
 ## Release
 
 - `python -m tools.deploy_release`  

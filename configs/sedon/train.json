@@ -1,0 +1,19 @@
+{
+  "n_envs_default": 4,
+  "total_timesteps": 1000000,
+  "smoke_timesteps": 4096,
+  "n_steps": 256,
+  "n_epochs": 8,
+  "gamma": 0.99,
+  "gae_lambda": 0.95,
+  "learning_rate": 0.0003,
+  "clip_range": 0.2,
+  "ent_coef": 0.002,
+  "vf_coef": 0.5,
+  "max_grad_norm": 0.8,
+  "net_arch": [256, 256],
+  "max_episode_steps": 400,
+  "checkpoint_freq_steps": 50000,
+  "eval_freq_steps": 25000,
+  "eval_episodes": 3
+}

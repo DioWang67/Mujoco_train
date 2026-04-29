@@ -23,6 +23,10 @@ logs/
 reports/
 artifacts/sync/
 
+# Private robot assets
+private_assets/
+configs/*_URDF*/
+
 # Eval outputs
 eval_ep*.csv
 eval_ep*.mp4

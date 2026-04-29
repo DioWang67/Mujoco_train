@@ -94,6 +94,24 @@ TOOLS: tuple[ToolEntry, ...] = (
         example="python -m tools.grasp_sanity_check",
     ),
     ToolEntry(
+        module="convert_urdf_to_mjcf",
+        category="sedon",
+        summary="Convert the private Sedon URDF/STL package into a MuJoCo MJCF scene.",
+        example="python -m tools.convert_urdf_to_mjcf",
+    ),
+    ToolEntry(
+        module="build_sedon_training_scene",
+        category="sedon",
+        summary="Build the floating-base Sedon training scene from converted MJCF.",
+        example="python -m tools.build_sedon_training_scene",
+    ),
+    ToolEntry(
+        module="smoke_sedon_env",
+        category="sedon",
+        summary="Run a short Sedon standing environment smoke test.",
+        example="python -m tools.smoke_sedon_env --steps 20",
+    ),
+    ToolEntry(
         module="deploy_release",
         category="release",
         summary="Create and optionally upload a clean source release archive.",

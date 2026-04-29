@@ -23,5 +23,5 @@ goto collect_args
 echo Starting remote training for project=%PROJECT_SLUG% in foreground...
 echo Log file: %LOG_FILE%
 echo.
-ssh -t %REMOTE_HOST% "bash -lc 'mkdir -p %RUN_ROOT%/logs/%PROJECT_SLUG% && cd %REMOTE_ROOT%/code/current && MUJOCO_TRAIN_LAYOUT_ROOT=%REMOTE_ROOT% MUJOCO_TRAIN_PROJECT_SLUG=%PROJECT_SLUG% /root/anaconda3/bin/python -u train.py --project %PROJECT_SLUG% %FORWARDED_ARGS% 2>&1 | tee %LOG_FILE%'"
+ssh -t %REMOTE_HOST% "bash -lc 'mkdir -p %RUN_ROOT%/logs/%PROJECT_SLUG% && cd %REMOTE_ROOT%/code/current && export MUJOCO_TRAIN_LAYOUT_ROOT=%REMOTE_ROOT% MUJOCO_TRAIN_PROJECT_SLUG=%PROJECT_SLUG% MKL_THREADING_LAYER=GNU OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 && /root/anaconda3/bin/python -u train.py --project %PROJECT_SLUG% %FORWARDED_ARGS% 2>&1 | tee %LOG_FILE%'"
 exit /b %errorlevel%

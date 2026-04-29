@@ -18,35 +18,57 @@ manual Windows/Linux operation.
 ## Local Evaluation
 
 - `eval.bat`  
-  Interactive H1 evaluation, compare, gate, aggregate, and benchmark menu.
+  Interactive H1 and grasp evaluation menu.
 - `tensorboard.bat`  
   Start local TensorBoard against `logs/tb`.
 
 ## Remote Training
 
+- `h1_remote_train.bat`  
+  Start formal remote H1 training.
+- `grasp_remote_train.bat`  
+  Start formal remote grasp training with `--phase full --n-envs 8`.
+- `sedon_remote_train.bat`  
+  Start formal remote Sedon standing training with `--n-envs 4`.
 - `run_remote_train.bat <project-slug> [args...]`  
   Start foreground remote training for any configured project.
-- `run_remote_h1_train.bat [args...]`  
-  Start foreground H1 remote training.
-- `run_remote_grasp_train.bat [args...]`  
-  Start foreground grasp remote training.
 - `stop_remote_train.bat [h1|grasp]`  
   Stop remote training processes for the selected target.
 
+## Remote Evaluation
+
+- `grasp_remote_eval.bat`  
+  Evaluate the remote grasp checkpoint headlessly for 10 episodes.
+
 ## Remote TensorBoard
 
+- `h1_tensorboard.bat`  
+  Open the remote H1 TensorBoard tunnel on port 6006.
+- `grasp_tensorboard.bat`  
+  Open the latest remote grasp TensorBoard run on port 6007.
+- `sedon_tensorboard.bat`  
+  Open the remote Sedon TensorBoard tunnel on port 6008.
 - `tensorboard_tunnel.bat [project] [job] [port]`  
   Start remote TensorBoard and open an SSH tunnel through PowerShell. If no
   project/job is provided, the script discovers available remote runs.
 - `start_remote_tensorboard.ps1`  
   PowerShell implementation with project/job discovery and automatic port
-  selection.
+  selection. Use `-LatestRun` to open the newest child run under a job.
 - `start_remote_tensorboard.sh`  
   Remote-side launcher used after deployment. It searches for a Python
   executable with TensorBoard installed.
 
 ## Release / Packaging
 
+- `install_vscode_server_offline.bat`  
+  Upload and install the local VS Code Server archive on an offline remote host.
+- `h1_deploy_remote.bat`  
+  Deploy the current committed release for H1 and run H1 smoke verify.
+- `grasp_deploy_remote.bat`  
+  Deploy the current committed release for grasp and run grasp smoke verify.
+- `sedon_deploy_remote.bat`  
+  Deploy the current committed release for Sedon, include private assets, and
+  run Sedon smoke verify.
 - `deploy_release.bat`  
   Wrapper for `python -m tools.deploy_release`.
 - `deploy_remote_release.bat`  
@@ -86,5 +108,13 @@ def main(argv: list[str] | None = None) -> int | None:
     ...
 ```
 
-The target-specific H1/grasp wrappers remain for convenience, but new robots
-should use the generic `run_remote_train.bat` entrypoint.
+Use the generic `run_remote_train.bat` entrypoint for new robots.
+Do not add a new per-robot wrapper unless it captures a real operator workflow
+that the generic script cannot express.
+
+If a robot needs ignored assets on the remote host, define `private_asset_dir`
+in `configs/<slug>/project.json` and deploy with:
+
+```bat
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\deploy_remote_release.ps1 -ProjectSlug <slug> -VerifyProject <slug> -IncludePrivateAssets
+```

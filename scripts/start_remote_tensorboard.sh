@@ -8,7 +8,8 @@ JOB_NAME="${3:-$PROJECT_SLUG}"
 PORT="${4:-6006}"
 
 LOGDIR="${REMOTE_ROOT}/runs/${PROJECT_SLUG}/logs/tb/${JOB_NAME}"
-REMOTE_LOG="/tmp/tb_${PROJECT_SLUG}_${JOB_NAME}_${PORT}.log"
+SAFE_JOB_NAME="$(printf '%s' "${JOB_NAME}" | tr '/\\' '__' | tr -c 'A-Za-z0-9_.-' '_')"
+REMOTE_LOG="/tmp/tb_${PROJECT_SLUG}_${SAFE_JOB_NAME}_${PORT}.log"
 
 pick_python() {
   local candidates=()

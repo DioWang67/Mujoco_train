@@ -23,6 +23,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from shutil import copy2, copytree
 
+from robot_projects import get_robot_project
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ARTIFACT_DIR = REPO_ROOT / "artifacts" / "sync"
@@ -118,6 +120,14 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Upload/extract only. Do not update the current symlink.",
     )
+    parser.add_argument(
+        "--include-private-assets",
+        action="store_true",
+        help=(
+            "Include the project private_asset_dir from project.json. "
+            "Use only when proprietary assets are approved for the target host."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -152,6 +162,33 @@ def iter_existing_extra_release_paths() -> list[Path]:
     return [REPO_ROOT / relative for relative in EXTRA_RELEASE_PATHS if (REPO_ROOT / relative).exists()]
 
 
+def iter_private_release_paths(project_slug: str, *, include_private_assets: bool) -> list[Path]:
+    """Return explicit opt-in private assets for one project.
+
+    Args:
+        project_slug: Configured project slug.
+        include_private_assets: Whether private assets should be included.
+
+    Returns:
+        Existing private asset paths to copy into the release staging tree.
+
+    Raises:
+        ValueError: If private assets were requested but the project has no
+            ``private_asset_dir`` or that directory does not exist.
+    """
+    if not include_private_assets:
+        return []
+
+    project = get_robot_project(project_slug)
+    if project.private_asset_dir is None:
+        raise ValueError(
+            f"Project '{project_slug}' does not define private_asset_dir in project.json."
+        )
+    if not project.private_asset_dir.exists():
+        raise ValueError(f"Private asset directory not found: {project.private_asset_dir}")
+    return [project.private_asset_dir]
+
+
 def _copy_path(source: Path, destination: Path) -> None:
     """Copy one file or directory into the staging tree."""
     if source.is_dir():
@@ -161,7 +198,13 @@ def _copy_path(source: Path, destination: Path) -> None:
         copy2(source, destination)
 
 
-def build_archive(ref: str, archive_path: Path) -> Path:
+def build_archive(
+    ref: str,
+    archive_path: Path,
+    *,
+    project_slug: str,
+    include_private_assets: bool = False,
+) -> Path:
     """Build a clean release archive and include required local assets."""
     archive_path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="deploy_release_") as temp_dir:
@@ -177,6 +220,12 @@ def build_archive(ref: str, archive_path: Path) -> Path:
 
         for extra_path in iter_existing_extra_release_paths():
             _copy_path(extra_path, staging_root / extra_path.name)
+        for private_path in iter_private_release_paths(
+            project_slug,
+            include_private_assets=include_private_assets,
+        ):
+            destination = staging_root / private_path.relative_to(REPO_ROOT)
+            _copy_path(private_path, destination)
 
         with tarfile.open(archive_path, mode="w:gz") as tar:
             tar.add(staging_root, arcname=".")
@@ -272,7 +321,12 @@ def main() -> int:
         archive_path = DEFAULT_ARTIFACT_DIR / f"{project_slug}_source_{commit}.tar.gz"
     archive_path = archive_path.resolve()
 
-    build_archive(args.ref, archive_path)
+    build_archive(
+        args.ref,
+        archive_path,
+        project_slug=project_slug,
+        include_private_assets=args.include_private_assets,
+    )
     layout = build_remote_layout(
         remote_root=args.remote_root,
         project_slug=project_slug,

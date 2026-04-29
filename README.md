@@ -4,6 +4,7 @@ This repository contains MuJoCo reinforcement-learning experiments for:
 
 - H1 walking with PPO
 - fixed-base grasping baseline
+- Sedon standing baseline from a private URDF/MJCF conversion flow
 - evaluation, comparison, benchmark, and release-gate tools
 - remote training/deployment helpers
 
@@ -17,6 +18,7 @@ architecture.
 configs/          Training, benchmark, and release-gate configs
 docs/             Runbooks, remote layout notes, and project status
 grasp_baseline/   Fixed-base grasp environment, training, assets, and tests
+sedon_baseline/   Sedon standing environment, training, and tests
 scripts/          Operator wrappers for Windows/Linux remote workflows
 tests/            Lightweight unit tests that should run without MuJoCo
 tools/            Evaluation, deployment, benchmark, and maintenance CLIs
@@ -34,6 +36,7 @@ models/
 logs/
 reports/
 artifacts/
+private_assets/
 ```
 
 ## Setup
@@ -79,6 +82,15 @@ python train.py --project grasp --smoke
 python train.py --project grasp --phase full --n-envs 32
 ```
 
+Prepare and train Sedon locally:
+
+```bash
+python -m tools.convert_urdf_to_mjcf
+python -m tools.build_sedon_training_scene
+python -m tools.smoke_sedon_env --steps 20
+python train.py --project sedon --smoke --n-envs 1
+```
+
 Add a new robot by creating `configs/<slug>/project.json` and a train module
 with `main(argv)`. The shared entrypoint will then accept:
 
@@ -94,7 +106,9 @@ Example `project.json`:
   "display_name": "Quadruped walking",
   "train_module": "robots.quadruped.train",
   "eval_module": "robots.quadruped.eval",
-  "job_name": "quadruped"
+  "job_name": "quadruped",
+  "smoke_args": ["--smoke", "--n-envs", "1"],
+  "private_asset_dir": "private_assets/quadruped"
 }
 ```
 
@@ -148,10 +162,25 @@ Upload and switch the remote `current` release when SSH is configured:
 python -m tools.deploy_release --project-slug h1 --remote-host root@10.6.243.55 --upload
 ```
 
+For robots that require ignored private assets on the remote host, explicitly
+include them:
+
+```bash
+python -m tools.deploy_release --project-slug sedon --include-private-assets
+```
+
+The operator wrapper for Sedon uses the same opt-in behavior:
+
+```bat
+scripts\sedon_deploy_remote.bat
+```
+
 ## Current Cleanup Rules
 
+- See `docs/ARCHITECTURE.md` for module boundaries and asset policy.
 - Keep root entrypoints thin when possible.
 - Put repeatable parameters in `configs/`, not hardcoded scripts.
+- Keep private URDF/STL/CAD exports under `private_assets/`, not `configs/`.
 - Keep generated outputs ignored unless they are intentional fixtures.
 - Keep pure logic tests separate from simulator-dependent tests.
 - Avoid adding abstractions unless a second real use case exists.

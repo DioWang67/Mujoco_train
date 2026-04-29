@@ -22,9 +22,11 @@ class RobotProject:
         slug: Stable CLI/project identifier, such as ``h1`` or ``grasp``.
         display_name: Human-readable project name.
         train_module: Python module exposing ``main(argv)``.
-        eval_module: Optional Python module for project-specific evaluation.
-        job_name: Artifact job name used under models/logs/tensorboard paths.
-        config_dir: Directory containing this project's config files.
+    eval_module: Optional Python module for project-specific evaluation.
+    job_name: Artifact job name used under models/logs/tensorboard paths.
+    smoke_args: Project-specific arguments for a short remote/local smoke train.
+    private_asset_dir: Optional ignored asset directory needed to run this project.
+    config_dir: Directory containing this project's config files.
     """
 
     slug: str
@@ -32,6 +34,8 @@ class RobotProject:
     train_module: str
     eval_module: str | None
     job_name: str
+    smoke_args: tuple[str, ...]
+    private_asset_dir: Path | None
     config_dir: Path
 
 
@@ -65,6 +69,34 @@ def _read_project_json(path: Path) -> dict[str, Any]:
     return data
 
 
+def _read_string_list(path: Path, data: dict[str, Any], key: str) -> tuple[str, ...]:
+    """Read an optional list of strings from project metadata."""
+    raw_value = data.get(key, [])
+    if raw_value is None:
+        return ()
+    if not isinstance(raw_value, list) or not all(isinstance(item, str) for item in raw_value):
+        raise ValueError(f"Project config field '{key}' must be a list of strings: {path}")
+    return tuple(item.strip() for item in raw_value if item.strip())
+
+
+def _read_optional_repo_relative_path(
+    path: Path,
+    data: dict[str, Any],
+    key: str,
+) -> Path | None:
+    """Read an optional repo-relative path and reject unsafe values."""
+    raw_value = data.get(key)
+    if raw_value in (None, ""):
+        return None
+    if not isinstance(raw_value, str):
+        raise ValueError(f"Project config field '{key}' must be a string: {path}")
+
+    relative = Path(raw_value)
+    if relative.is_absolute() or ".." in relative.parts:
+        raise ValueError(f"Project config field '{key}' must be repo-relative: {path}")
+    return REPO_ROOT / relative
+
+
 def _load_project(path: Path) -> RobotProject:
     """Load one project metadata file."""
     data = _read_project_json(path)
@@ -82,6 +114,8 @@ def _load_project(path: Path) -> RobotProject:
     eval_module = str(eval_module_value).strip() if eval_module_value else None
     display_name = str(data.get("display_name", slug)).strip() or slug
     job_name = validate_project_slug(str(data.get("job_name", slug)))
+    smoke_args = _read_string_list(path, data, "smoke_args") or ("--smoke",)
+    private_asset_dir = _read_optional_repo_relative_path(path, data, "private_asset_dir")
 
     return RobotProject(
         slug=slug,
@@ -89,6 +123,8 @@ def _load_project(path: Path) -> RobotProject:
         train_module=train_module,
         eval_module=eval_module,
         job_name=job_name,
+        smoke_args=smoke_args,
+        private_asset_dir=private_asset_dir,
         config_dir=path.parent,
     )
 

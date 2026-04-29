@@ -62,6 +62,29 @@ class GraspTrainConfig:
     eval_episodes: int
 
 
+@dataclass(frozen=True)
+class SedonTrainConfig:
+    """Static training configuration for the Sedon standing baseline."""
+
+    n_envs_default: int
+    total_timesteps: int
+    smoke_timesteps: int
+    n_steps: int
+    n_epochs: int
+    gamma: float
+    gae_lambda: float
+    learning_rate: float
+    clip_range: float
+    ent_coef: float
+    vf_coef: float
+    max_grad_norm: float
+    net_arch: list[int]
+    max_episode_steps: int
+    checkpoint_freq_steps: int
+    eval_freq_steps: int
+    eval_episodes: int
+
+
 def _load_json(path: Path) -> dict[str, Any]:
     """Load one JSON config file with a useful error if it is missing."""
     if not path.exists():
@@ -175,6 +198,54 @@ def load_grasp_train_config(repo_root: Path) -> GraspTrainConfig:
         },
     )
     return GraspTrainConfig(
+        n_envs_default=int(data["n_envs_default"]),
+        total_timesteps=int(data["total_timesteps"]),
+        smoke_timesteps=int(data["smoke_timesteps"]),
+        n_steps=int(data["n_steps"]),
+        n_epochs=int(data["n_epochs"]),
+        gamma=float(data["gamma"]),
+        gae_lambda=float(data["gae_lambda"]),
+        learning_rate=float(data["learning_rate"]),
+        clip_range=float(data["clip_range"]),
+        ent_coef=float(data["ent_coef"]),
+        vf_coef=float(data["vf_coef"]),
+        max_grad_norm=float(data["max_grad_norm"]),
+        net_arch=[int(value) for value in data["net_arch"]],
+        max_episode_steps=int(data["max_episode_steps"]),
+        checkpoint_freq_steps=int(data["checkpoint_freq_steps"]),
+        eval_freq_steps=int(data["eval_freq_steps"]),
+        eval_episodes=int(data["eval_episodes"]),
+    )
+
+
+def load_sedon_train_config(repo_root: Path) -> SedonTrainConfig:
+    """Load the Sedon standing config from ``configs/sedon/train.json``."""
+    path = repo_root / "configs" / "sedon" / "train.json"
+    data = _load_json(path)
+    _require_keys(
+        path,
+        data,
+        {
+            "n_envs_default",
+            "total_timesteps",
+            "smoke_timesteps",
+            "n_steps",
+            "n_epochs",
+            "gamma",
+            "gae_lambda",
+            "learning_rate",
+            "clip_range",
+            "ent_coef",
+            "vf_coef",
+            "max_grad_norm",
+            "net_arch",
+            "max_episode_steps",
+            "checkpoint_freq_steps",
+            "eval_freq_steps",
+            "eval_episodes",
+        },
+    )
+    return SedonTrainConfig(
         n_envs_default=int(data["n_envs_default"]),
         total_timesteps=int(data["total_timesteps"]),
         smoke_timesteps=int(data["smoke_timesteps"]),

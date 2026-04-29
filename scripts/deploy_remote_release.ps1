@@ -3,8 +3,8 @@ param(
     [string]$Ref = "HEAD",
     [string]$RemoteHost = "root@10.6.243.55",
     [string]$RemoteRoot = "/root/anaconda3/mujoco-train-system",
-    [ValidateSet("none", "h1", "grasp")]
     [string]$VerifyProject = "none",
+    [switch]$IncludePrivateAssets,
     [switch]$CleanRelease,
     [switch]$DryRun
 )
@@ -35,13 +35,34 @@ Write-Host "Project slug   : $ProjectSlug"
 Write-Host "Remote host    : $RemoteHost"
 Write-Host "Remote root    : $RemoteRoot"
 Write-Host "Remote release : $remoteRelease"
+Write-Host "Private assets : $IncludePrivateAssets"
 Write-Host
+
+function Get-ProjectSmokeArgs {
+    param([string]$Slug)
+
+    $configPath = Join-Path $repoRoot "configs\$Slug\project.json"
+    if (-not (Test-Path -LiteralPath $configPath)) {
+        throw "Missing project config: $configPath"
+    }
+
+    $projectConfig = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
+    if ($null -eq $projectConfig.smoke_args -or $projectConfig.smoke_args.Count -eq 0) {
+        return "--smoke"
+    }
+    return ($projectConfig.smoke_args -join " ")
+}
+
+$deployArgs = @("-m", "tools.deploy_release", "--project-slug", $ProjectSlug, "--ref", $Ref)
+if ($IncludePrivateAssets) {
+    $deployArgs += "--include-private-assets"
+}
 
 $steps = @(
     @{
         Name = "Build archive"
         Action = {
-            & $pythonExe -m tools.deploy_release --project-slug $ProjectSlug --ref $Ref
+            & $pythonExe @deployArgs
         }
     },
     @{
@@ -101,12 +122,8 @@ foreach ($step in $steps) {
     Write-Host
 }
 
-if ($VerifyProject -eq "h1" -and -not $DryRun) {
-    Write-Host "==> Remote smoke verify (h1)"
-    & ssh $RemoteHost "cd $RemoteRoot/code/current && MUJOCO_TRAIN_LAYOUT_ROOT=$RemoteRoot MUJOCO_TRAIN_PROJECT_SLUG=h1 /root/anaconda3/bin/python train.py --project h1 --smoke"
-}
-
-if ($VerifyProject -eq "grasp" -and -not $DryRun) {
-    Write-Host "==> Remote smoke verify (grasp)"
-    & ssh $RemoteHost "cd $RemoteRoot/code/current && MUJOCO_TRAIN_LAYOUT_ROOT=$RemoteRoot MUJOCO_TRAIN_PROJECT_SLUG=grasp /root/anaconda3/bin/python train.py --project grasp --smoke --n-envs 1 --fixed-cube"
+if ($VerifyProject -ne "none" -and -not $DryRun) {
+    $smokeArgs = Get-ProjectSmokeArgs -Slug $VerifyProject
+    Write-Host "==> Remote smoke verify ($VerifyProject): $smokeArgs"
+    & ssh $RemoteHost "cd $RemoteRoot/code/current && export MUJOCO_TRAIN_LAYOUT_ROOT=$RemoteRoot MUJOCO_TRAIN_PROJECT_SLUG=$VerifyProject MKL_THREADING_LAYER=GNU OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 && /root/anaconda3/bin/python train.py --project $VerifyProject $smokeArgs"
 }

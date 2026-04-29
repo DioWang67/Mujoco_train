@@ -3,5 +3,6 @@
   "display_name": "Fixed-base grasp baseline",
   "train_module": "grasp_baseline.train",
   "eval_module": "tools.eval_grasp",
-  "job_name": "grasp"
+  "job_name": "grasp",
+  "smoke_args": ["--smoke", "--n-envs", "1", "--fixed-cube"]
 }

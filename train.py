@@ -7,10 +7,20 @@ Each project train module must expose ``main(argv: list[str] | None = None)``.
 from __future__ import annotations
 
 import importlib
+import os
 import sys
 
 from robot_projects import get_robot_project, load_robot_projects
 from train_entrypoint import split_mode_args
+
+
+def configure_numeric_runtime() -> None:
+    """Set conservative BLAS/OpenMP defaults before importing training modules."""
+    os.environ.setdefault("MKL_THREADING_LAYER", "GNU")
+    os.environ.setdefault("OMP_NUM_THREADS", "1")
+    os.environ.setdefault("MKL_NUM_THREADS", "1")
+    os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+    os.environ.setdefault("NUMEXPR_NUM_THREADS", "1")
 
 
 def _run_project_train(module_name: str, argv: list[str]) -> int:
@@ -38,6 +48,7 @@ def _run_project_train(module_name: str, argv: list[str]) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     """Dispatch to the selected robot training project."""
+    configure_numeric_runtime()
     raw_argv = list(sys.argv[1:] if argv is None else argv)
     if raw_argv in (["--help"], ["-h"]) or "--list-projects" in raw_argv:
         print("Usage: python train.py [--project <slug>] [project args...]")

@@ -3,7 +3,8 @@ param(
     [string]$RemoteRoot = "/root/anaconda3/mujoco-train-system",
     [string]$ProjectSlug = "",
     [string]$JobName = "",
-    [string]$Port = ""
+    [string]$Port = "",
+    [switch]$LatestRun
 )
 
 $ErrorActionPreference = "Stop"
@@ -177,6 +178,30 @@ function Get-RemoteJobs {
     )
 }
 
+function Get-LatestTensorBoardRun {
+    param(
+        [string]$SelectedProject,
+        [string]$SelectedJob
+    )
+    $tbRoot = "$RemoteRoot/runs/$SelectedProject/logs/tb/$SelectedJob"
+    $command = "find '$tbRoot' -mindepth 1 -maxdepth 1 -type d -printf '%T@ %f`n' 2>/dev/null | sort -n | tail -n 1 | awk '{print `$2}'"
+    $result = Invoke-SshCapture -Command $command
+    if ($result.ExitCode -ne 0) {
+        throw "Failed to find latest TensorBoard run under project '$SelectedProject' job '$SelectedJob'."
+    }
+    $latestRun = @(
+        $result.Output |
+        Where-Object { $_ -and $_.ToString().Trim() } |
+        ForEach-Object { $_.ToString().Trim() } |
+        Where-Object { $_ -match '^[A-Za-z0-9][A-Za-z0-9_.-]*$' -and -not $_.StartsWith("--") }
+    ) | Select-Object -Last 1
+
+    if (-not $latestRun) {
+        throw "No TensorBoard run directories found under: $tbRoot"
+    }
+    return "$SelectedJob/$latestRun"
+}
+
 if (-not $ProjectSlug) {
     $ProjectSlug = Get-Selection -Title "Available projects:" -Options (Get-RemoteProjects)
 }
@@ -190,10 +215,16 @@ if (-not $JobName) {
     }
 }
 
+if ($LatestRun) {
+    $JobName = Get-LatestTensorBoardRun -SelectedProject $ProjectSlug -SelectedJob $JobName
+    Write-Host "Selected latest TensorBoard run: $JobName"
+}
+
 $portNumber = Get-TensorBoardPort -SelectedProject $ProjectSlug -RequestedPort $Port
 
 $remoteLogDir = "$RemoteRoot/runs/$ProjectSlug/logs/tb/$JobName"
-$remoteLog = "/tmp/tb_${ProjectSlug}_${JobName}_${portNumber}.log"
+$safeJobName = ($JobName -replace '[\\/]', '_' -replace '[^A-Za-z0-9_.-]', '_')
+$remoteLog = "/tmp/tb_${ProjectSlug}_${safeJobName}_${portNumber}.log"
 
 Write-Host "Starting TensorBoard on remote for project=$ProjectSlug job=$JobName..."
 $remoteLauncher = "$RemoteRoot/code/current/scripts/start_remote_tensorboard.sh"

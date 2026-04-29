@@ -1,4 +1,4 @@
-"""PPO training entrypoint for the standalone fixed-base grasp baseline."""
+"""PPO training entrypoint for the Sedon standing baseline."""
 
 from __future__ import annotations
 
@@ -17,8 +17,12 @@ from stable_baselines3.common.callbacks import BaseCallback, CheckpointCallback,
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecNormalize
 
-from grasp_baseline.env import FixedBaseGraspEnv, GraspRewardConfig
-from training_config import load_grasp_train_config
+from sedon_baseline.env import (
+    DEFAULT_SCENE_PATH,
+    SedonStandingConfig,
+    SedonStandingEnv,
+)
+from training_config import load_sedon_train_config
 from training_paths import resolve_training_paths
 from training_runtime import (
     compute_ppo_batch_size,
@@ -29,14 +33,15 @@ from training_runtime import (
 
 HERE = Path(__file__).resolve().parent
 REPO_ROOT = HERE.parent
-GRASP_CONFIG = load_grasp_train_config(REPO_ROOT)
+SEDON_CONFIG = load_sedon_train_config(REPO_ROOT)
 PATHS = resolve_training_paths(
     REPO_ROOT,
-    "grasp",
-    legacy_model_dir=os.path.join("models", "grasp"),
-    legacy_log_dir=os.path.join("logs", "grasp"),
-    legacy_tb_dir=os.path.join("logs", "tb", "grasp"),
+    "sedon",
+    legacy_model_dir=os.path.join("models", "sedon"),
+    legacy_log_dir=os.path.join("logs", "sedon"),
+    legacy_tb_dir=os.path.join("logs", "tb", "sedon"),
 )
+
 MODEL_ROOT = str(PATHS.models_root)
 LOG_ROOT = str(PATHS.logs_root)
 TB_ROOT = str(PATHS.tb_root)
@@ -46,36 +51,35 @@ LATEST_MODEL_PATH = os.path.join(MODEL_ROOT, "latest_model")
 CONFIG_PATH = os.path.join(LOG_ROOT, "train_config.json")
 MANIFEST_PATH = os.path.join(LOG_ROOT, "run_manifest.json")
 
-N_ENVS_DEFAULT = int(os.environ.get("GRASP_N_ENVS", str(GRASP_CONFIG.n_envs_default)))
-TOTAL_TIMESTEPS = GRASP_CONFIG.total_timesteps
-SMOKE_TIMESTEPS = GRASP_CONFIG.smoke_timesteps
-N_STEPS = GRASP_CONFIG.n_steps
-N_EPOCHS = GRASP_CONFIG.n_epochs
-GAMMA = GRASP_CONFIG.gamma
-GAE_LAMBDA = GRASP_CONFIG.gae_lambda
-LEARNING_RATE = GRASP_CONFIG.learning_rate
-CLIP_RANGE = GRASP_CONFIG.clip_range
-ENT_COEF = GRASP_CONFIG.ent_coef
-VF_COEF = GRASP_CONFIG.vf_coef
-MAX_GRAD_NORM = GRASP_CONFIG.max_grad_norm
-NET_ARCH = GRASP_CONFIG.net_arch
-MAX_EPISODE_STEPS = GRASP_CONFIG.max_episode_steps
+N_ENVS_DEFAULT = int(os.environ.get("SEDON_N_ENVS", str(SEDON_CONFIG.n_envs_default)))
+TOTAL_TIMESTEPS = SEDON_CONFIG.total_timesteps
+SMOKE_TIMESTEPS = SEDON_CONFIG.smoke_timesteps
+N_STEPS = SEDON_CONFIG.n_steps
+N_EPOCHS = SEDON_CONFIG.n_epochs
+GAMMA = SEDON_CONFIG.gamma
+GAE_LAMBDA = SEDON_CONFIG.gae_lambda
+LEARNING_RATE = SEDON_CONFIG.learning_rate
+CLIP_RANGE = SEDON_CONFIG.clip_range
+ENT_COEF = SEDON_CONFIG.ent_coef
+VF_COEF = SEDON_CONFIG.vf_coef
+MAX_GRAD_NORM = SEDON_CONFIG.max_grad_norm
+NET_ARCH = SEDON_CONFIG.net_arch
+MAX_EPISODE_STEPS = SEDON_CONFIG.max_episode_steps
 
 
-class GraspMetricsCallback(BaseCallback):
-    """Print H1-style progress plus grasp-specific success/fall rates."""
+class SedonMetricsCallback(BaseCallback):
+    """Record and print compact standing metrics during PPO training."""
 
-    LOG_FREQ = 4_096
-    PRINT_FREQ = 20_000
+    LOG_FREQ = 2_048
+    PRINT_FREQ = 10_000
 
     def __init__(self, total_timesteps: int):
         super().__init__(0)
         self._total_timesteps = total_timesteps
         self._ep_rewards: deque[float] = deque(maxlen=50)
         self._ep_lengths: deque[int] = deque(maxlen=50)
-        self._ep_successes: deque[float] = deque(maxlen=50)
-        self._ep_falls: deque[float] = deque(maxlen=50)
-        self._reward_buffers: dict[str, deque[float]] = {}
+        self._base_heights: deque[float] = deque(maxlen=500)
+        self._uprights: deque[float] = deque(maxlen=500)
         self._last_print = 0
         self._last_log = 0
         self._episode_count = 0
@@ -86,54 +90,50 @@ class GraspMetricsCallback(BaseCallback):
         self._started_at = time.time()
         print(
             f"\n{'Steps':>12}  {'Eps':>6}  {'MeanR':>9}  "
-            f"{'MeanLen':>8}  {'Succ%':>7}  {'Fall%':>7}  "
+            f"{'MeanLen':>8}  {'BaseZ':>7}  {'Upright':>7}  "
             f"{'BestR':>8}  {'FPS':>6}  {'ETA':>9}",
         )
         print("-" * 92)
 
     def _on_step(self) -> bool:
         for info in self.locals.get("infos", []):
-            for key, value in info.items():
-                if key.startswith("reward_"):
-                    self._reward_buffers.setdefault(key, deque(maxlen=200)).append(float(value))
+            if "base_height" in info:
+                self._base_heights.append(float(info["base_height"]))
+            if "upright" in info:
+                self._uprights.append(float(info["upright"]))
             episode = info.get("episode")
             if episode:
-                self._ep_rewards.append(float(episode["r"]))
+                reward = float(episode["r"])
+                self._ep_rewards.append(reward)
                 self._ep_lengths.append(int(episode["l"]))
-                self._ep_successes.append(float(bool(info.get("is_success", False))))
-                self._ep_falls.append(float(bool(info.get("cube_fell", False))))
                 self._episode_count += 1
-                self._best_reward = max(self._best_reward, float(episode["r"]))
+                self._best_reward = max(self._best_reward, reward)
 
         if self.num_timesteps - self._last_log >= self.LOG_FREQ:
             self._last_log = self.num_timesteps
-            for key, values in self._reward_buffers.items():
-                if values:
-                    self.logger.record(
-                        f"reward/{key.removeprefix('reward_')}",
-                        float(np.mean(values)),
-                    )
             if self._ep_rewards:
                 self.logger.record("episode/mean_reward", float(np.mean(self._ep_rewards)))
                 self.logger.record("episode/mean_length", float(np.mean(self._ep_lengths)))
-                self.logger.record("episode/success_rate", float(np.mean(self._ep_successes)))
-                self.logger.record("episode/cube_fell_rate", float(np.mean(self._ep_falls)))
+            if self._base_heights:
+                self.logger.record("sedon/base_height", float(np.mean(self._base_heights)))
+            if self._uprights:
+                self.logger.record("sedon/upright", float(np.mean(self._uprights)))
 
         if self.num_timesteps - self._last_print >= self.PRINT_FREQ:
             self._last_print = self.num_timesteps
             elapsed = time.time() - self._started_at
             fps = int(self.num_timesteps / elapsed) if elapsed > 0 else 0
             remaining = ((self._total_timesteps - self.num_timesteps) / fps) if fps > 0 else 0
-            mean_reward = float(np.mean(self._ep_rewards)) if self._ep_rewards else float("nan")
-            mean_length = float(np.mean(self._ep_lengths)) if self._ep_lengths else float("nan")
-            success_rate = 100.0 * float(np.mean(self._ep_successes)) if self._ep_successes else float("nan")
-            fall_rate = 100.0 * float(np.mean(self._ep_falls)) if self._ep_falls else float("nan")
             minutes, seconds = divmod(int(remaining), 60)
             hours, minutes = divmod(minutes, 60)
+            mean_reward = float(np.mean(self._ep_rewards)) if self._ep_rewards else float("nan")
+            mean_length = float(np.mean(self._ep_lengths)) if self._ep_lengths else float("nan")
+            base_z = float(np.mean(self._base_heights)) if self._base_heights else float("nan")
+            upright = float(np.mean(self._uprights)) if self._uprights else float("nan")
             print(
                 f"{self.num_timesteps:>12,}  {self._episode_count:>6}  "
                 f"{mean_reward:>9.1f}  {mean_length:>8.1f}  "
-                f"{success_rate:>6.1f}%  {fall_rate:>6.1f}%  "
+                f"{base_z:>7.3f}  {upright:>7.3f}  "
                 f"{self._best_reward:>8.1f}  {fps:>6}  "
                 f"{hours:02d}:{minutes:02d}:{seconds:02d}",
             )
@@ -141,23 +141,15 @@ class GraspMetricsCallback(BaseCallback):
 
 
 def _compute_batch_size(n_envs: int) -> int:
-    """Return a PPO batch size that is valid for the chosen env count."""
-    return compute_ppo_batch_size(n_envs, N_STEPS, minimum=256)
+    """Return a PPO batch size compatible with rollout size."""
+    return compute_ppo_batch_size(n_envs, N_STEPS, minimum=128)
 
 
-def _make_env(
-    seed: int,
-    rank: int,
-    task_phase: str,
-    randomize_cube_pose: bool,
-):
-    """Build one monitored environment instance."""
+def _make_env(seed: int, rank: int, reset_noise_scale: float):
+    """Build one monitored Sedon standing environment."""
 
     def _thunk():
-        env = FixedBaseGraspEnv(
-            task_phase=task_phase,
-            randomize_cube_pose=randomize_cube_pose,
-        )
+        env = SedonStandingEnv(reset_noise_scale=reset_noise_scale)
         env = TimeLimit(env, max_episode_steps=MAX_EPISODE_STEPS)
         env.reset(seed=seed + rank)
         return Monitor(env)
@@ -165,17 +157,9 @@ def _make_env(
     return _thunk
 
 
-def _build_vec_env(
-    n_envs: int,
-    seed: int,
-    task_phase: str,
-    randomize_cube_pose: bool,
-):
-    """Create a vectorized training environment."""
-    env_fns = [
-        _make_env(seed, rank, task_phase, randomize_cube_pose)
-        for rank in range(n_envs)
-    ]
+def _build_vec_env(n_envs: int, seed: int, reset_noise_scale: float):
+    """Create a vectorized Sedon training environment."""
+    env_fns = [_make_env(seed, rank, reset_noise_scale) for rank in range(n_envs)]
     if n_envs == 1:
         return DummyVecEnv(env_fns)
     return SubprocVecEnv(env_fns)
@@ -184,17 +168,11 @@ def _build_vec_env(
 def _build_train_env(
     n_envs: int,
     seed: int,
-    task_phase: str,
-    randomize_cube_pose: bool,
+    reset_noise_scale: float,
     resume: bool,
 ) -> VecNormalize:
-    """Create the normalized training environment, reusing VecNormalize stats."""
-    train_vec = _build_vec_env(
-        n_envs=n_envs,
-        seed=seed,
-        task_phase=task_phase,
-        randomize_cube_pose=randomize_cube_pose,
-    )
+    """Create the normalized training environment."""
+    train_vec = _build_vec_env(n_envs, seed, reset_noise_scale)
     if resume and os.path.exists(VECNORM_PATH):
         train_env = VecNormalize.load(VECNORM_PATH, train_vec)
         train_env.training = True
@@ -211,14 +189,11 @@ def _build_train_env(
 
 def _build_eval_env(
     seed: int,
-    task_phase: str,
-    randomize_cube_pose: bool,
+    reset_noise_scale: float,
     train_env: VecNormalize,
 ) -> VecNormalize:
-    """Create a deterministic eval env that reuses training observation stats."""
-    eval_vec = DummyVecEnv(
-        [_make_env(seed + 10_000, 0, task_phase, randomize_cube_pose)]
-    )
+    """Create a deterministic eval environment sharing observation stats."""
+    eval_vec = DummyVecEnv([_make_env(seed + 10_000, 0, reset_noise_scale)])
     eval_env = VecNormalize(
         eval_vec,
         norm_obs=True,
@@ -233,13 +208,15 @@ def _build_eval_env(
 
 
 def _save_config(args: argparse.Namespace, n_envs: int, batch_size: int) -> None:
-    """Persist the grasp training config for reproducibility."""
+    """Persist the Sedon training config for reproducibility."""
+    os.makedirs(LOG_ROOT, exist_ok=True)
     cfg = {
         "artifacts": {
             "models_root": MODEL_ROOT,
             "logs_root": LOG_ROOT,
             "tb_root": TB_ROOT,
         },
+        "scene_path": str(DEFAULT_SCENE_PATH),
         "n_envs": n_envs,
         "batch_size": batch_size,
         "total_timesteps": SMOKE_TIMESTEPS if args.smoke else TOTAL_TIMESTEPS,
@@ -253,55 +230,15 @@ def _save_config(args: argparse.Namespace, n_envs: int, batch_size: int) -> None
         "vf_coef": VF_COEF,
         "max_grad_norm": MAX_GRAD_NORM,
         "net_arch": NET_ARCH,
-        "task_phase": args.phase,
-        "randomize_cube_pose": not args.fixed_cube,
-        "reward_config": asdict(GraspRewardConfig()),
         "max_episode_steps": MAX_EPISODE_STEPS,
+        "reset_noise_scale": args.reset_noise_scale,
+        "reward_config": asdict(SedonStandingConfig()),
     }
     write_json(CONFIG_PATH, cfg)
 
 
-def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    """Parse command-line options for grasp training."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--smoke", action="store_true", help="Run a short sanity training.")
-    parser.add_argument(
-        "--phase",
-        choices=["reach", "grasp", "lift", "full"],
-        default="full",
-        help="Reward curriculum phase.",
-    )
-    parser.add_argument(
-        "--fixed-cube",
-        action="store_true",
-        help="Disable cube XY randomization to debug scripted or early RL behavior.",
-    )
-    parser.add_argument(
-        "--resume",
-        type=str,
-        default=None,
-        help="Path to an existing PPO zip checkpoint to resume from.",
-    )
-    parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument(
-        "--n-envs",
-        type=int,
-        default=N_ENVS_DEFAULT,
-        help="Number of parallel environments.",
-    )
-    return parser.parse_args(argv)
-
-
-def main(argv: list[str] | None = None) -> None:
-    """Train the standalone grasp baseline with PPO."""
-    args = parse_args(argv)
-    if args.n_envs <= 0:
-        raise ValueError("--n-envs must be positive.")
-
-    ensure_dirs(MODEL_ROOT, LOG_ROOT, BEST_MODEL_DIR, TB_ROOT)
-
-    batch_size = _compute_batch_size(args.n_envs)
-    _save_config(args, args.n_envs, batch_size)
+def _write_manifest() -> None:
+    """Write a small run manifest."""
     write_run_manifest(
         MANIFEST_PATH,
         repo_root=REPO_ROOT,
@@ -311,39 +248,83 @@ def main(argv: list[str] | None = None) -> None:
         tb_root=TB_ROOT,
         managed_layout=PATHS.managed_layout,
     )
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse command-line options for Sedon PPO training."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--smoke", action="store_true", help="Run a short sanity training.")
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument(
+        "--n-envs",
+        type=int,
+        default=N_ENVS_DEFAULT,
+        help="Number of parallel environments.",
+    )
+    parser.add_argument(
+        "--reset-noise-scale",
+        type=float,
+        default=0.01,
+        help="Uniform reset noise applied to actuated joint positions.",
+    )
+    parser.add_argument(
+        "--resume",
+        type=str,
+        default=None,
+        help="Path to an existing PPO zip checkpoint to resume from.",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Train the Sedon standing baseline with PPO."""
+    args = parse_args(argv)
+    if args.n_envs <= 0:
+        raise ValueError("--n-envs must be positive.")
+    if args.reset_noise_scale < 0.0:
+        raise ValueError("--reset-noise-scale must be non-negative.")
+    if not DEFAULT_SCENE_PATH.is_file():
+        raise FileNotFoundError(
+            f"Sedon training scene not found: {DEFAULT_SCENE_PATH}. "
+            "Run `python -m tools.convert_urdf_to_mjcf` and "
+            "`python -m tools.build_sedon_training_scene` first."
+        )
+
+    ensure_dirs(MODEL_ROOT, LOG_ROOT, BEST_MODEL_DIR, TB_ROOT)
+
+    total_timesteps = SMOKE_TIMESTEPS if args.smoke else TOTAL_TIMESTEPS
+    batch_size = _compute_batch_size(args.n_envs)
+    _save_config(args, args.n_envs, batch_size)
+    _write_manifest()
     print(f"Artifacts: models={MODEL_ROOT} logs={LOG_ROOT} tb={TB_ROOT}")
 
     train_env = _build_train_env(
         n_envs=args.n_envs,
         seed=args.seed,
-        task_phase=args.phase,
-        randomize_cube_pose=not args.fixed_cube,
+        reset_noise_scale=args.reset_noise_scale,
         resume=bool(args.resume),
     )
     eval_env = _build_eval_env(
         seed=args.seed,
-        task_phase=args.phase,
-        randomize_cube_pose=not args.fixed_cube,
+        reset_noise_scale=0.0,
         train_env=train_env,
     )
 
     callback_list = [
-        GraspMetricsCallback(
-            total_timesteps=SMOKE_TIMESTEPS if args.smoke else TOTAL_TIMESTEPS,
-        ),
+        SedonMetricsCallback(total_timesteps=total_timesteps),
         CheckpointCallback(
-            save_freq=max(1, GRASP_CONFIG.checkpoint_freq_steps // args.n_envs),
+            save_freq=max(1, SEDON_CONFIG.checkpoint_freq_steps // args.n_envs),
             save_path=MODEL_ROOT,
-            name_prefix="grasp_ppo",
+            name_prefix="sedon_ppo",
         ),
         EvalCallback(
             eval_env,
             best_model_save_path=BEST_MODEL_DIR,
             log_path=LOG_ROOT,
-            eval_freq=max(1, GRASP_CONFIG.eval_freq_steps // args.n_envs),
+            eval_freq=max(1, SEDON_CONFIG.eval_freq_steps // args.n_envs),
             deterministic=True,
             render=False,
-            n_eval_episodes=GRASP_CONFIG.eval_episodes,
+            n_eval_episodes=SEDON_CONFIG.eval_episodes,
         ),
     ]
 
@@ -372,18 +353,19 @@ def main(argv: list[str] | None = None) -> None:
     else:
         model = PPO(**model_kwargs)
 
-    total_timesteps = SMOKE_TIMESTEPS if args.smoke else TOTAL_TIMESTEPS
-    model.learn(
-        total_timesteps=total_timesteps,
-        callback=callback_list,
-        tb_log_name=f"grasp_{args.phase}",
-    )
-    model.save(LATEST_MODEL_PATH)
-    train_env.save(VECNORM_PATH)
-
-    eval_env.close()
-    train_env.close()
+    try:
+        model.learn(
+            total_timesteps=total_timesteps,
+            callback=callback_list,
+            tb_log_name="sedon_standing",
+        )
+        model.save(LATEST_MODEL_PATH)
+        train_env.save(VECNORM_PATH)
+    finally:
+        eval_env.close()
+        train_env.close()
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
