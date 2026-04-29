@@ -12,6 +12,11 @@ import mujoco
 BASE_LINK_NAME = "base_link"
 DEFAULT_BASE_HEIGHT = 0.46
 DEFAULT_MOTOR_CTRL_RANGE = "-100 100"
+VISUAL_ONLY_ATTRS = {
+    "contype": "0",
+    "conaffinity": "0",
+    "group": "1",
+}
 
 
 def _set_compiler_defaults(root: ET.Element, mesh_dir: Path | None = None) -> None:
@@ -190,6 +195,62 @@ def _replace_actuators(root: ET.Element, ctrl_range: str) -> list[str]:
     return joint_names
 
 
+def _set_mesh_geoms_visual_only(root: ET.Element) -> None:
+    """Keep imported STL meshes visible but remove them from contact physics."""
+    for geom in root.findall(".//geom"):
+        if geom.attrib.get("type") == "mesh" or "mesh" in geom.attrib:
+            geom.attrib.update(VISUAL_ONLY_ATTRS)
+
+
+def _remove_base_mesh_visual(base_body: ET.Element) -> None:
+    """Hide the noisy SolidWorks base STL in favor of a clean proxy body."""
+    for geom in list(base_body.findall("geom")):
+        if geom.attrib.get("mesh") == BASE_LINK_NAME:
+            base_body.remove(geom)
+
+
+def _add_training_proxy_geoms(root: ET.Element) -> None:
+    """Add simple, stable visual/contact geometry for training and debugging."""
+    base_body = root.find(f".//body[@name='{BASE_LINK_NAME}']")
+    if base_body is None:
+        raise ValueError(f"MJCF has no body named '{BASE_LINK_NAME}'.")
+    _remove_base_mesh_visual(base_body)
+
+    ET.SubElement(
+        base_body,
+        "geom",
+        {
+            "name": "base_proxy",
+            "type": "ellipsoid",
+            "pos": "-0.02 0 -0.08",
+            "size": "0.17 0.11 0.10",
+            "rgba": "0.36 0.45 0.55 1",
+            "friction": "0.8 0.005 0.0001",
+        },
+    )
+
+    foot_specs = {
+        "R_link_ankle_pitch": ("R_foot_collision", "0.025 0.025 -0.055"),
+        "L_link_ankle_pitch": ("L_foot_collision", "0.025 -0.025 -0.055"),
+    }
+    for body_name, (geom_name, pos) in foot_specs.items():
+        body = root.find(f".//body[@name='{body_name}']")
+        if body is None:
+            raise ValueError(f"MJCF has no body named '{body_name}'.")
+        ET.SubElement(
+            body,
+            "geom",
+            {
+                "name": geom_name,
+                "type": "box",
+                "pos": pos,
+                "size": "0.07 0.04 0.025",
+                "rgba": "0.12 0.12 0.12 0",
+                "friction": "1.0 0.005 0.0001",
+            },
+        )
+
+
 def build_training_scene(
     source_scene: Path,
     source_urdf: Path,
@@ -228,6 +289,8 @@ def build_training_scene(
             base_height=base_height,
         )
     )
+    _set_mesh_geoms_visual_only(root)
+    _add_training_proxy_geoms(root)
 
     actuated_joints = _replace_actuators(root, motor_ctrl_range)
     ET.indent(tree, space="  ")
