@@ -10,8 +10,8 @@ import importlib
 import os
 import sys
 
-from robot_projects import get_robot_project, load_robot_projects
-from train_entrypoint import split_mode_args
+from robot_learning.projects import get_robot_project, load_robot_projects
+from robot_learning.train_entrypoint import split_mode_args
 
 
 def configure_numeric_runtime() -> None:

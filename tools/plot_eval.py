@@ -151,7 +151,7 @@ if __name__ == "__main__":
     args = p.parse_args()
 
     if not os.path.exists(args.file):
-        print(f"找不到 {args.file}，請先跑：python eval.py --log")
+        print(f"找不到 {args.file}，請先跑：python -m h1_baseline.eval --log")
         sys.exit(1)
 
     plot(args.file, args.save)

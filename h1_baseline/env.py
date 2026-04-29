@@ -37,8 +37,9 @@ from gymnasium.envs.mujoco.mujoco_env import MujocoEnv
 from gymnasium.spaces import Box
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
+_REPO_ROOT = os.path.dirname(_HERE)
 _XML_PATH = os.path.join(
-    _HERE, "mujoco_menagerie", "unitree_h1", "scene.xml",
+    _REPO_ROOT, "mujoco_menagerie", "unitree_h1", "scene.xml",
 )
 
 # ── PD gains (from unitree_rl_gym H1 config) ────────────────────────────

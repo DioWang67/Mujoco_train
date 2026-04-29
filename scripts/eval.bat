@@ -25,16 +25,16 @@ echo   13. Remote grasp eval headless (10 eps)
 echo.
 set /p choice="Select (1-13): "
 
-if "%choice%"=="1" %PYTHON% eval.py
-if "%choice%"=="2" %PYTHON% eval.py --dr
-if "%choice%"=="3" %PYTHON% eval.py --auto-dr
-if "%choice%"=="4" %PYTHON% eval.py --record
-if "%choice%"=="5" %PYTHON% eval.py --record --dr
+if "%choice%"=="1" %PYTHON% -m h1_baseline.eval
+if "%choice%"=="2" %PYTHON% -m h1_baseline.eval --dr
+if "%choice%"=="3" %PYTHON% -m h1_baseline.eval --auto-dr
+if "%choice%"=="4" %PYTHON% -m h1_baseline.eval --record
+if "%choice%"=="5" %PYTHON% -m h1_baseline.eval --record --dr
 if "%choice%"=="6" (
   echo [BASE]
-  %PYTHON% eval.py --episodes 3 --no-render
+  %PYTHON% -m h1_baseline.eval --episodes 3 --no-render
   echo [DR]
-  %PYTHON% eval.py --episodes 3 --no-render --dr
+  %PYTHON% -m h1_baseline.eval --episodes 3 --no-render --dr
 )
 if "%choice%"=="7" %PYTHON% -m tools.compare_eval --episodes 8 --vel 1.0
 if "%choice%"=="8" (

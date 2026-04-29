@@ -26,7 +26,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
-from h1_env import H1Env, _DEFAULT_REWARD_SCALES
+from h1_baseline.env import H1Env, _DEFAULT_REWARD_SCALES
 
 SWEEP_DIR = REPO_ROOT / "logs" / "sweep"
 os.makedirs(SWEEP_DIR, exist_ok=True)

@@ -1,4 +1,4 @@
-from train_entrypoint import split_mode_args
+from robot_learning.train_entrypoint import split_mode_args
 
 
 def test_split_mode_args_defaults_to_h1() -> None:

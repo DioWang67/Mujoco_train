@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parent
+REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIGS_ROOT = REPO_ROOT / "configs"
 DEFAULT_PROJECT_SLUG = "h1"
 _PROJECT_SLUG_PATTERN = re.compile(r"^[a-z][a-z0-9_]*$")

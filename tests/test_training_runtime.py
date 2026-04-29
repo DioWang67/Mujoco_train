@@ -5,7 +5,11 @@ from pathlib import Path
 
 import pytest
 
-from training_runtime import compute_ppo_batch_size, ensure_dirs, write_run_manifest
+from robot_learning.training_runtime import (
+    compute_ppo_batch_size,
+    ensure_dirs,
+    write_run_manifest,
+)
 
 
 def test_compute_ppo_batch_size_stays_within_rollout_size() -> None:

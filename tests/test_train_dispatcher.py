@@ -52,7 +52,7 @@ def test_train_dispatcher_lists_projects_without_importing_train_modules(
         train,
         "load_robot_projects",
         lambda: {
-            "h1": _Project("h1_train"),
+            "h1": _Project("h1_baseline.train"),
             "quadruped": _Project("robots.quadruped.train"),
         },
     )

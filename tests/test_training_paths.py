@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from training_paths import resolve_training_paths
+from robot_learning.training_paths import resolve_training_paths
 
 
 def test_resolve_training_paths_uses_local_legacy_dirs(tmp_path: Path) -> None:

@@ -18,9 +18,9 @@ from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecNormalize
 
 from grasp_baseline.env import FixedBaseGraspEnv, GraspRewardConfig
-from training_config import load_grasp_train_config
-from training_paths import resolve_training_paths
-from training_runtime import (
+from robot_learning.training_config import load_grasp_train_config
+from robot_learning.training_paths import resolve_training_paths
+from robot_learning.training_runtime import (
     compute_ppo_batch_size,
     ensure_dirs,
     write_json,

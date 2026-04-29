@@ -1,8 +1,8 @@
 {
   "slug": "h1",
   "display_name": "H1 walking",
-  "train_module": "h1_train",
-  "eval_module": "eval",
+  "train_module": "h1_baseline.train",
+  "eval_module": "h1_baseline.eval",
   "job_name": "h1",
   "smoke_args": ["--smoke"]
 }

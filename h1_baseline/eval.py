@@ -1,11 +1,11 @@
 """Render a trained H1 policy.
 
 Usage:
-    python eval.py                          # watch live
-    python eval.py --episodes 3             # run 3 episodes
-    python eval.py --record                 # save mp4 (no display needed)
-    python eval.py --record --episodes 3    # record 3 episodes
-    python eval.py --no-render --log        # headless, save CSV only
+    python -m h1_baseline.eval                          # watch live
+    python -m h1_baseline.eval --episodes 3             # run 3 episodes
+    python -m h1_baseline.eval --record                 # save mp4
+    python -m h1_baseline.eval --record --episodes 3    # record 3 episodes
+    python -m h1_baseline.eval --no-render --log        # headless CSV
 """
 
 import argparse
@@ -21,11 +21,12 @@ from gymnasium.wrappers import TimeLimit
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from h1_env import H1Env
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, REPO_ROOT)
+from h1_baseline.env import H1Env
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-MODEL_DIR = os.path.join(HERE, "models")
+HERE = REPO_ROOT
+MODEL_DIR = os.path.join(REPO_ROOT, "models")
 BEST_PATH = os.path.join(MODEL_DIR, "best_model.zip")
 FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo.zip")
 DR_FINAL_PATH = os.path.join(MODEL_DIR, "h1_ppo_dr.zip")

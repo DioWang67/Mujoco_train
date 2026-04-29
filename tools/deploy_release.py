@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from shutil import copy2, copytree
 
-from robot_projects import get_robot_project
+from robot_learning.projects import get_robot_project
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]

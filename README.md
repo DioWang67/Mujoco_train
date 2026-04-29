@@ -1,4 +1,4 @@
-# H1 MuJoCo Robot Learning
+﻿# H1 MuJoCo Robot Learning
 
 This repository contains MuJoCo reinforcement-learning experiments for:
 
@@ -17,15 +17,14 @@ architecture.
 ```text
 configs/          Training, benchmark, and release-gate configs
 docs/             Runbooks, remote layout notes, and project status
+h1_baseline/      H1 walking environment, training, evaluation, and tests
 grasp_baseline/   Fixed-base grasp environment, training, assets, and tests
 sedon_baseline/   Sedon standing environment, training, and tests
+robot_learning/   Shared project discovery, config, paths, and runtime helpers
 scripts/          Operator wrappers for Windows/Linux remote workflows
 tests/            Lightweight unit tests that should run without MuJoCo
 tools/            Evaluation, deployment, benchmark, and maintenance CLIs
 train.py          Unified training entrypoint, defaults to H1
-h1_train.py       H1-specific PPO training implementation
-eval.py           H1 evaluation entrypoint
-h1_env.py         H1 MuJoCo walking environment
 ```
 
 Generated runtime outputs should stay out of Git unless they are deliberate
@@ -115,7 +114,7 @@ Example `project.json`:
 Evaluate and gate H1 results:
 
 ```bash
-python eval.py
+python -m h1_baseline.eval
 python -m tools.compare_eval --episodes 8 --vel 1.0 --out-json reports/compare_report.json --out-csv reports/compare_report.csv
 python -m tools.gate_check --report reports/compare_report.json --gates configs/gate_profiles.json --profile preprod
 ```
@@ -184,3 +183,4 @@ scripts\sedon_deploy_remote.bat
 - Keep generated outputs ignored unless they are intentional fixtures.
 - Keep pure logic tests separate from simulator-dependent tests.
 - Avoid adding abstractions unless a second real use case exists.
+

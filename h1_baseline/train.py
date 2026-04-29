@@ -38,16 +38,16 @@ from stable_baselines3.common.vec_env import (
     VecNormalize,
 )
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from h1_env import H1Env, _DEFAULT_REWARD_SCALES
-from training_config import load_h1_train_config
-from training_paths import resolve_training_paths
+from h1_baseline.env import H1Env, _DEFAULT_REWARD_SCALES
+from robot_learning.training_config import load_h1_train_config
+from robot_learning.training_paths import resolve_training_paths
 
 # ── Paths ────────────────────────────────────────────────────────────────
 HERE = Path(__file__).resolve().parent
-H1_CONFIG = load_h1_train_config(HERE)
+REPO_ROOT = HERE.parent
+H1_CONFIG = load_h1_train_config(REPO_ROOT)
 PATHS = resolve_training_paths(
-    HERE,
+    REPO_ROOT,
     "h1",
     legacy_model_dir="models",
     legacy_log_dir="logs",

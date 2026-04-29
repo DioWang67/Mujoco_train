@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from training_config import (
+from robot_learning.training_config import (
     load_grasp_train_config,
     load_h1_train_config,
     load_sedon_train_config,

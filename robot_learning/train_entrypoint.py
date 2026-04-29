@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Collection
 
-from robot_projects import DEFAULT_PROJECT_SLUG, list_project_slugs
+from robot_learning.projects import DEFAULT_PROJECT_SLUG, list_project_slugs
 
 
 def split_mode_args(

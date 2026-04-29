@@ -57,9 +57,17 @@ logs/             Ignored logs and TensorBoard outputs.
 reports/          Ignored/generated evaluation reports unless intentionally saved.
 ```
 
-H1 is still in the legacy root layout (`h1_env.py`, `h1_train.py`, `eval.py`).
-Do not create more root-level robot files. New robot projects should use a
-package directory like `sedon_baseline/`.
+H1 now follows the same package pattern as newer robots:
+
+```text
+h1_baseline/
+  env.py
+  train.py
+  eval.py
+```
+
+Do not create root-level robot files. New robot projects should use a package
+directory like `sedon_baseline/`.
 
 ## What Belongs In Shared Code
 
@@ -135,15 +143,16 @@ scripts\tensorboard_tunnel.bat <project> <job> <port>
 
 ## Refactor Direction
 
-The next sensible cleanup is moving H1 into a package:
+If the codebase grows again, the next sensible cleanup is splitting larger
+H1-specific tools into the H1 package:
 
 ```text
 h1_baseline/
-  env.py
-  train.py
-  eval.py
-  tests/
+  tools/
+    compare_eval.py
+    benchmark_matrix.py
+    sweep.py
 ```
 
-That should be done as its own focused refactor because H1 has the most
-evaluation, benchmark, and deployment coupling.
+Keep that as a focused refactor because H1 still has the most evaluation,
+benchmark, and documentation coupling.

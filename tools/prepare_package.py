@@ -125,8 +125,6 @@ def main() -> None:
     print("\n[1/4] Copying source code ...")
     copy_pairs = [
         (HERE / "train.py", CODE / "train.py"),
-        (HERE / "h1_env.py", CODE / "h1_env.py"),
-        (HERE / "eval.py", CODE / "eval.py"),
         (HERE / "requirements.txt", CODE / "requirements.txt"),
     ]
     for src, dst in copy_pairs:
@@ -134,7 +132,7 @@ def main() -> None:
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(src, dst)
 
-    for package_name in ["tools", "grasp_baseline"]:
+    for package_name in ["tools", "robot_learning", "h1_baseline", "grasp_baseline", "sedon_baseline"]:
         src_dir = HERE / package_name
         dst_dir = CODE / package_name
         if src_dir.exists():

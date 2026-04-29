@@ -19,7 +19,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
-from h1_env import H1Env
+from h1_baseline.env import H1Env
 
 MODEL_DIR = REPO_ROOT / "models"
 BEST_PATH = MODEL_DIR / "best_model.zip"

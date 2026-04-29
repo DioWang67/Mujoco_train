@@ -39,7 +39,7 @@ def main() -> int:
     # 2) File layout
     required = [
         REPO_ROOT / "train.py",
-        REPO_ROOT / "h1_env.py",
+        REPO_ROOT / "h1_baseline" / "env.py",
         REPO_ROOT / "mujoco_menagerie" / "unitree_h1" / "scene.xml",
     ]
     for p in required:
@@ -51,7 +51,7 @@ def main() -> int:
 
     # 3) Runtime env smoke
     try:
-        from h1_env import H1Env
+        from h1_baseline.env import H1Env
 
         env = H1Env(render_mode=None)
         obs, _ = env.reset(seed=123)
