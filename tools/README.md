@@ -39,8 +39,10 @@ python -m tools
   Build the floating-base Sedon training scene from converted MJCF.
 - `python -m tools.smoke_sedon_env --steps 20`  
   Run a short Sedon standing environment smoke test.
-- `python -m tools.sedon_eval --episodes 5`  
-  Evaluate a trained Sedon standing checkpoint.
+- `python -m tools.sedon_eval --episodes 1 --render`
+  Watch a trained Sedon standing checkpoint in the MuJoCo viewer.
+- `python -m tools.sedon_eval --episodes 1 --record`
+  Record a trained Sedon standing checkpoint to `reports/sedon_eval.gif`.
 
 ## Release
 

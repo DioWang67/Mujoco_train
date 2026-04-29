@@ -3,12 +3,15 @@
 Usage:
     python -m sedon_baseline.eval --episodes 5
     python -m sedon_baseline.eval --model-path models/sedon/latest_model.zip
+    python -m sedon_baseline.eval --episodes 1 --render
+    python -m sedon_baseline.eval --episodes 1 --record
 """
 
 from __future__ import annotations
 
 import argparse
 import csv
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -23,6 +26,7 @@ from sedon_baseline.train import MAX_EPISODE_STEPS
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MODELS_ROOT = REPO_ROOT / "models" / "sedon"
 DEFAULT_REPORT_PATH = REPO_ROOT / "reports" / "sedon_eval.csv"
+DEFAULT_VIDEO_PATH = REPO_ROOT / "reports" / "sedon_eval.gif"
 
 
 @dataclass(frozen=True)
@@ -84,11 +88,11 @@ def resolve_vecnorm_path(models_root: Path, explicit_vecnorm_path: Path | None) 
     return vecnorm_path
 
 
-def _make_eval_env(seed: int):
+def _make_eval_env(seed: int, render_mode: str | None):
     """Build one deterministic monitored eval environment."""
 
     def _thunk():
-        env = SedonStandingEnv(reset_noise_scale=0.0)
+        env = SedonStandingEnv(reset_noise_scale=0.0, render_mode=render_mode)
         env = TimeLimit(env, max_episode_steps=MAX_EPISODE_STEPS)
         env.reset(seed=seed)
         return env
@@ -96,13 +100,57 @@ def _make_eval_env(seed: int):
     return _thunk
 
 
-def build_eval_vec_env(vecnorm_path: Path, seed: int) -> VecNormalize:
+def build_eval_vec_env(vecnorm_path: Path, seed: int, render_mode: str | None) -> VecNormalize:
     """Create a normalized Sedon eval environment."""
-    vec_env = DummyVecEnv([_make_eval_env(seed)])
+    vec_env = DummyVecEnv([_make_eval_env(seed, render_mode)])
     eval_env = VecNormalize.load(str(vecnorm_path), vec_env)
     eval_env.training = False
     eval_env.norm_reward = False
     return eval_env
+
+
+def _capture_rgb_frame(eval_env: VecNormalize) -> np.ndarray | None:
+    """Return one RGB frame from a vectorized MuJoCo environment if available."""
+    frame = eval_env.render()
+    if isinstance(frame, list):
+        frame = frame[0] if frame else None
+    if frame is None:
+        # Some VecEnv wrappers do not return frames directly; the wrapped env
+        # still has the MuJoCo renderer configured with render_mode="rgb_array".
+        frame = eval_env.venv.envs[0].render()
+    if isinstance(frame, list):
+        frame = frame[0] if frame else None
+    if frame is None:
+        return None
+    return np.asarray(frame)
+
+
+def _save_video(path: Path, frames: list[np.ndarray], fps: int) -> None:
+    """Save captured RGB frames as an animation file.
+
+    Args:
+        path: Destination animation path.
+        frames: RGB frames captured during evaluation.
+        fps: Output video frame rate.
+
+    Raises:
+        RuntimeError: If ``imageio`` is unavailable.
+    """
+    try:
+        import imageio.v2 as imageio
+    except ImportError as exc:
+        raise RuntimeError("Recording requires imageio. Install project requirements first.") from exc
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        imageio.mimsave(path, frames, fps=fps)
+    except ValueError as exc:
+        if path.suffix.lower() == ".mp4":
+            raise RuntimeError(
+                "MP4 recording requires an ffmpeg backend. Install it with "
+                "`pip install imageio[ffmpeg]`, or use a .gif --video-path."
+            ) from exc
+        raise
 
 
 def evaluate_policy(
@@ -111,20 +159,33 @@ def evaluate_policy(
     *,
     episodes: int,
     seed: int,
+    render: bool = False,
+    record_path: Path | None = None,
+    fps: int = SedonStandingEnv.metadata["render_fps"],
 ) -> list[SedonEvalEpisode]:
     """Run deterministic Sedon policy evaluation episodes."""
     if episodes <= 0:
         raise ValueError("episodes must be positive.")
+    if fps <= 0:
+        raise ValueError("fps must be positive.")
+    if render and record_path is not None:
+        raise ValueError("--render and --record cannot be used together.")
 
-    eval_env = build_eval_vec_env(vecnorm_path, seed)
+    render_mode = "rgb_array" if record_path is not None else ("human" if render else None)
+    eval_env = build_eval_vec_env(vecnorm_path, seed, render_mode)
     model = PPO.load(str(model_path), env=eval_env)
     results: list[SedonEvalEpisode] = []
+    frames: list[np.ndarray] = []
     try:
         for episode_index in range(1, episodes + 1):
             obs = eval_env.reset()
             episode_reward = 0.0
             episode_length = 0
             final_info: dict = {}
+            if record_path is not None:
+                frame = _capture_rgb_frame(eval_env)
+                if frame is not None:
+                    frames.append(frame)
 
             while True:
                 action, _ = model.predict(obs, deterministic=True)
@@ -132,6 +193,13 @@ def evaluate_policy(
                 episode_reward += float(rewards[0])
                 episode_length += 1
                 final_info = infos[0]
+                if record_path is not None:
+                    frame = _capture_rgb_frame(eval_env)
+                    if frame is not None:
+                        frames.append(frame)
+                elif render:
+                    eval_env.render()
+                    time.sleep(1.0 / fps)
                 if bool(dones[0]):
                     break
 
@@ -146,6 +214,10 @@ def evaluate_policy(
                     final_upright=float(final_info.get("upright", np.nan)),
                 )
             )
+        if record_path is not None:
+            if not frames:
+                raise RuntimeError("No frames were captured; cannot save evaluation video.")
+            _save_video(record_path, frames, fps)
     finally:
         eval_env.close()
     return results
@@ -207,6 +279,23 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=DEFAULT_REPORT_PATH,
         help="Where to write per-episode CSV metrics.",
     )
+    parser.add_argument(
+        "--render",
+        action="store_true",
+        help="Open the MuJoCo viewer and watch the deterministic policy live.",
+    )
+    parser.add_argument(
+        "--record",
+        action="store_true",
+        help="Record the deterministic policy to an animation instead of opening a viewer.",
+    )
+    parser.add_argument(
+        "--video-path",
+        type=Path,
+        default=DEFAULT_VIDEO_PATH,
+        help="Where to write the animation when --record is enabled.",
+    )
+    parser.add_argument("--fps", type=int, default=SedonStandingEnv.metadata["render_fps"])
     return parser.parse_args(argv)
 
 
@@ -223,10 +312,15 @@ def main(argv: list[str] | None = None) -> int:
         vecnorm_path=vecnorm_path,
         episodes=args.episodes,
         seed=args.seed,
+        render=args.render,
+        record_path=args.video_path if args.record else None,
+        fps=args.fps,
     )
     write_csv(args.out_csv, episodes)
     print_summary(episodes)
     print(f"CSV       : {args.out_csv}")
+    if args.record:
+        print(f"Video     : {args.video_path}")
     return 0
 
 

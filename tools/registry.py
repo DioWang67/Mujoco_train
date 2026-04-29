@@ -114,8 +114,8 @@ TOOLS: tuple[ToolEntry, ...] = (
     ToolEntry(
         module="sedon_eval",
         category="sedon",
-        summary="Evaluate a trained Sedon standing checkpoint.",
-        example="python -m tools.sedon_eval --episodes 5",
+        summary="Evaluate or render a trained Sedon standing checkpoint.",
+        example="python -m tools.sedon_eval --episodes 1 --record",
     ),
     ToolEntry(
         module="deploy_release",
