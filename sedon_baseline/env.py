@@ -38,6 +38,7 @@ JOINT_NAMES = (
     "L_joint_knee_pitch",
     "L_joint_ankle_pitch",
 )
+FOOT_GEOM_NAMES = ("R_foot_collision", "L_foot_collision")
 
 
 @dataclass(frozen=True)
@@ -61,10 +62,13 @@ class SedonStandingConfig:
         velocity_penalty_weight: Penalty coefficient for joint velocity.
         base_xy_velocity_penalty_weight: Penalty coefficient for horizontal drift speed.
         base_roll_pitch_rate_penalty_weight: Penalty coefficient for roll/pitch angular speed.
+        foot_flat_weight: Weight for keeping both foot collision boxes flat.
+        foot_height_penalty_weight: Penalty coefficient for foot bottom height error.
+        foot_air_penalty_weight: Penalty coefficient for feet not near the floor.
         max_base_xy_drift: Episode terminates if the base drifts farther than this radius.
     """
 
-    target_base_height: float = 0.46
+    target_base_height: float = 0.446
     min_base_height: float = 0.34
     max_base_height: float = 0.65
     min_upright: float = 0.75
@@ -80,6 +84,9 @@ class SedonStandingConfig:
     velocity_penalty_weight: float = 0.003
     base_xy_velocity_penalty_weight: float = 1.0
     base_roll_pitch_rate_penalty_weight: float = 0.1
+    foot_flat_weight: float = 2.0
+    foot_height_penalty_weight: float = 20.0
+    foot_air_penalty_weight: float = 0.5
     max_base_xy_drift: float = 0.08
 
 
@@ -92,6 +99,9 @@ def compute_standing_reward(
     joint_position_error_l2: float,
     base_xy_velocity_l2: float,
     base_roll_pitch_rate_l2: float,
+    foot_flatness: float,
+    foot_height_error_l2: float,
+    feet_near_floor: int,
     config: SedonStandingConfig,
 ) -> dict[str, float]:
     """Compute shaped reward terms for standing.
@@ -105,6 +115,9 @@ def compute_standing_reward(
         joint_position_error_l2: Squared norm of actuated joint deviation from the seed pose.
         base_xy_velocity_l2: Squared norm of horizontal base velocity.
         base_roll_pitch_rate_l2: Squared norm of base roll/pitch angular rate.
+        foot_flatness: Mean foot z-axis alignment with world z-axis.
+        foot_height_error_l2: Squared norm of foot bottom height error from the floor.
+        feet_near_floor: Number of feet whose bottom is close to the floor.
         config: Reward coefficients.
 
     Returns:
@@ -114,21 +127,27 @@ def compute_standing_reward(
     height = float(np.exp(-config.height_sharpness * height_error * height_error))
     upright_clipped = float(np.clip(upright, -1.0, 1.0))
     pose = float(np.exp(-config.pose_sharpness * joint_position_error_l2))
+    foot_flatness_clipped = float(np.clip(foot_flatness, 0.0, 1.0))
+    missing_feet = max(0, len(FOOT_GEOM_NAMES) - feet_near_floor)
     components = {
         "alive": config.alive_reward,
         "height": height,
         "upright": max(0.0, upright_clipped),
         "pose": pose,
+        "foot_flat": foot_flatness_clipped,
         "action_penalty": action_l2,
         "action_rate_penalty": action_rate_l2,
         "velocity_penalty": joint_velocity_l2,
         "base_xy_velocity_penalty": base_xy_velocity_l2,
         "base_roll_pitch_rate_penalty": base_roll_pitch_rate_l2,
+        "foot_height_penalty": foot_height_error_l2,
+        "foot_air_penalty": float(missing_feet),
     }
     total = components["alive"]
     total += config.height_weight * components["height"]
     total += config.upright_weight * components["upright"]
     total += config.pose_weight * components["pose"]
+    total += config.foot_flat_weight * components["foot_flat"]
     total -= config.action_penalty_weight * components["action_penalty"]
     total -= config.action_rate_penalty_weight * components["action_rate_penalty"]
     total -= config.velocity_penalty_weight * components["velocity_penalty"]
@@ -137,6 +156,8 @@ def compute_standing_reward(
         config.base_roll_pitch_rate_penalty_weight
         * components["base_roll_pitch_rate_penalty"]
     )
+    total -= config.foot_height_penalty_weight * components["foot_height_penalty"]
+    total -= config.foot_air_penalty_weight * components["foot_air_penalty"]
     components["total"] = float(total)
     return components
 
@@ -217,6 +238,7 @@ class SedonStandingEnv(MujocoEnv):
 
         self._base_body_id = self._body_id("base_link")
         self._joint_ids = [self._joint_id(name) for name in JOINT_NAMES]
+        self._foot_geom_ids = [self._geom_id(name) for name in FOOT_GEOM_NAMES]
         self._ctrl_range = self.model.actuator_ctrlrange.copy()
         self._default_qpos = self.init_qpos.copy()
         self._default_qvel = self.init_qvel.copy()
@@ -261,6 +283,9 @@ class SedonStandingEnv(MujocoEnv):
         base_xy_velocity_l2 = float(np.dot(base_xy_velocity, base_xy_velocity))
         base_roll_pitch_rate = self.data.qvel[3:5]
         base_roll_pitch_rate_l2 = float(np.dot(base_roll_pitch_rate, base_roll_pitch_rate))
+        foot_flatness = self._foot_flatness()
+        foot_height_error_l2 = self._foot_height_error_l2()
+        feet_near_floor = self._feet_near_floor()
         rewards = compute_standing_reward(
             base_height=base_height,
             upright=upright,
@@ -270,6 +295,9 @@ class SedonStandingEnv(MujocoEnv):
             joint_position_error_l2=joint_position_error_l2,
             base_xy_velocity_l2=base_xy_velocity_l2,
             base_roll_pitch_rate_l2=base_roll_pitch_rate_l2,
+            foot_flatness=foot_flatness,
+            foot_height_error_l2=foot_height_error_l2,
+            feet_near_floor=feet_near_floor,
             config=self._reward_config,
         )
         terminated = self._is_terminated(base_height, upright, obs)
@@ -285,6 +313,9 @@ class SedonStandingEnv(MujocoEnv):
             "joint_position_error_l2": joint_position_error_l2,
             "base_xy_velocity_l2": base_xy_velocity_l2,
             "base_roll_pitch_rate_l2": base_roll_pitch_rate_l2,
+            "foot_flatness": foot_flatness,
+            "foot_height_error_l2": foot_height_error_l2,
+            "feet_near_floor": feet_near_floor,
         }
         for key, value in rewards.items():
             info[f"reward_{key}"] = value
@@ -379,12 +410,45 @@ class SedonStandingEnv(MujocoEnv):
             dtype=np.float64,
         )
 
+    def _foot_bottom_heights(self) -> np.ndarray:
+        """Return estimated bottom heights for the collision foot boxes."""
+        heights = []
+        for geom_id in self._foot_geom_ids:
+            geom_z = self.data.geom_xpos[geom_id][2]
+            half_height = self.model.geom_size[geom_id][2]
+            heights.append(float(geom_z - half_height))
+        return np.array(heights, dtype=np.float64)
+
+    def _foot_flatness(self) -> float:
+        """Return mean alignment between foot box z-axes and world z-axis."""
+        alignments = []
+        for geom_id in self._foot_geom_ids:
+            xmat = self.data.geom_xmat[geom_id].reshape(3, 3)
+            alignments.append(float(xmat[2, 2]))
+        return float(np.mean(alignments))
+
+    def _foot_height_error_l2(self) -> float:
+        """Return squared foot bottom height error from the floor plane."""
+        foot_bottom_heights = self._foot_bottom_heights()
+        return float(np.dot(foot_bottom_heights, foot_bottom_heights))
+
+    def _feet_near_floor(self) -> int:
+        """Return how many feet are close enough to the floor for standing."""
+        return int(np.count_nonzero(np.abs(self._foot_bottom_heights()) <= 0.015))
+
     def _body_id(self, name: str) -> int:
         """Resolve a MuJoCo body id by name."""
         body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, name)
         if body_id < 0:
             raise ValueError(f"Body '{name}' not found in Sedon model.")
         return body_id
+
+    def _geom_id(self, name: str) -> int:
+        """Resolve a MuJoCo geom id by name."""
+        geom_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_GEOM, name)
+        if geom_id < 0:
+            raise ValueError(f"Geom '{name}' not found in Sedon model.")
+        return geom_id
 
     def _joint_id(self, name: str) -> int:
         """Resolve a MuJoCo joint id by name."""

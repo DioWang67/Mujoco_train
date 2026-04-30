@@ -29,6 +29,9 @@ def test_compute_standing_reward_prefers_target_height_and_upright_pose() -> Non
         joint_position_error_l2=0.0,
         base_xy_velocity_l2=0.0,
         base_roll_pitch_rate_l2=0.0,
+        foot_flatness=1.0,
+        foot_height_error_l2=0.0,
+        feet_near_floor=2,
         config=config,
     )
     bad = compute_standing_reward(
@@ -40,6 +43,9 @@ def test_compute_standing_reward_prefers_target_height_and_upright_pose() -> Non
         joint_position_error_l2=2.0,
         base_xy_velocity_l2=4.0,
         base_roll_pitch_rate_l2=4.0,
+        foot_flatness=0.4,
+        foot_height_error_l2=0.05,
+        feet_near_floor=0,
         config=config,
     )
 
@@ -58,6 +64,9 @@ def test_compute_standing_reward_penalizes_low_crouch() -> None:
         joint_position_error_l2=0.0,
         base_xy_velocity_l2=0.0,
         base_roll_pitch_rate_l2=0.0,
+        foot_flatness=1.0,
+        foot_height_error_l2=0.0,
+        feet_near_floor=2,
         config=config,
     )
     low_crouch = compute_standing_reward(
@@ -69,6 +78,9 @@ def test_compute_standing_reward_penalizes_low_crouch() -> None:
         joint_position_error_l2=0.0,
         base_xy_velocity_l2=0.0,
         base_roll_pitch_rate_l2=0.0,
+        foot_flatness=1.0,
+        foot_height_error_l2=0.0,
+        feet_near_floor=2,
         config=config,
     )
 
@@ -87,6 +99,9 @@ def test_compute_standing_reward_penalizes_joint_pose_deviation() -> None:
         joint_position_error_l2=0.0,
         base_xy_velocity_l2=0.0,
         base_roll_pitch_rate_l2=0.0,
+        foot_flatness=1.0,
+        foot_height_error_l2=0.0,
+        feet_near_floor=2,
         config=config,
     )
     toe_stance = compute_standing_reward(
@@ -98,6 +113,9 @@ def test_compute_standing_reward_penalizes_joint_pose_deviation() -> None:
         joint_position_error_l2=0.45,
         base_xy_velocity_l2=0.0,
         base_roll_pitch_rate_l2=0.0,
+        foot_flatness=0.5,
+        foot_height_error_l2=0.03,
+        feet_near_floor=1,
         config=config,
     )
 
@@ -116,6 +134,9 @@ def test_compute_standing_reward_penalizes_horizontal_drift_and_shaking() -> Non
         joint_position_error_l2=0.0,
         base_xy_velocity_l2=0.0,
         base_roll_pitch_rate_l2=0.0,
+        foot_flatness=1.0,
+        foot_height_error_l2=0.0,
+        feet_near_floor=2,
         config=config,
     )
     unstable = compute_standing_reward(
@@ -127,6 +148,9 @@ def test_compute_standing_reward_penalizes_horizontal_drift_and_shaking() -> Non
         joint_position_error_l2=0.15,
         base_xy_velocity_l2=1.5,
         base_roll_pitch_rate_l2=2.0,
+        foot_flatness=0.6,
+        foot_height_error_l2=0.02,
+        feet_near_floor=1,
         config=config,
     )
 
