@@ -54,21 +54,33 @@ class SedonStandingConfig:
         height_weight: Weight for matching target height.
         height_sharpness: Exponential penalty sharpness for base-height error.
         upright_weight: Weight for keeping the base z-axis upright.
+        pose_weight: Weight for keeping actuated joints near the nominal stance.
+        pose_sharpness: Exponential penalty sharpness for joint pose error.
         action_penalty_weight: Penalty coefficient for squared normalized action.
+        action_rate_penalty_weight: Penalty coefficient for changing actions too abruptly.
         velocity_penalty_weight: Penalty coefficient for joint velocity.
+        base_xy_velocity_penalty_weight: Penalty coefficient for horizontal drift speed.
+        base_roll_pitch_rate_penalty_weight: Penalty coefficient for roll/pitch angular speed.
+        max_base_xy_drift: Episode terminates if the base drifts farther than this radius.
     """
 
     target_base_height: float = 0.46
     min_base_height: float = 0.34
     max_base_height: float = 0.65
-    min_upright: float = 0.45
+    min_upright: float = 0.75
     torque_scale: float = 45.0
     alive_reward: float = 0.2
     height_weight: float = 3.0
     height_sharpness: float = 40.0
-    upright_weight: float = 1.0
+    upright_weight: float = 2.0
+    pose_weight: float = 2.5
+    pose_sharpness: float = 8.0
     action_penalty_weight: float = 0.005
-    velocity_penalty_weight: float = 0.001
+    action_rate_penalty_weight: float = 0.02
+    velocity_penalty_weight: float = 0.003
+    base_xy_velocity_penalty_weight: float = 1.0
+    base_roll_pitch_rate_penalty_weight: float = 0.1
+    max_base_xy_drift: float = 0.08
 
 
 def compute_standing_reward(
@@ -76,6 +88,10 @@ def compute_standing_reward(
     upright: float,
     joint_velocity_l2: float,
     action_l2: float,
+    action_rate_l2: float,
+    joint_position_error_l2: float,
+    base_xy_velocity_l2: float,
+    base_roll_pitch_rate_l2: float,
     config: SedonStandingConfig,
 ) -> dict[str, float]:
     """Compute shaped reward terms for standing.
@@ -85,6 +101,10 @@ def compute_standing_reward(
         upright: Dot product between local base z-axis and world z-axis.
         joint_velocity_l2: Squared norm of actuated joint velocities.
         action_l2: Squared norm of normalized actions.
+        action_rate_l2: Squared norm of the action delta from the previous step.
+        joint_position_error_l2: Squared norm of actuated joint deviation from the seed pose.
+        base_xy_velocity_l2: Squared norm of horizontal base velocity.
+        base_roll_pitch_rate_l2: Squared norm of base roll/pitch angular rate.
         config: Reward coefficients.
 
     Returns:
@@ -93,18 +113,30 @@ def compute_standing_reward(
     height_error = base_height - config.target_base_height
     height = float(np.exp(-config.height_sharpness * height_error * height_error))
     upright_clipped = float(np.clip(upright, -1.0, 1.0))
+    pose = float(np.exp(-config.pose_sharpness * joint_position_error_l2))
     components = {
         "alive": config.alive_reward,
         "height": height,
         "upright": max(0.0, upright_clipped),
+        "pose": pose,
         "action_penalty": action_l2,
+        "action_rate_penalty": action_rate_l2,
         "velocity_penalty": joint_velocity_l2,
+        "base_xy_velocity_penalty": base_xy_velocity_l2,
+        "base_roll_pitch_rate_penalty": base_roll_pitch_rate_l2,
     }
     total = components["alive"]
     total += config.height_weight * components["height"]
     total += config.upright_weight * components["upright"]
+    total += config.pose_weight * components["pose"]
     total -= config.action_penalty_weight * components["action_penalty"]
+    total -= config.action_rate_penalty_weight * components["action_rate_penalty"]
     total -= config.velocity_penalty_weight * components["velocity_penalty"]
+    total -= config.base_xy_velocity_penalty_weight * components["base_xy_velocity_penalty"]
+    total -= (
+        config.base_roll_pitch_rate_penalty_weight
+        * components["base_roll_pitch_rate_penalty"]
+    )
     components["total"] = float(total)
     return components
 
@@ -188,6 +220,7 @@ class SedonStandingEnv(MujocoEnv):
         self._ctrl_range = self.model.actuator_ctrlrange.copy()
         self._default_qpos = self.init_qpos.copy()
         self._default_qvel = self.init_qvel.copy()
+        self._nominal_joint_qpos = self._extract_joint_positions(self._default_qpos)
         self._set_base_pose(self._default_qpos)
 
         self.action_space = Box(
@@ -216,13 +249,27 @@ class SedonStandingEnv(MujocoEnv):
         obs = self._get_obs()
         base_height = self._base_height()
         upright = self._base_upright()
-        joint_velocity_l2 = float(np.dot(self._joint_velocities(), self._joint_velocities()))
+        joint_positions = self._joint_positions()
+        joint_velocities = self._joint_velocities()
+        joint_velocity_l2 = float(np.dot(joint_velocities, joint_velocities))
         action_l2 = float(np.dot(clipped_action, clipped_action))
+        action_delta = clipped_action - self._prev_action
+        action_rate_l2 = float(np.dot(action_delta, action_delta))
+        joint_position_error = joint_positions - self._nominal_joint_qpos
+        joint_position_error_l2 = float(np.dot(joint_position_error, joint_position_error))
+        base_xy_velocity = self.data.qvel[0:2]
+        base_xy_velocity_l2 = float(np.dot(base_xy_velocity, base_xy_velocity))
+        base_roll_pitch_rate = self.data.qvel[3:5]
+        base_roll_pitch_rate_l2 = float(np.dot(base_roll_pitch_rate, base_roll_pitch_rate))
         rewards = compute_standing_reward(
             base_height=base_height,
             upright=upright,
             joint_velocity_l2=joint_velocity_l2,
             action_l2=action_l2,
+            action_rate_l2=action_rate_l2,
+            joint_position_error_l2=joint_position_error_l2,
+            base_xy_velocity_l2=base_xy_velocity_l2,
+            base_roll_pitch_rate_l2=base_roll_pitch_rate_l2,
             config=self._reward_config,
         )
         terminated = self._is_terminated(base_height, upright, obs)
@@ -234,6 +281,10 @@ class SedonStandingEnv(MujocoEnv):
             "upright": upright,
             "joint_velocity_l2": joint_velocity_l2,
             "action_l2": action_l2,
+            "action_rate_l2": action_rate_l2,
+            "joint_position_error_l2": joint_position_error_l2,
+            "base_xy_velocity_l2": base_xy_velocity_l2,
+            "base_roll_pitch_rate_l2": base_roll_pitch_rate_l2,
         }
         for key, value in rewards.items():
             info[f"reward_{key}"] = value
@@ -294,6 +345,8 @@ class SedonStandingEnv(MujocoEnv):
             return True
         if base_height > self._reward_config.max_base_height:
             return True
+        if float(np.linalg.norm(self.data.qpos[0:2])) > self._reward_config.max_base_xy_drift:
+            return True
         return bool(upright < self._reward_config.min_upright)
 
     def _base_height(self) -> float:
@@ -316,6 +369,13 @@ class SedonStandingEnv(MujocoEnv):
         """Return actuated joint velocities in stable order."""
         return np.array(
             [self.data.qvel[self.model.jnt_dofadr[joint_id]] for joint_id in self._joint_ids],
+            dtype=np.float64,
+        )
+
+    def _extract_joint_positions(self, qpos: np.ndarray) -> np.ndarray:
+        """Return actuated joint positions from a MuJoCo qpos vector."""
+        return np.array(
+            [qpos[self.model.jnt_qposadr[joint_id]] for joint_id in self._joint_ids],
             dtype=np.float64,
         )
 

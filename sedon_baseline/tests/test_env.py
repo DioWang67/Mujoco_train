@@ -25,6 +25,10 @@ def test_compute_standing_reward_prefers_target_height_and_upright_pose() -> Non
         upright=1.0,
         joint_velocity_l2=0.0,
         action_l2=0.0,
+        action_rate_l2=0.0,
+        joint_position_error_l2=0.0,
+        base_xy_velocity_l2=0.0,
+        base_roll_pitch_rate_l2=0.0,
         config=config,
     )
     bad = compute_standing_reward(
@@ -32,6 +36,10 @@ def test_compute_standing_reward_prefers_target_height_and_upright_pose() -> Non
         upright=0.0,
         joint_velocity_l2=10.0,
         action_l2=10.0,
+        action_rate_l2=10.0,
+        joint_position_error_l2=2.0,
+        base_xy_velocity_l2=4.0,
+        base_roll_pitch_rate_l2=4.0,
         config=config,
     )
 
@@ -46,6 +54,10 @@ def test_compute_standing_reward_penalizes_low_crouch() -> None:
         upright=1.0,
         joint_velocity_l2=0.0,
         action_l2=0.0,
+        action_rate_l2=0.0,
+        joint_position_error_l2=0.0,
+        base_xy_velocity_l2=0.0,
+        base_roll_pitch_rate_l2=0.0,
         config=config,
     )
     low_crouch = compute_standing_reward(
@@ -53,10 +65,72 @@ def test_compute_standing_reward_penalizes_low_crouch() -> None:
         upright=0.95,
         joint_velocity_l2=0.0,
         action_l2=0.0,
+        action_rate_l2=0.0,
+        joint_position_error_l2=0.0,
+        base_xy_velocity_l2=0.0,
+        base_roll_pitch_rate_l2=0.0,
         config=config,
     )
 
     assert low_crouch["total"] < target_pose["total"] * 0.5
+
+
+def test_compute_standing_reward_penalizes_joint_pose_deviation() -> None:
+    config = SedonStandingConfig()
+
+    nominal = compute_standing_reward(
+        base_height=config.target_base_height,
+        upright=1.0,
+        joint_velocity_l2=0.0,
+        action_l2=0.0,
+        action_rate_l2=0.0,
+        joint_position_error_l2=0.0,
+        base_xy_velocity_l2=0.0,
+        base_roll_pitch_rate_l2=0.0,
+        config=config,
+    )
+    toe_stance = compute_standing_reward(
+        base_height=config.target_base_height,
+        upright=1.0,
+        joint_velocity_l2=0.0,
+        action_l2=0.0,
+        action_rate_l2=0.0,
+        joint_position_error_l2=0.45,
+        base_xy_velocity_l2=0.0,
+        base_roll_pitch_rate_l2=0.0,
+        config=config,
+    )
+
+    assert toe_stance["total"] < nominal["total"]
+
+
+def test_compute_standing_reward_penalizes_horizontal_drift_and_shaking() -> None:
+    config = SedonStandingConfig()
+
+    stable = compute_standing_reward(
+        base_height=config.target_base_height,
+        upright=1.0,
+        joint_velocity_l2=0.0,
+        action_l2=0.0,
+        action_rate_l2=0.0,
+        joint_position_error_l2=0.0,
+        base_xy_velocity_l2=0.0,
+        base_roll_pitch_rate_l2=0.0,
+        config=config,
+    )
+    unstable = compute_standing_reward(
+        base_height=config.target_base_height,
+        upright=0.92,
+        joint_velocity_l2=4.0,
+        action_l2=1.0,
+        action_rate_l2=2.0,
+        joint_position_error_l2=0.15,
+        base_xy_velocity_l2=1.5,
+        base_roll_pitch_rate_l2=2.0,
+        config=config,
+    )
+
+    assert unstable["total"] < stable["total"]
 
 
 @pytest.fixture

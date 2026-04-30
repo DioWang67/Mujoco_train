@@ -11,8 +11,8 @@ if not "%~1"=="" (
 
 echo Sedon Eval Options:
 echo.
-echo   1. Watch best checkpoint in MuJoCo viewer
-echo   2. Record best checkpoint to reports\sedon_eval.gif
+echo   1. Watch best available checkpoint in MuJoCo viewer
+echo   2. Record best available checkpoint to reports\sedon_eval.gif
 echo   3. Headless numeric eval, 5 episodes
 echo   4. Watch latest_model.zip in MuJoCo viewer
 echo.

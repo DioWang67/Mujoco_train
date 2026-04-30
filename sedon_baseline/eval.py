@@ -11,7 +11,9 @@ from __future__ import annotations
 
 import argparse
 import csv
+import re
 import time
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -27,6 +29,24 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MODELS_ROOT = REPO_ROOT / "models" / "sedon"
 DEFAULT_REPORT_PATH = REPO_ROOT / "reports" / "sedon_eval.csv"
 DEFAULT_VIDEO_PATH = REPO_ROOT / "reports" / "sedon_eval.gif"
+STEP_CHECKPOINT_RE = re.compile(r"sedon_ppo_(\d+)_steps\.zip$")
+
+
+def _is_valid_sb3_checkpoint(path: Path) -> bool:
+    """Return whether a Stable-Baselines3 checkpoint zip can be read.
+
+    A plain ``zipfile.is_zipfile`` check is not enough here because a partially
+    written checkpoint can still look like a valid zip container while failing
+    CRC validation when SB3 reads the embedded ``data`` file.
+    """
+    if not path.is_file() or not zipfile.is_zipfile(path):
+        return False
+    try:
+        with zipfile.ZipFile(path) as archive:
+            archive.read("data")
+        return True
+    except (KeyError, OSError, ValueError, zipfile.BadZipFile):
+        return False
 
 
 @dataclass(frozen=True)
@@ -57,6 +77,8 @@ def resolve_model_path(models_root: Path, explicit_model_path: Path | None) -> P
     if explicit_model_path is not None:
         if not explicit_model_path.is_file():
             raise FileNotFoundError(f"Model checkpoint not found: {explicit_model_path}")
+        if not _is_valid_sb3_checkpoint(explicit_model_path):
+            raise ValueError(f"Model checkpoint is not a readable SB3 zip: {explicit_model_path}")
         return explicit_model_path
 
     candidates = [
@@ -71,21 +93,42 @@ def resolve_model_path(models_root: Path, explicit_model_path: Path | None) -> P
         )
     )
     for candidate in candidates:
-        if candidate.is_file():
+        if _is_valid_sb3_checkpoint(candidate):
             return candidate
     raise FileNotFoundError(
-        "No Sedon checkpoint found. Expected best/best_model.zip, "
+        "No readable Sedon checkpoint found. Expected a valid best/best_model.zip, "
         "latest_model.zip, or sedon_ppo_*_steps.zip under "
         f"{models_root}."
     )
 
 
-def resolve_vecnorm_path(models_root: Path, explicit_vecnorm_path: Path | None) -> Path:
+def resolve_vecnorm_path(
+    models_root: Path,
+    model_path: Path,
+    explicit_vecnorm_path: Path | None,
+) -> Path:
     """Resolve the VecNormalize stats used with the Sedon policy."""
-    vecnorm_path = explicit_vecnorm_path or (models_root / "vecnorm.pkl")
-    if not vecnorm_path.is_file():
-        raise FileNotFoundError(f"VecNormalize file not found: {vecnorm_path}")
-    return vecnorm_path
+    if explicit_vecnorm_path is not None:
+        if not explicit_vecnorm_path.is_file():
+            raise FileNotFoundError(f"VecNormalize file not found: {explicit_vecnorm_path}")
+        return explicit_vecnorm_path
+
+    candidates: list[Path] = []
+    if model_path.name == "best_model.zip" and model_path.parent.name == "best":
+        candidates.append(model_path.parent / "vecnorm.pkl")
+
+    match = STEP_CHECKPOINT_RE.fullmatch(model_path.name)
+    if match:
+        candidates.append(models_root / f"sedon_vecnorm_{match.group(1)}_steps.pkl")
+
+    candidates.append(models_root / "vecnorm.pkl")
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(
+        "VecNormalize file not found. Expected one of: "
+        + ", ".join(str(candidate) for candidate in candidates)
+    )
 
 
 def _make_eval_env(seed: int, render_mode: str | None):
@@ -303,7 +346,7 @@ def main(argv: list[str] | None = None) -> int:
     """Evaluate a Sedon standing policy checkpoint."""
     args = parse_args(argv)
     model_path = resolve_model_path(args.models_root, args.model_path)
-    vecnorm_path = resolve_vecnorm_path(args.models_root, args.vecnorm_path)
+    vecnorm_path = resolve_vecnorm_path(args.models_root, model_path, args.vecnorm_path)
     print(f"Model     : {model_path}")
     print(f"VecNormalize: {vecnorm_path}")
 

@@ -46,7 +46,9 @@ MODEL_ROOT = str(PATHS.models_root)
 LOG_ROOT = str(PATHS.logs_root)
 TB_ROOT = str(PATHS.tb_root)
 VECNORM_PATH = os.path.join(MODEL_ROOT, "vecnorm.pkl")
+VECNORM_PREFIX = "sedon_vecnorm"
 BEST_MODEL_DIR = os.path.join(MODEL_ROOT, "best")
+BEST_VECNORM_PATH = os.path.join(BEST_MODEL_DIR, "vecnorm.pkl")
 LATEST_MODEL_PATH = os.path.join(MODEL_ROOT, "latest_model")
 CONFIG_PATH = os.path.join(LOG_ROOT, "train_config.json")
 MANIFEST_PATH = os.path.join(LOG_ROOT, "run_manifest.json")
@@ -137,6 +139,42 @@ class SedonMetricsCallback(BaseCallback):
                 f"{self._best_reward:>8.1f}  {fps:>6}  "
                 f"{hours:02d}:{minutes:02d}:{seconds:02d}",
             )
+        return True
+
+
+class SedonVecNormalizeCheckpointCallback(BaseCallback):
+    """Save VecNormalize stats whenever a model checkpoint is written."""
+
+    def __init__(self, save_freq: int):
+        super().__init__(0)
+        self._save_freq = save_freq
+
+    def _on_step(self) -> bool:
+        if self.n_calls % self._save_freq == 0:
+            self.training_env.save(VECNORM_PATH)
+            versioned_path = os.path.join(
+                MODEL_ROOT,
+                f"{VECNORM_PREFIX}_{self.num_timesteps}_steps.pkl",
+            )
+            self.training_env.save(versioned_path)
+        return True
+
+
+class SedonBestVecNormalizeCallback(BaseCallback):
+    """Save VecNormalize stats when EvalCallback updates best_model.zip."""
+
+    def __init__(self, best_model_dir: str, eval_env: VecNormalize):
+        super().__init__(0)
+        self._best_model_path = os.path.join(best_model_dir, "best_model.zip")
+        self._eval_env = eval_env
+        self._last_mtime = 0.0
+
+    def _on_step(self) -> bool:
+        if os.path.exists(self._best_model_path):
+            mtime = os.path.getmtime(self._best_model_path)
+            if mtime > self._last_mtime:
+                self._last_mtime = mtime
+                self._eval_env.save(BEST_VECNORM_PATH)
         return True
 
 
@@ -310,22 +348,27 @@ def main(argv: list[str] | None = None) -> int:
         train_env=train_env,
     )
 
+    checkpoint_save_freq = max(1, SEDON_CONFIG.checkpoint_freq_steps // args.n_envs)
+    eval_freq = max(1, SEDON_CONFIG.eval_freq_steps // args.n_envs)
+
     callback_list = [
         SedonMetricsCallback(total_timesteps=total_timesteps),
         CheckpointCallback(
-            save_freq=max(1, SEDON_CONFIG.checkpoint_freq_steps // args.n_envs),
+            save_freq=checkpoint_save_freq,
             save_path=MODEL_ROOT,
             name_prefix="sedon_ppo",
         ),
+        SedonVecNormalizeCheckpointCallback(save_freq=checkpoint_save_freq),
         EvalCallback(
             eval_env,
             best_model_save_path=BEST_MODEL_DIR,
             log_path=LOG_ROOT,
-            eval_freq=max(1, SEDON_CONFIG.eval_freq_steps // args.n_envs),
+            eval_freq=eval_freq,
             deterministic=True,
             render=False,
             n_eval_episodes=SEDON_CONFIG.eval_episodes,
         ),
+        SedonBestVecNormalizeCallback(BEST_MODEL_DIR, eval_env),
     ]
 
     model_kwargs = dict(
