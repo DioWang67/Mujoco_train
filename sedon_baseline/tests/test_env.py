@@ -27,6 +27,8 @@ def test_compute_standing_reward_prefers_target_height_and_upright_pose() -> Non
         action_l2=0.0,
         action_rate_l2=0.0,
         joint_position_error_l2=0.0,
+        forward_velocity=config.target_forward_velocity,
+        lateral_velocity_l2=0.0,
         base_xy_velocity_l2=0.0,
         base_roll_pitch_rate_l2=0.0,
         foot_flatness=1.0,
@@ -41,6 +43,8 @@ def test_compute_standing_reward_prefers_target_height_and_upright_pose() -> Non
         action_l2=10.0,
         action_rate_l2=10.0,
         joint_position_error_l2=2.0,
+        forward_velocity=-0.2,
+        lateral_velocity_l2=1.0,
         base_xy_velocity_l2=4.0,
         base_roll_pitch_rate_l2=4.0,
         foot_flatness=0.4,
@@ -62,6 +66,8 @@ def test_compute_standing_reward_penalizes_low_crouch() -> None:
         action_l2=0.0,
         action_rate_l2=0.0,
         joint_position_error_l2=0.0,
+        forward_velocity=config.target_forward_velocity,
+        lateral_velocity_l2=0.0,
         base_xy_velocity_l2=0.0,
         base_roll_pitch_rate_l2=0.0,
         foot_flatness=1.0,
@@ -76,6 +82,8 @@ def test_compute_standing_reward_penalizes_low_crouch() -> None:
         action_l2=0.0,
         action_rate_l2=0.0,
         joint_position_error_l2=0.0,
+        forward_velocity=config.target_forward_velocity,
+        lateral_velocity_l2=0.0,
         base_xy_velocity_l2=0.0,
         base_roll_pitch_rate_l2=0.0,
         foot_flatness=1.0,
@@ -97,6 +105,8 @@ def test_compute_standing_reward_penalizes_joint_pose_deviation() -> None:
         action_l2=0.0,
         action_rate_l2=0.0,
         joint_position_error_l2=0.0,
+        forward_velocity=config.target_forward_velocity,
+        lateral_velocity_l2=0.0,
         base_xy_velocity_l2=0.0,
         base_roll_pitch_rate_l2=0.0,
         foot_flatness=1.0,
@@ -111,6 +121,8 @@ def test_compute_standing_reward_penalizes_joint_pose_deviation() -> None:
         action_l2=0.0,
         action_rate_l2=0.0,
         joint_position_error_l2=0.45,
+        forward_velocity=0.0,
+        lateral_velocity_l2=0.2,
         base_xy_velocity_l2=0.0,
         base_roll_pitch_rate_l2=0.0,
         foot_flatness=0.5,
@@ -132,6 +144,8 @@ def test_compute_standing_reward_penalizes_horizontal_drift_and_shaking() -> Non
         action_l2=0.0,
         action_rate_l2=0.0,
         joint_position_error_l2=0.0,
+        forward_velocity=config.target_forward_velocity,
+        lateral_velocity_l2=0.0,
         base_xy_velocity_l2=0.0,
         base_roll_pitch_rate_l2=0.0,
         foot_flatness=1.0,
@@ -146,6 +160,8 @@ def test_compute_standing_reward_penalizes_horizontal_drift_and_shaking() -> Non
         action_l2=1.0,
         action_rate_l2=2.0,
         joint_position_error_l2=0.15,
+        forward_velocity=-0.1,
+        lateral_velocity_l2=0.5,
         base_xy_velocity_l2=1.5,
         base_roll_pitch_rate_l2=2.0,
         foot_flatness=0.6,
@@ -155,6 +171,63 @@ def test_compute_standing_reward_penalizes_horizontal_drift_and_shaking() -> Non
     )
 
     assert unstable["total"] < stable["total"]
+
+
+def test_compute_standing_reward_prefers_target_forward_velocity() -> None:
+    config = SedonStandingConfig()
+
+    standing_still = compute_standing_reward(
+        base_height=config.target_base_height,
+        upright=1.0,
+        joint_velocity_l2=0.0,
+        action_l2=0.0,
+        action_rate_l2=0.0,
+        joint_position_error_l2=0.0,
+        forward_velocity=0.0,
+        lateral_velocity_l2=0.0,
+        base_xy_velocity_l2=0.0,
+        base_roll_pitch_rate_l2=0.0,
+        foot_flatness=1.0,
+        foot_height_error_l2=0.0,
+        feet_near_floor=2,
+        config=config,
+    )
+    walking_forward = compute_standing_reward(
+        base_height=config.target_base_height,
+        upright=1.0,
+        joint_velocity_l2=0.0,
+        action_l2=0.0,
+        action_rate_l2=0.0,
+        joint_position_error_l2=0.0,
+        forward_velocity=config.target_forward_velocity,
+        lateral_velocity_l2=0.0,
+        base_xy_velocity_l2=config.target_forward_velocity
+        * config.target_forward_velocity,
+        base_roll_pitch_rate_l2=0.0,
+        foot_flatness=1.0,
+        foot_height_error_l2=0.0,
+        feet_near_floor=2,
+        config=config,
+    )
+    moving_sideways = compute_standing_reward(
+        base_height=config.target_base_height,
+        upright=1.0,
+        joint_velocity_l2=0.0,
+        action_l2=0.0,
+        action_rate_l2=0.0,
+        joint_position_error_l2=0.0,
+        forward_velocity=0.0,
+        lateral_velocity_l2=0.25,
+        base_xy_velocity_l2=0.25,
+        base_roll_pitch_rate_l2=0.0,
+        foot_flatness=1.0,
+        foot_height_error_l2=0.0,
+        feet_near_floor=2,
+        config=config,
+    )
+
+    assert walking_forward["total"] > standing_still["total"]
+    assert walking_forward["total"] > moving_sideways["total"]
 
 
 @pytest.fixture

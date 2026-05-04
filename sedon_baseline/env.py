@@ -1,4 +1,4 @@
-"""Minimal MuJoCo standing environment for the private Sedon robot model."""
+"""Minimal MuJoCo locomotion environment for the private Sedon robot model."""
 
 from __future__ import annotations
 
@@ -43,10 +43,11 @@ FOOT_GEOM_NAMES = ("R_foot_collision", "L_foot_collision")
 
 @dataclass(frozen=True)
 class SedonStandingConfig:
-    """Reward and termination settings for the Sedon standing task.
+    """Reward and termination settings for the Sedon locomotion task.
 
     Args:
         target_base_height: Desired base height in meters.
+        target_forward_velocity: Desired base x velocity in meters per second.
         min_base_height: Episode terminates below this height.
         max_base_height: Episode terminates above this height.
         min_upright: Episode terminates below this base upright alignment.
@@ -58,12 +59,16 @@ class SedonStandingConfig:
         height_weight: Weight for matching target height.
         height_sharpness: Exponential penalty sharpness for base-height error.
         upright_weight: Weight for keeping the base z-axis upright.
+        forward_velocity_weight: Weight for tracking target forward speed.
+        forward_velocity_sharpness: Exponential penalty sharpness for forward speed error.
+        backward_velocity_penalty_weight: Penalty coefficient for moving backward.
+        lateral_velocity_penalty_weight: Penalty coefficient for lateral drift speed.
         pose_weight: Weight for keeping actuated joints near the nominal stance.
         pose_sharpness: Exponential penalty sharpness for joint pose error.
         action_penalty_weight: Penalty coefficient for squared normalized action.
         action_rate_penalty_weight: Penalty coefficient for changing actions too abruptly.
         velocity_penalty_weight: Penalty coefficient for joint velocity.
-        base_xy_velocity_penalty_weight: Penalty coefficient for horizontal drift speed.
+        base_xy_velocity_penalty_weight: Deprecated full horizontal speed penalty.
         base_roll_pitch_rate_penalty_weight: Penalty coefficient for roll/pitch angular speed.
         foot_flat_weight: Weight for keeping both foot collision boxes flat.
         foot_height_penalty_weight: Penalty coefficient for foot bottom height error.
@@ -72,6 +77,7 @@ class SedonStandingConfig:
     """
 
     target_base_height: float = 0.446
+    target_forward_velocity: float = 0.25
     min_base_height: float = 0.34
     max_base_height: float = 0.65
     min_upright: float = 0.75
@@ -83,17 +89,21 @@ class SedonStandingConfig:
     height_weight: float = 3.0
     height_sharpness: float = 40.0
     upright_weight: float = 2.0
-    pose_weight: float = 2.5
+    forward_velocity_weight: float = 4.0
+    forward_velocity_sharpness: float = 10.0
+    backward_velocity_penalty_weight: float = 1.0
+    lateral_velocity_penalty_weight: float = 0.5
+    pose_weight: float = 1.2
     pose_sharpness: float = 8.0
     action_penalty_weight: float = 0.005
     action_rate_penalty_weight: float = 0.02
     velocity_penalty_weight: float = 0.003
-    base_xy_velocity_penalty_weight: float = 1.0
+    base_xy_velocity_penalty_weight: float = 0.0
     base_roll_pitch_rate_penalty_weight: float = 0.1
-    foot_flat_weight: float = 2.0
-    foot_height_penalty_weight: float = 20.0
-    foot_air_penalty_weight: float = 0.5
-    max_base_xy_drift: float = 0.08
+    foot_flat_weight: float = 0.5
+    foot_height_penalty_weight: float = 2.0
+    foot_air_penalty_weight: float = 0.05
+    max_base_xy_drift: float = 2.0
 
 
 def compute_standing_reward(
@@ -103,6 +113,8 @@ def compute_standing_reward(
     action_l2: float,
     action_rate_l2: float,
     joint_position_error_l2: float,
+    forward_velocity: float,
+    lateral_velocity_l2: float,
     base_xy_velocity_l2: float,
     base_roll_pitch_rate_l2: float,
     foot_flatness: float,
@@ -119,6 +131,8 @@ def compute_standing_reward(
         action_l2: Squared norm of normalized actions.
         action_rate_l2: Squared norm of the action delta from the previous step.
         joint_position_error_l2: Squared norm of actuated joint deviation from the seed pose.
+        forward_velocity: Base x velocity in meters per second.
+        lateral_velocity_l2: Squared base y velocity.
         base_xy_velocity_l2: Squared norm of horizontal base velocity.
         base_roll_pitch_rate_l2: Squared norm of base roll/pitch angular rate.
         foot_flatness: Mean foot z-axis alignment with world z-axis.
@@ -132,6 +146,11 @@ def compute_standing_reward(
     height_error = base_height - config.target_base_height
     height = float(np.exp(-config.height_sharpness * height_error * height_error))
     upright_clipped = float(np.clip(upright, -1.0, 1.0))
+    forward_error = forward_velocity - config.target_forward_velocity
+    forward_tracking = float(
+        np.exp(-config.forward_velocity_sharpness * forward_error * forward_error)
+    )
+    backward_velocity = max(0.0, -forward_velocity)
     pose = float(np.exp(-config.pose_sharpness * joint_position_error_l2))
     foot_flatness_clipped = float(np.clip(foot_flatness, 0.0, 1.0))
     missing_feet = max(0, len(FOOT_GEOM_NAMES) - feet_near_floor)
@@ -139,6 +158,9 @@ def compute_standing_reward(
         "alive": config.alive_reward,
         "height": height,
         "upright": max(0.0, upright_clipped),
+        "forward_velocity": forward_tracking,
+        "backward_velocity_penalty": backward_velocity * backward_velocity,
+        "lateral_velocity_penalty": lateral_velocity_l2,
         "pose": pose,
         "foot_flat": foot_flatness_clipped,
         "action_penalty": action_l2,
@@ -152,6 +174,15 @@ def compute_standing_reward(
     total = components["alive"]
     total += config.height_weight * components["height"]
     total += config.upright_weight * components["upright"]
+    total += config.forward_velocity_weight * components["forward_velocity"]
+    total -= (
+        config.backward_velocity_penalty_weight
+        * components["backward_velocity_penalty"]
+    )
+    total -= (
+        config.lateral_velocity_penalty_weight
+        * components["lateral_velocity_penalty"]
+    )
     total += config.pose_weight * components["pose"]
     total += config.foot_flat_weight * components["foot_flat"]
     total -= config.action_penalty_weight * components["action_penalty"]
@@ -285,6 +316,8 @@ class SedonStandingEnv(MujocoEnv):
         joint_position_error = joint_positions - self._nominal_joint_qpos
         joint_position_error_l2 = float(np.dot(joint_position_error, joint_position_error))
         base_xy_velocity = self.data.qvel[0:2]
+        forward_velocity = float(base_xy_velocity[0])
+        lateral_velocity_l2 = float(base_xy_velocity[1] * base_xy_velocity[1])
         base_xy_velocity_l2 = float(np.dot(base_xy_velocity, base_xy_velocity))
         base_roll_pitch_rate = self.data.qvel[3:5]
         base_roll_pitch_rate_l2 = float(np.dot(base_roll_pitch_rate, base_roll_pitch_rate))
@@ -298,6 +331,8 @@ class SedonStandingEnv(MujocoEnv):
             action_l2=action_l2,
             action_rate_l2=action_rate_l2,
             joint_position_error_l2=joint_position_error_l2,
+            forward_velocity=forward_velocity,
+            lateral_velocity_l2=lateral_velocity_l2,
             base_xy_velocity_l2=base_xy_velocity_l2,
             base_roll_pitch_rate_l2=base_roll_pitch_rate_l2,
             foot_flatness=foot_flatness,
@@ -316,6 +351,8 @@ class SedonStandingEnv(MujocoEnv):
             "action_l2": action_l2,
             "action_rate_l2": action_rate_l2,
             "joint_position_error_l2": joint_position_error_l2,
+            "forward_velocity": forward_velocity,
+            "lateral_velocity_l2": lateral_velocity_l2,
             "base_xy_velocity_l2": base_xy_velocity_l2,
             "base_roll_pitch_rate_l2": base_roll_pitch_rate_l2,
             "foot_flatness": foot_flatness,

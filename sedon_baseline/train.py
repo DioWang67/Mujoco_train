@@ -82,6 +82,7 @@ class SedonMetricsCallback(BaseCallback):
         self._ep_lengths: deque[int] = deque(maxlen=50)
         self._base_heights: deque[float] = deque(maxlen=500)
         self._uprights: deque[float] = deque(maxlen=500)
+        self._forward_velocities: deque[float] = deque(maxlen=500)
         self._last_print = 0
         self._last_log = 0
         self._episode_count = 0
@@ -93,9 +94,9 @@ class SedonMetricsCallback(BaseCallback):
         print(
             f"\n{'Steps':>12}  {'Eps':>6}  {'MeanR':>9}  "
             f"{'MeanLen':>8}  {'BaseZ':>7}  {'Upright':>7}  "
-            f"{'BestR':>8}  {'FPS':>6}  {'ETA':>9}",
+            f"{'FwdV':>7}  {'BestR':>8}  {'FPS':>6}  {'ETA':>9}",
         )
-        print("-" * 92)
+        print("-" * 101)
 
     def _on_step(self) -> bool:
         for info in self.locals.get("infos", []):
@@ -103,6 +104,8 @@ class SedonMetricsCallback(BaseCallback):
                 self._base_heights.append(float(info["base_height"]))
             if "upright" in info:
                 self._uprights.append(float(info["upright"]))
+            if "forward_velocity" in info:
+                self._forward_velocities.append(float(info["forward_velocity"]))
             episode = info.get("episode")
             if episode:
                 reward = float(episode["r"])
@@ -120,6 +123,11 @@ class SedonMetricsCallback(BaseCallback):
                 self.logger.record("sedon/base_height", float(np.mean(self._base_heights)))
             if self._uprights:
                 self.logger.record("sedon/upright", float(np.mean(self._uprights)))
+            if self._forward_velocities:
+                self.logger.record(
+                    "sedon/forward_velocity",
+                    float(np.mean(self._forward_velocities)),
+                )
 
         if self.num_timesteps - self._last_print >= self.PRINT_FREQ:
             self._last_print = self.num_timesteps
@@ -132,10 +140,15 @@ class SedonMetricsCallback(BaseCallback):
             mean_length = float(np.mean(self._ep_lengths)) if self._ep_lengths else float("nan")
             base_z = float(np.mean(self._base_heights)) if self._base_heights else float("nan")
             upright = float(np.mean(self._uprights)) if self._uprights else float("nan")
+            forward_velocity = (
+                float(np.mean(self._forward_velocities))
+                if self._forward_velocities
+                else float("nan")
+            )
             print(
                 f"{self.num_timesteps:>12,}  {self._episode_count:>6}  "
                 f"{mean_reward:>9.1f}  {mean_length:>8.1f}  "
-                f"{base_z:>7.3f}  {upright:>7.3f}  "
+                f"{base_z:>7.3f}  {upright:>7.3f}  {forward_velocity:>7.3f}  "
                 f"{self._best_reward:>8.1f}  {fps:>6}  "
                 f"{hours:02d}:{minutes:02d}:{seconds:02d}",
             )

@@ -1,6 +1,6 @@
 {
   "n_envs_default": 4,
-  "total_timesteps": 1000000,
+  "total_timesteps": 100000,
   "smoke_timesteps": 4096,
   "n_steps": 256,
   "n_epochs": 8,
