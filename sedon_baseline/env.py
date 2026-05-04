@@ -61,6 +61,8 @@ class SedonStandingConfig:
         height_sharpness: Exponential penalty sharpness for base-height error.
         upright_weight: Weight for keeping the base z-axis upright.
         forward_velocity_weight: Weight for tracking target forward speed.
+        min_rewarded_forward_velocity: Forward speed below which stable policies are penalized.
+        low_forward_velocity_penalty_weight: Penalty for standing still while stable.
         forward_overspeed_limit: Base x velocity threshold that starts an overspeed penalty.
         forward_overspeed_penalty_weight: Penalty coefficient for rushing forward too fast.
         backward_velocity_penalty_weight: Penalty coefficient for moving backward.
@@ -79,7 +81,7 @@ class SedonStandingConfig:
     """
 
     target_base_height: float = 0.446
-    target_forward_velocity: float = 0.08
+    target_forward_velocity: float = 0.12
     min_base_height: float = 0.34
     max_base_height: float = 0.65
     min_upright: float = 0.75
@@ -93,6 +95,8 @@ class SedonStandingConfig:
     height_sharpness: float = 40.0
     upright_weight: float = 1.5
     forward_velocity_weight: float = 5.0
+    min_rewarded_forward_velocity: float = 0.02
+    low_forward_velocity_penalty_weight: float = 1.5
     forward_overspeed_limit: float = 0.15
     forward_overspeed_penalty_weight: float = 120.0
     backward_velocity_penalty_weight: float = 5.0
@@ -162,6 +166,11 @@ def compute_standing_reward(
     )
     stability_gate = height * upright_gate
     backward_velocity = max(0.0, -forward_velocity)
+    low_forward_shortfall = max(
+        0.0,
+        (config.min_rewarded_forward_velocity - forward_velocity)
+        / config.min_rewarded_forward_velocity,
+    )
     overspeed = max(0.0, forward_velocity - config.forward_overspeed_limit)
     pose = float(np.exp(-config.pose_sharpness * joint_position_error_l2))
     foot_flatness_clipped = float(np.clip(foot_flatness, 0.0, 1.0))
@@ -172,6 +181,9 @@ def compute_standing_reward(
         "upright": max(0.0, upright_clipped),
         "forward_velocity": forward_progress * stability_gate,
         "stability_gate": stability_gate,
+        "low_forward_velocity_penalty": low_forward_shortfall
+        * low_forward_shortfall
+        * stability_gate,
         "forward_overspeed_penalty": overspeed * overspeed,
         "backward_velocity_penalty": backward_velocity * backward_velocity,
         "lateral_velocity_penalty": lateral_velocity_l2,
@@ -189,6 +201,10 @@ def compute_standing_reward(
     total += config.height_weight * components["height"]
     total += config.upright_weight * components["upright"]
     total += config.forward_velocity_weight * components["forward_velocity"]
+    total -= (
+        config.low_forward_velocity_penalty_weight
+        * components["low_forward_velocity_penalty"]
+    )
     total -= (
         config.forward_overspeed_penalty_weight
         * components["forward_overspeed_penalty"]

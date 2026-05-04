@@ -228,6 +228,8 @@ def test_compute_standing_reward_prefers_target_forward_velocity() -> None:
 
     assert walking_forward["total"] > standing_still["total"]
     assert walking_forward["total"] > moving_sideways["total"]
+    assert standing_still["low_forward_velocity_penalty"] > 0.0
+    assert walking_forward["low_forward_velocity_penalty"] == 0.0
 
 
 @pytest.fixture
