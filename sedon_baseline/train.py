@@ -220,12 +220,12 @@ def _build_train_env(
     n_envs: int,
     seed: int,
     reset_noise_scale: float,
-    resume: bool,
+    resume_vecnorm_path: Path | None,
 ) -> VecNormalize:
     """Create the normalized training environment."""
     train_vec = _build_vec_env(n_envs, seed, reset_noise_scale)
-    if resume and os.path.exists(VECNORM_PATH):
-        train_env = VecNormalize.load(VECNORM_PATH, train_vec)
+    if resume_vecnorm_path is not None:
+        train_env = VecNormalize.load(str(resume_vecnorm_path), train_vec)
         train_env.training = True
         train_env.norm_reward = True
         return train_env
@@ -236,6 +236,33 @@ def _build_train_env(
         clip_obs=10.0,
         gamma=GAMMA,
     )
+
+
+def _resolve_resume_vecnorm_path(
+    resume_model_path: str | None,
+    explicit_vecnorm_path: str | None,
+) -> Path | None:
+    """Return VecNormalize stats to use when resuming a PPO checkpoint."""
+    if explicit_vecnorm_path:
+        vecnorm_path = Path(explicit_vecnorm_path)
+        if not vecnorm_path.is_file():
+            raise FileNotFoundError(f"--resume-vecnorm not found: {vecnorm_path}")
+        return vecnorm_path
+    if not resume_model_path:
+        return None
+
+    resume_path = Path(resume_model_path)
+    candidates = [
+        resume_path.with_name("vecnorm.pkl"),
+        resume_path.parent / "vecnorm.pkl",
+        resume_path.parent.parent / "vecnorm.pkl",
+    ]
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    if os.path.exists(VECNORM_PATH):
+        return Path(VECNORM_PATH)
+    return None
 
 
 def _build_eval_env(
@@ -283,6 +310,9 @@ def _save_config(args: argparse.Namespace, n_envs: int, batch_size: int) -> None
         "net_arch": NET_ARCH,
         "max_episode_steps": MAX_EPISODE_STEPS,
         "reset_noise_scale": args.reset_noise_scale,
+        "resume": args.resume,
+        "resume_vecnorm": args.resume_vecnorm,
+        "resume_action_std": args.resume_action_std,
         "reward_config": asdict(SedonStandingConfig()),
     }
     write_json(CONFIG_PATH, cfg)
@@ -324,6 +354,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help="Path to an existing PPO zip checkpoint to resume from.",
     )
+    parser.add_argument(
+        "--resume-vecnorm",
+        type=str,
+        default=None,
+        help="Path to VecNormalize stats for the resumed checkpoint.",
+    )
+    parser.add_argument(
+        "--resume-action-std",
+        type=float,
+        default=0.03,
+        help="Stochastic policy action std to use when fine-tuning a resumed checkpoint.",
+    )
     return parser.parse_args(argv)
 
 
@@ -334,6 +376,8 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError("--n-envs must be positive.")
     if args.reset_noise_scale < 0.0:
         raise ValueError("--reset-noise-scale must be non-negative.")
+    if args.resume_action_std <= 0.0:
+        raise ValueError("--resume-action-std must be positive.")
     if not DEFAULT_SCENE_PATH.is_file():
         raise FileNotFoundError(
             f"Sedon training scene not found: {DEFAULT_SCENE_PATH}. "
@@ -345,15 +389,20 @@ def main(argv: list[str] | None = None) -> int:
 
     total_timesteps = SMOKE_TIMESTEPS if args.smoke else TOTAL_TIMESTEPS
     batch_size = _compute_batch_size(args.n_envs)
+    resume_vecnorm_path = _resolve_resume_vecnorm_path(args.resume, args.resume_vecnorm)
     _save_config(args, args.n_envs, batch_size)
     _write_manifest()
     print(f"Artifacts: models={MODEL_ROOT} logs={LOG_ROOT} tb={TB_ROOT}")
+    if args.resume:
+        print(f"Resume model: {args.resume}")
+        print(f"Resume VecNormalize: {resume_vecnorm_path or '(fresh stats)'}")
+        print(f"Resume action std: {args.resume_action_std}")
 
     train_env = _build_train_env(
         n_envs=args.n_envs,
         seed=args.seed,
         reset_noise_scale=args.reset_noise_scale,
-        resume=bool(args.resume),
+        resume_vecnorm_path=resume_vecnorm_path,
     )
     eval_env = _build_eval_env(
         seed=args.seed,
@@ -405,6 +454,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.resume:
         model = PPO.load(args.resume, env=train_env)
+        if hasattr(model.policy, "log_std"):
+            model.policy.log_std.data.fill_(float(np.log(args.resume_action_std)))
         model.set_random_seed(args.seed)
     else:
         model = PPO(**model_kwargs)

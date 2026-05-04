@@ -59,6 +59,8 @@ class SedonEvalEpisode:
     fell: bool
     final_base_height: float
     final_upright: float
+    final_base_x: float
+    mean_forward_velocity: float
 
 
 def resolve_model_path(models_root: Path, explicit_model_path: Path | None) -> Path:
@@ -224,6 +226,7 @@ def evaluate_policy(
             obs = eval_env.reset()
             episode_reward = 0.0
             episode_length = 0
+            forward_velocity_sum = 0.0
             final_info: dict = {}
             if record_path is not None:
                 frame = _capture_rgb_frame(eval_env)
@@ -236,6 +239,7 @@ def evaluate_policy(
                 episode_reward += float(rewards[0])
                 episode_length += 1
                 final_info = infos[0]
+                forward_velocity_sum += float(final_info.get("forward_velocity", 0.0))
                 if record_path is not None:
                     frame = _capture_rgb_frame(eval_env)
                     if frame is not None:
@@ -255,6 +259,8 @@ def evaluate_policy(
                     fell=not time_limit_reached,
                     final_base_height=float(final_info.get("base_height", np.nan)),
                     final_upright=float(final_info.get("upright", np.nan)),
+                    final_base_x=float(final_info.get("base_x_position", np.nan)),
+                    mean_forward_velocity=forward_velocity_sum / max(1, episode_length),
                 )
             )
         if record_path is not None:
@@ -279,6 +285,8 @@ def write_csv(path: Path, episodes: list[SedonEvalEpisode]) -> None:
                 "fell",
                 "final_base_height",
                 "final_upright",
+                "final_base_x",
+                "mean_forward_velocity",
             ],
         )
         writer.writeheader()
@@ -293,6 +301,11 @@ def print_summary(episodes: list[SedonEvalEpisode]) -> None:
     falls = np.array([episode.fell for episode in episodes], dtype=np.float64)
     base_heights = np.array([episode.final_base_height for episode in episodes], dtype=np.float64)
     uprights = np.array([episode.final_upright for episode in episodes], dtype=np.float64)
+    base_x = np.array([episode.final_base_x for episode in episodes], dtype=np.float64)
+    forward_velocities = np.array(
+        [episode.mean_forward_velocity for episode in episodes],
+        dtype=np.float64,
+    )
 
     print("Sedon eval summary")
     print(f"episodes          : {len(episodes)}")
@@ -301,6 +314,8 @@ def print_summary(episodes: list[SedonEvalEpisode]) -> None:
     print(f"fall_rate         : {100.0 * float(np.mean(falls)):.1f}%")
     print(f"mean_final_base_z : {float(np.nanmean(base_heights)):.3f}")
     print(f"mean_final_upright: {float(np.nanmean(uprights)):.3f}")
+    print(f"mean_final_base_x : {float(np.nanmean(base_x)):.3f}")
+    print(f"mean_forward_vel  : {float(np.nanmean(forward_velocities)):.3f}")
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:

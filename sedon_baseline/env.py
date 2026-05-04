@@ -51,6 +51,7 @@ class SedonStandingConfig:
         min_base_height: Episode terminates below this height.
         max_base_height: Episode terminates above this height.
         min_upright: Episode terminates below this base upright alignment.
+        termination_penalty: Penalty applied when an episode terminates early.
         torque_scale: Maximum absolute PD torque command before actuator clipping.
         action_joint_delta_scale: Maximum joint target offset represented by action 1.0.
         pd_stiffness: Joint-space proportional gain for stance tracking.
@@ -60,7 +61,8 @@ class SedonStandingConfig:
         height_sharpness: Exponential penalty sharpness for base-height error.
         upright_weight: Weight for keeping the base z-axis upright.
         forward_velocity_weight: Weight for tracking target forward speed.
-        forward_velocity_sharpness: Exponential penalty sharpness for forward speed error.
+        forward_overspeed_limit: Base x velocity threshold that starts an overspeed penalty.
+        forward_overspeed_penalty_weight: Penalty coefficient for rushing forward too fast.
         backward_velocity_penalty_weight: Penalty coefficient for moving backward.
         lateral_velocity_penalty_weight: Penalty coefficient for lateral drift speed.
         pose_weight: Weight for keeping actuated joints near the nominal stance.
@@ -77,31 +79,33 @@ class SedonStandingConfig:
     """
 
     target_base_height: float = 0.446
-    target_forward_velocity: float = 0.25
+    target_forward_velocity: float = 0.08
     min_base_height: float = 0.34
     max_base_height: float = 0.65
     min_upright: float = 0.75
+    termination_penalty: float = 50.0
     torque_scale: float = 45.0
     action_joint_delta_scale: float = 0.25
     pd_stiffness: float = 35.0
     pd_damping: float = 2.0
-    alive_reward: float = 0.2
-    height_weight: float = 3.0
+    alive_reward: float = 0.1
+    height_weight: float = 1.5
     height_sharpness: float = 40.0
-    upright_weight: float = 2.0
-    forward_velocity_weight: float = 4.0
-    forward_velocity_sharpness: float = 10.0
-    backward_velocity_penalty_weight: float = 1.0
-    lateral_velocity_penalty_weight: float = 0.5
-    pose_weight: float = 1.2
+    upright_weight: float = 1.5
+    forward_velocity_weight: float = 5.0
+    forward_overspeed_limit: float = 0.15
+    forward_overspeed_penalty_weight: float = 120.0
+    backward_velocity_penalty_weight: float = 5.0
+    lateral_velocity_penalty_weight: float = 3.0
+    pose_weight: float = 1.0
     pose_sharpness: float = 8.0
-    action_penalty_weight: float = 0.005
-    action_rate_penalty_weight: float = 0.02
+    action_penalty_weight: float = 0.01
+    action_rate_penalty_weight: float = 0.08
     velocity_penalty_weight: float = 0.003
     base_xy_velocity_penalty_weight: float = 0.0
     base_roll_pitch_rate_penalty_weight: float = 0.1
-    foot_flat_weight: float = 0.5
-    foot_height_penalty_weight: float = 2.0
+    foot_flat_weight: float = 0.8
+    foot_height_penalty_weight: float = 8.0
     foot_air_penalty_weight: float = 0.05
     max_base_xy_drift: float = 2.0
 
@@ -146,11 +150,19 @@ def compute_standing_reward(
     height_error = base_height - config.target_base_height
     height = float(np.exp(-config.height_sharpness * height_error * height_error))
     upright_clipped = float(np.clip(upright, -1.0, 1.0))
-    forward_error = forward_velocity - config.target_forward_velocity
-    forward_tracking = float(
-        np.exp(-config.forward_velocity_sharpness * forward_error * forward_error)
+    forward_progress = float(
+        np.clip(forward_velocity / config.target_forward_velocity, 0.0, 1.0)
     )
+    upright_gate = float(
+        np.clip(
+            (upright_clipped - config.min_upright) / (1.0 - config.min_upright),
+            0.0,
+            1.0,
+        )
+    )
+    stability_gate = height * upright_gate
     backward_velocity = max(0.0, -forward_velocity)
+    overspeed = max(0.0, forward_velocity - config.forward_overspeed_limit)
     pose = float(np.exp(-config.pose_sharpness * joint_position_error_l2))
     foot_flatness_clipped = float(np.clip(foot_flatness, 0.0, 1.0))
     missing_feet = max(0, len(FOOT_GEOM_NAMES) - feet_near_floor)
@@ -158,7 +170,9 @@ def compute_standing_reward(
         "alive": config.alive_reward,
         "height": height,
         "upright": max(0.0, upright_clipped),
-        "forward_velocity": forward_tracking,
+        "forward_velocity": forward_progress * stability_gate,
+        "stability_gate": stability_gate,
+        "forward_overspeed_penalty": overspeed * overspeed,
         "backward_velocity_penalty": backward_velocity * backward_velocity,
         "lateral_velocity_penalty": lateral_velocity_l2,
         "pose": pose,
@@ -175,6 +189,10 @@ def compute_standing_reward(
     total += config.height_weight * components["height"]
     total += config.upright_weight * components["upright"]
     total += config.forward_velocity_weight * components["forward_velocity"]
+    total -= (
+        config.forward_overspeed_penalty_weight
+        * components["forward_overspeed_penalty"]
+    )
     total -= (
         config.backward_velocity_penalty_weight
         * components["backward_velocity_penalty"]
@@ -342,10 +360,11 @@ class SedonStandingEnv(MujocoEnv):
         )
         terminated = self._is_terminated(base_height, upright, obs)
         if terminated:
-            rewards["total"] -= 2.0
+            rewards["total"] -= self._reward_config.termination_penalty
 
         info = {
             "base_height": base_height,
+            "base_x_position": float(self.data.qpos[0]),
             "upright": upright,
             "joint_velocity_l2": joint_velocity_l2,
             "action_l2": action_l2,
