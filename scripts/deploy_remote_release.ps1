@@ -41,11 +41,22 @@ Write-Host
 function Invoke-NativeChecked {
     param(
         [string]$FilePath,
-        [string[]]$ArgumentList
+        [string[]]$ArgumentList,
+        [string]$WorkingDirectory = ""
     )
 
-    & $FilePath @ArgumentList
-    $exitCode = $LASTEXITCODE
+    if ($WorkingDirectory) {
+        Push-Location -LiteralPath $WorkingDirectory
+    }
+    try {
+        & $FilePath @ArgumentList
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        if ($WorkingDirectory) {
+            Pop-Location
+        }
+    }
     if ($exitCode -ne 0) {
         throw "Command failed with exit code ${exitCode}: $FilePath $($ArgumentList -join ' ')"
     }
@@ -75,7 +86,10 @@ $steps = @(
     @{
         Name = "Build archive"
         Action = {
-            Invoke-NativeChecked -FilePath $pythonExe -ArgumentList $deployArgs
+            Invoke-NativeChecked `
+                -FilePath $pythonExe `
+                -ArgumentList $deployArgs `
+                -WorkingDirectory $repoRoot
             if (-not (Test-Path -LiteralPath $localArchive)) {
                 throw "Archive was not created: $localArchive"
             }
