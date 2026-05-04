@@ -50,7 +50,10 @@ class SedonStandingConfig:
         min_base_height: Episode terminates below this height.
         max_base_height: Episode terminates above this height.
         min_upright: Episode terminates below this base upright alignment.
-        torque_scale: Normalized action multiplier before clipping to motor limits.
+        torque_scale: Maximum absolute PD torque command before actuator clipping.
+        action_joint_delta_scale: Maximum joint target offset represented by action 1.0.
+        pd_stiffness: Joint-space proportional gain for stance tracking.
+        pd_damping: Joint-space velocity damping gain for stance tracking.
         alive_reward: Reward granted each non-terminal step.
         height_weight: Weight for matching target height.
         height_sharpness: Exponential penalty sharpness for base-height error.
@@ -73,6 +76,9 @@ class SedonStandingConfig:
     max_base_height: float = 0.65
     min_upright: float = 0.75
     torque_scale: float = 45.0
+    action_joint_delta_scale: float = 0.25
+    pd_stiffness: float = 35.0
+    pd_damping: float = 2.0
     alive_reward: float = 0.2
     height_weight: float = 3.0
     height_sharpness: float = 40.0
@@ -261,18 +267,17 @@ class SedonStandingEnv(MujocoEnv):
                 f"got {action_array.shape}."
             )
         clipped_action = np.clip(action_array, -1.0, 1.0).astype(np.float64)
-        scaled_ctrl = clipped_action * self._reward_config.torque_scale
-        ctrl_low = self._ctrl_range[:, 0]
-        ctrl_high = self._ctrl_range[:, 1]
-        ctrl = np.clip(scaled_ctrl, ctrl_low, ctrl_high)
-
-        self.do_simulation(ctrl, self.frame_skip)
+        joint_positions = self._joint_positions()
+        joint_velocities = self._joint_velocities()
+        target_positions = (
+            self._nominal_joint_qpos
+            + clipped_action * self._reward_config.action_joint_delta_scale
+        )
+        self._do_pd_simulation(target_positions)
 
         obs = self._get_obs()
         base_height = self._base_height()
         upright = self._base_upright()
-        joint_positions = self._joint_positions()
-        joint_velocities = self._joint_velocities()
         joint_velocity_l2 = float(np.dot(joint_velocities, joint_velocities))
         action_l2 = float(np.dot(clipped_action, clipped_action))
         action_delta = clipped_action - self._prev_action
@@ -409,6 +414,25 @@ class SedonStandingEnv(MujocoEnv):
             [qpos[self.model.jnt_qposadr[joint_id]] for joint_id in self._joint_ids],
             dtype=np.float64,
         )
+
+    def _pd_control(self, target_positions: np.ndarray) -> np.ndarray:
+        """Return a clipped torque command for the current joint state."""
+        pd_ctrl = (
+            self._reward_config.pd_stiffness * (target_positions - self._joint_positions())
+            - self._reward_config.pd_damping * self._joint_velocities()
+        )
+        scaled_ctrl = np.clip(
+            pd_ctrl,
+            -self._reward_config.torque_scale,
+            self._reward_config.torque_scale,
+        )
+        return np.clip(scaled_ctrl, self._ctrl_range[:, 0], self._ctrl_range[:, 1])
+
+    def _do_pd_simulation(self, target_positions: np.ndarray) -> None:
+        """Step MuJoCo while refreshing the stance PD torque every physics step."""
+        for _ in range(self.frame_skip):
+            self.data.ctrl[:] = self._pd_control(target_positions)
+            mujoco.mj_step(self.model, self.data)
 
     def _foot_bottom_heights(self) -> np.ndarray:
         """Return estimated bottom heights for the collision foot boxes."""
