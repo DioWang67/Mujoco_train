@@ -54,6 +54,10 @@ class SedonStandingConfig:
         termination_penalty: Penalty applied when an episode terminates early.
         torque_scale: Maximum absolute PD torque command before actuator clipping.
         action_joint_delta_scale: Maximum joint target offset represented by action 1.0.
+        gait_cycle_steps: Number of RL steps in one built-in walking gait cycle.
+        gait_hip_pitch_amp: Hip pitch amplitude for the built-in gait target.
+        gait_knee_pitch_amp: Knee pitch amplitude for the built-in gait target.
+        gait_ankle_pitch_amp: Ankle pitch amplitude for the built-in gait target.
         pd_stiffness: Joint-space proportional gain for stance tracking.
         pd_damping: Joint-space velocity damping gain for stance tracking.
         alive_reward: Reward granted each non-terminal step.
@@ -85,9 +89,13 @@ class SedonStandingConfig:
     min_base_height: float = 0.34
     max_base_height: float = 0.65
     min_upright: float = 0.75
-    termination_penalty: float = 50.0
+    termination_penalty: float = 3000.0
     torque_scale: float = 45.0
     action_joint_delta_scale: float = 0.25
+    gait_cycle_steps: int = 60
+    gait_hip_pitch_amp: float = -0.06
+    gait_knee_pitch_amp: float = 0.09
+    gait_ankle_pitch_amp: float = 0.045
     pd_stiffness: float = 35.0
     pd_damping: float = 2.0
     alive_reward: float = 0.0
@@ -282,11 +290,12 @@ class SedonStandingEnv(MujocoEnv):
         self._reward_config = reward_config or SedonStandingConfig()
         self._reset_noise_scale = reset_noise_scale
         self._prev_action = np.zeros(len(JOINT_NAMES), dtype=np.float64)
+        self._gait_step = 0
 
         observation_space = Box(
             low=-np.inf,
             high=np.inf,
-            shape=(41,),
+            shape=(43,),
             dtype=np.float64,
         )
         super().__init__(
@@ -332,22 +341,24 @@ class SedonStandingEnv(MujocoEnv):
                 f"got {action_array.shape}."
             )
         clipped_action = np.clip(action_array, -1.0, 1.0).astype(np.float64)
-        joint_positions = self._joint_positions()
-        joint_velocities = self._joint_velocities()
+        gait_target = self._nominal_joint_qpos + self._gait_joint_offsets()
         target_positions = (
-            self._nominal_joint_qpos
+            gait_target
             + clipped_action * self._reward_config.action_joint_delta_scale
         )
         self._do_pd_simulation(target_positions)
+        self._gait_step += 1
 
         obs = self._get_obs()
         base_height = self._base_height()
         upright = self._base_upright()
+        joint_positions = self._joint_positions()
+        joint_velocities = self._joint_velocities()
         joint_velocity_l2 = float(np.dot(joint_velocities, joint_velocities))
         action_l2 = float(np.dot(clipped_action, clipped_action))
         action_delta = clipped_action - self._prev_action
         action_rate_l2 = float(np.dot(action_delta, action_delta))
-        joint_position_error = joint_positions - self._nominal_joint_qpos
+        joint_position_error = joint_positions - gait_target
         joint_position_error_l2 = float(np.dot(joint_position_error, joint_position_error))
         base_xy_velocity = self.data.qvel[0:2]
         forward_velocity = float(base_xy_velocity[0])
@@ -390,6 +401,7 @@ class SedonStandingEnv(MujocoEnv):
             "lateral_velocity_l2": lateral_velocity_l2,
             "base_xy_velocity_l2": base_xy_velocity_l2,
             "base_roll_pitch_rate_l2": base_roll_pitch_rate_l2,
+            "gait_phase": self._gait_phase(),
             "foot_flatness": foot_flatness,
             "foot_height_error_l2": foot_height_error_l2,
             "feet_near_floor": feet_near_floor,
@@ -417,6 +429,7 @@ class SedonStandingEnv(MujocoEnv):
         qvel[:] = 0.0
         self.set_state(qpos, qvel)
         self._prev_action = np.zeros(len(JOINT_NAMES), dtype=np.float64)
+        self._gait_step = 0
         return self._get_obs()
 
     def _get_obs(self) -> np.ndarray:
@@ -428,6 +441,10 @@ class SedonStandingEnv(MujocoEnv):
                 np.array([self._base_height()], dtype=np.float64),
                 base_quat,
                 base_velocity,
+                np.array(
+                    [np.sin(self._gait_phase()), np.cos(self._gait_phase())],
+                    dtype=np.float64,
+                ),
                 self._joint_positions(),
                 self._joint_velocities(),
                 self._prev_action,
@@ -499,6 +516,26 @@ class SedonStandingEnv(MujocoEnv):
             self._reward_config.torque_scale,
         )
         return np.clip(scaled_ctrl, self._ctrl_range[:, 0], self._ctrl_range[:, 1])
+
+    def _gait_phase(self) -> float:
+        """Return the current built-in gait phase in radians."""
+        cycle_steps = max(1, self._reward_config.gait_cycle_steps)
+        return float(2.0 * np.pi * (self._gait_step % cycle_steps) / cycle_steps)
+
+    def _gait_joint_offsets(self) -> np.ndarray:
+        """Return a small periodic joint target that seeds forward stepping."""
+        phase = self._gait_phase()
+        swing = np.sin(phase)
+        right_swing = max(0.0, swing)
+        left_swing = max(0.0, -swing)
+        offsets = np.zeros(len(JOINT_NAMES), dtype=np.float64)
+        offsets[2] = self._reward_config.gait_hip_pitch_amp * swing
+        offsets[3] = self._reward_config.gait_knee_pitch_amp * right_swing
+        offsets[4] = self._reward_config.gait_ankle_pitch_amp * right_swing
+        offsets[7] = -self._reward_config.gait_hip_pitch_amp * swing
+        offsets[8] = self._reward_config.gait_knee_pitch_amp * left_swing
+        offsets[9] = self._reward_config.gait_ankle_pitch_amp * left_swing
+        return offsets
 
     def _do_pd_simulation(self, target_positions: np.ndarray) -> None:
         """Step MuJoCo while refreshing the stance PD torque every physics step."""

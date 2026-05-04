@@ -313,6 +313,7 @@ def _save_config(args: argparse.Namespace, n_envs: int, batch_size: int) -> None
         "resume": args.resume,
         "resume_vecnorm": args.resume_vecnorm,
         "resume_action_std": args.resume_action_std,
+        "action_std": args.action_std,
         "reward_config": asdict(SedonStandingConfig()),
     }
     write_json(CONFIG_PATH, cfg)
@@ -366,6 +367,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=0.03,
         help="Stochastic policy action std to use when fine-tuning a resumed checkpoint.",
     )
+    parser.add_argument(
+        "--action-std",
+        type=float,
+        default=None,
+        help="Stochastic policy action std to use after creating or loading a model.",
+    )
     return parser.parse_args(argv)
 
 
@@ -378,6 +385,8 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError("--reset-noise-scale must be non-negative.")
     if args.resume_action_std <= 0.0:
         raise ValueError("--resume-action-std must be positive.")
+    if args.action_std is not None and args.action_std <= 0.0:
+        raise ValueError("--action-std must be positive.")
     if not DEFAULT_SCENE_PATH.is_file():
         raise FileNotFoundError(
             f"Sedon training scene not found: {DEFAULT_SCENE_PATH}. "
@@ -397,6 +406,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Resume model: {args.resume}")
         print(f"Resume VecNormalize: {resume_vecnorm_path or '(fresh stats)'}")
         print(f"Resume action std: {args.resume_action_std}")
+    if args.action_std is not None:
+        print(f"Action std override: {args.action_std}")
 
     train_env = _build_train_env(
         n_envs=args.n_envs,
@@ -459,6 +470,8 @@ def main(argv: list[str] | None = None) -> int:
         model.set_random_seed(args.seed)
     else:
         model = PPO(**model_kwargs)
+    if args.action_std is not None and hasattr(model.policy, "log_std"):
+        model.policy.log_std.data.fill_(float(np.log(args.action_std)))
 
     try:
         model.learn(

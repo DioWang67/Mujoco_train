@@ -247,7 +247,7 @@ def test_sedon_env_reset_returns_expected_observation_shape(
     env = sedon_env_class(reset_noise_scale=0.0)
     try:
         obs, _ = env.reset(seed=42)
-        assert obs.shape == (41,)
+        assert obs.shape == (43,)
         assert np.isfinite(obs).all()
         assert env.action_space.shape == (10,)
     finally:
@@ -263,7 +263,7 @@ def test_sedon_env_zero_action_step_stays_numeric(
         action = np.zeros(env.action_space.shape, dtype=np.float64)
         obs, reward, _, _, info = env.step(action)
 
-        assert obs.shape == (41,)
+        assert obs.shape == (43,)
         assert np.isfinite(obs).all()
         assert np.isfinite(reward)
         assert info["base_height"] > 0.0
