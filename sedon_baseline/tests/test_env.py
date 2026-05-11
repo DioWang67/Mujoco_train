@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -10,11 +12,18 @@ import pytest
 pytestmark = pytest.mark.mujoco
 
 from sedon_baseline.env import (
+    compute_com_shift_reward,
     DEFAULT_SCENE_PATH,
+    LEFT_HIP_ROLL_ACTUATOR_INDEX,
+    LEFT_KNEE_JOINT_INDEX,
+    RIGHT_HIP_ROLL_ACTUATOR_INDEX,
+    RIGHT_KNEE_JOINT_INDEX,
     SedonStandingConfig,
     SedonStandingEnv,
     compute_standing_reward,
 )
+
+sedon_env_module = sys.modules[SedonStandingEnv.__module__]
 
 
 def test_compute_standing_reward_prefers_target_height_and_upright_pose() -> None:
@@ -230,6 +239,317 @@ def test_compute_standing_reward_prefers_target_forward_velocity() -> None:
     assert walking_forward["total"] > moving_sideways["total"]
     assert standing_still["low_forward_velocity_penalty"] > 0.0
     assert walking_forward["low_forward_velocity_penalty"] == 0.0
+
+
+def test_sedon_gait_offsets_keep_configured_joint_signs() -> None:
+    env = SedonStandingEnv.__new__(SedonStandingEnv)
+    env._reward_config = SedonStandingConfig(
+        gait_mode="sin",
+        gait_cycle_steps=100,
+        gait_hip_pitch_amp=-0.12,
+        gait_knee_pitch_amp=0.21,
+        gait_ankle_pitch_amp=-0.08,
+    )
+    env._gait_step = 25
+
+    offsets = env._sin_gait_joint_offsets()
+
+    assert offsets[2] < 0.0
+    assert offsets[3] > 0.0
+    assert offsets[4] < 0.0
+    assert offsets[7] == pytest.approx(0.0)
+    assert offsets[8] == pytest.approx(0.0)
+    assert offsets[9] == pytest.approx(0.0)
+
+
+def test_sedon_nominal_joint_pose_offsets_apply_symmetrically() -> None:
+    env = SedonStandingEnv.__new__(SedonStandingEnv)
+    env._reward_config = SedonStandingConfig(
+        nominal_hip_pitch_offset=-0.18,
+        nominal_knee_pitch_offset=0.32,
+        nominal_ankle_pitch_offset=-0.14,
+    )
+
+    offsets = env._nominal_joint_pose_offsets()
+
+    expected = np.zeros(10, dtype=np.float64)
+    expected[2] = expected[7] = -0.18
+    expected[3] = expected[8] = 0.32
+    expected[4] = expected[9] = -0.14
+    np.testing.assert_allclose(offsets, expected)
+
+
+def test_sedon_knee_safe_ranges_return_none_when_unset() -> None:
+    env = SedonStandingEnv.__new__(SedonStandingEnv)
+    env._reward_config = SedonStandingConfig()
+
+    assert env.knee_safe_ranges() == {"right": None, "left": None}
+
+
+def test_sedon_knee_safe_range_violation_reports_excess_distance() -> None:
+    env = SedonStandingEnv.__new__(SedonStandingEnv)
+    env._reward_config = SedonStandingConfig(
+        right_knee_safe_lower=0.0,
+        right_knee_safe_upper=0.4,
+        left_knee_safe_lower=0.0,
+        left_knee_safe_upper=0.3,
+    )
+    env._joint_positions = lambda: np.array(  # type: ignore[method-assign]
+        [0.0, 0.0, 0.0, 0.55, 0.0, 0.0, 0.0, 0.0, -0.1, 0.0],
+        dtype=np.float64,
+    )
+
+    violation = env._knee_safe_range_violation()
+
+    assert violation["right"] == pytest.approx(0.15)
+    assert violation["left"] == pytest.approx(0.1)
+    assert violation["total"] == pytest.approx(0.25)
+
+
+def test_sedon_safe_joint_target_clamps_limit_knees() -> None:
+    env = SedonStandingEnv.__new__(SedonStandingEnv)
+    env._reward_config = SedonStandingConfig(
+        right_knee_safe_lower=-1.0,
+        right_knee_safe_upper=0.0,
+        left_knee_safe_lower=-0.8,
+        left_knee_safe_upper=0.0,
+    )
+    unclamped = np.array([0.0, 0.0, 0.0, 0.35, 0.0, 0.0, 0.0, 0.0, 0.25, 0.0])
+
+    clamped = env._apply_safe_joint_target_clamps(unclamped)
+
+    assert clamped[RIGHT_KNEE_JOINT_INDEX] == pytest.approx(0.0)
+    assert clamped[LEFT_KNEE_JOINT_INDEX] == pytest.approx(0.0)
+    assert clamped[2] == pytest.approx(unclamped[2])
+
+
+def test_compute_com_shift_reward_prefers_matching_shift_target() -> None:
+    config = SedonStandingConfig(
+        task_mode="com_shift",
+        target_base_height=0.434,
+        com_shift_lateral_target_magnitude=0.025,
+        com_shift_lateral_target_weight=8.0,
+        com_shift_shift_phase_error_penalty_weight=12.0,
+        com_shift_support_contact_reward_weight=3.0,
+    )
+
+    centered = compute_com_shift_reward(
+        base_height=config.target_base_height,
+        upright=1.0,
+        joint_velocity_l2=0.0,
+        action_l2=0.0,
+        action_rate_l2=0.0,
+        joint_position_error_l2=0.0,
+        forward_velocity=0.0,
+        lateral_velocity=0.0,
+        base_roll_pitch_rate_l2=0.0,
+        foot_flatness=1.0,
+        base_y=0.0,
+        target_base_y=0.025,
+        previous_abs_y_error=0.025,
+        current_base_x_displacement=0.0,
+        in_double_support=False,
+        support_contact=True,
+        swing_contact=True,
+        support_foot_bottom_z=0.0,
+        swing_foot_bottom_z=0.0,
+        config=config,
+    )
+    shifted = compute_com_shift_reward(
+        base_height=config.target_base_height,
+        upright=1.0,
+        joint_velocity_l2=0.0,
+        action_l2=0.0,
+        action_rate_l2=0.0,
+        joint_position_error_l2=0.0,
+        forward_velocity=0.0,
+        lateral_velocity=0.0,
+        base_roll_pitch_rate_l2=0.0,
+        foot_flatness=1.0,
+        base_y=0.022,
+        target_base_y=0.025,
+        previous_abs_y_error=0.025,
+        current_base_x_displacement=0.0,
+        in_double_support=False,
+        support_contact=True,
+        swing_contact=True,
+        support_foot_bottom_z=0.0,
+        swing_foot_bottom_z=0.001,
+        config=config,
+    )
+
+    assert shifted["lateral_target"] > centered["lateral_target"]
+    assert shifted["shift_phase_error_penalty"] < centered["shift_phase_error_penalty"]
+    assert shifted["total"] > centered["total"]
+
+
+def test_compute_com_shift_reward_prefers_double_support_during_center_hold() -> None:
+    config = SedonStandingConfig(
+        task_mode="com_shift",
+        target_base_height=0.434,
+        com_shift_both_contact_reward_weight=5.0,
+        com_shift_support_contact_reward_weight=3.0,
+    )
+
+    both_contact = compute_com_shift_reward(
+        base_height=config.target_base_height,
+        upright=1.0,
+        joint_velocity_l2=0.0,
+        action_l2=0.0,
+        action_rate_l2=0.0,
+        joint_position_error_l2=0.0,
+        forward_velocity=0.0,
+        lateral_velocity=0.0,
+        base_roll_pitch_rate_l2=0.0,
+        foot_flatness=1.0,
+        base_y=0.0,
+        target_base_y=0.0,
+        previous_abs_y_error=0.0,
+        current_base_x_displacement=0.0,
+        in_double_support=True,
+        support_contact=True,
+        swing_contact=True,
+        support_foot_bottom_z=0.0,
+        swing_foot_bottom_z=0.0,
+        config=config,
+    )
+    missing_swing_contact = compute_com_shift_reward(
+        base_height=config.target_base_height,
+        upright=1.0,
+        joint_velocity_l2=0.0,
+        action_l2=0.0,
+        action_rate_l2=0.0,
+        joint_position_error_l2=0.0,
+        forward_velocity=0.0,
+        lateral_velocity=0.0,
+        base_roll_pitch_rate_l2=0.0,
+        foot_flatness=1.0,
+        base_y=0.0,
+        target_base_y=0.0,
+        previous_abs_y_error=0.0,
+        current_base_x_displacement=0.0,
+        in_double_support=True,
+        support_contact=True,
+        swing_contact=False,
+        support_foot_bottom_z=0.0,
+        swing_foot_bottom_z=0.0,
+        config=config,
+    )
+
+    assert both_contact["double_support_contact"] == pytest.approx(1.0)
+    assert missing_swing_contact["double_support_contact"] == pytest.approx(0.0)
+    assert both_contact["total"] > missing_swing_contact["total"]
+
+
+def test_sedon_fsm_offsets_honor_configured_double_support_window() -> None:
+    env = SedonStandingEnv.__new__(SedonStandingEnv)
+    env._reward_config = SedonStandingConfig(
+        gait_mode="fsm",
+        fsm_right_lift_steps=2,
+        fsm_right_lower_steps=2,
+        fsm_left_lift_steps=2,
+        fsm_left_lower_steps=2,
+        fsm_double_support_steps=3,
+        gait_hip_roll_amp=0.1,
+        gait_hip_pitch_amp=-0.2,
+        gait_knee_pitch_amp=-0.2,
+        gait_ankle_pitch_amp=0.2,
+    )
+    env._gait_step = 5
+
+    offsets = env._fsm_gait_joint_offsets()
+
+    np.testing.assert_allclose(offsets, np.zeros(10, dtype=np.float64))
+
+
+def test_sedon_fsm_offsets_use_configured_support_roll_scale() -> None:
+    env = SedonStandingEnv.__new__(SedonStandingEnv)
+    env._reward_config = SedonStandingConfig(
+        gait_mode="fsm",
+        fsm_right_lift_steps=4,
+        fsm_right_lower_steps=1,
+        fsm_left_lift_steps=1,
+        fsm_left_lower_steps=1,
+        fsm_double_support_steps=0,
+        fsm_right_support_roll_scale=2.0,
+        gait_hip_roll_amp=0.05,
+        gait_hip_pitch_amp=-0.1,
+        gait_knee_pitch_amp=-0.1,
+        gait_ankle_pitch_amp=0.1,
+    )
+    env._gait_step = 1
+
+    offsets = env._fsm_gait_joint_offsets()
+
+    assert offsets[6] > 0.0
+    assert offsets[6] == pytest.approx(0.05)
+
+
+def test_do_pd_simulation_with_torque_assist_clamps_and_records_actual_delta(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    env = SedonStandingEnv.__new__(SedonStandingEnv)
+    env.frame_skip = 2
+    env.model = object()
+    env.data = SimpleNamespace(ctrl=np.zeros(10, dtype=np.float64))
+    env._ctrl_range = np.tile(np.array([[-1.0, 1.0]], dtype=np.float64), (10, 1))
+    env._ctrl_range[RIGHT_HIP_ROLL_ACTUATOR_INDEX] = np.array([-0.45, 0.45], dtype=np.float64)
+    env._ctrl_range[LEFT_HIP_ROLL_ACTUATOR_INDEX] = np.array([-0.5, 0.5], dtype=np.float64)
+    env._last_ctrl_assist_delta = np.zeros(10, dtype=np.float64)
+
+    base_ctrl = np.zeros(10, dtype=np.float64)
+    base_ctrl[RIGHT_HIP_ROLL_ACTUATOR_INDEX] = 0.4
+    base_ctrl[LEFT_HIP_ROLL_ACTUATOR_INDEX] = -0.45
+    env._pd_control = lambda target_positions: base_ctrl.copy()  # type: ignore[method-assign]
+
+    expected_ctrl = base_ctrl.copy()
+    expected_ctrl[RIGHT_HIP_ROLL_ACTUATOR_INDEX] = 0.45
+    expected_ctrl[LEFT_HIP_ROLL_ACTUATOR_INDEX] = -0.5
+
+    observed_ctrl: list[np.ndarray] = []
+
+    def fake_mj_step(model: object, data: SimpleNamespace) -> None:
+        observed_ctrl.append(np.array(data.ctrl, copy=True))
+
+    monkeypatch.setattr(sedon_env_module, "mujoco", SimpleNamespace(mj_step=fake_mj_step))
+
+    env._do_pd_simulation_with_torque_assist(
+        np.zeros(10, dtype=np.float64),
+        left_tau_assist=-0.2,
+        right_tau_assist=0.2,
+    )
+
+    assert len(observed_ctrl) == env.frame_skip
+    for ctrl in observed_ctrl:
+        np.testing.assert_allclose(ctrl, expected_ctrl)
+    np.testing.assert_allclose(env.data.ctrl, expected_ctrl)
+    assert env.last_hip_roll_ctrl_assist_delta() == pytest.approx((-0.05, 0.05))
+    assert env.data.ctrl[0] == pytest.approx(base_ctrl[0])
+
+
+def test_do_pd_simulation_without_assist_keeps_zero_injected_delta(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    env = SedonStandingEnv.__new__(SedonStandingEnv)
+    env.frame_skip = 1
+    env.model = object()
+    env.data = SimpleNamespace(ctrl=np.zeros(10, dtype=np.float64))
+    env._ctrl_range = np.tile(np.array([[-1.0, 1.0]], dtype=np.float64), (10, 1))
+    env._last_ctrl_assist_delta = np.ones(10, dtype=np.float64)
+
+    base_ctrl = np.linspace(-0.4, 0.4, num=10, dtype=np.float64)
+    env._pd_control = lambda target_positions: base_ctrl.copy()  # type: ignore[method-assign]
+
+    monkeypatch.setattr(
+        sedon_env_module,
+        "mujoco",
+        SimpleNamespace(mj_step=lambda model, data: None),
+    )
+
+    env._do_pd_simulation(np.zeros(10, dtype=np.float64))
+
+    np.testing.assert_allclose(env.data.ctrl, base_ctrl)
+    assert env.last_hip_roll_ctrl_assist_delta() == pytest.approx((0.0, 0.0))
 
 
 @pytest.fixture

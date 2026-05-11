@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 
 import numpy as np
 
@@ -13,6 +14,12 @@ def build_parser() -> argparse.ArgumentParser:
     """Build the command line parser."""
     parser = argparse.ArgumentParser(description="Run a short Sedon env smoke test.")
     parser.add_argument("--steps", type=int, default=100, help="Number of env steps.")
+    parser.add_argument(
+        "--scene-path",
+        type=Path,
+        default=None,
+        help="Optional Sedon scene XML path.",
+    )
     parser.add_argument(
         "--random-action",
         action="store_true",
@@ -27,7 +34,10 @@ def main(argv: list[str] | None = None) -> int:
     if args.steps <= 0:
         raise ValueError("steps must be positive.")
 
-    env = SedonStandingEnv(reset_noise_scale=0.0)
+    env_kwargs = {"reset_noise_scale": 0.0}
+    if args.scene_path is not None:
+        env_kwargs["scene_path"] = args.scene_path
+    env = SedonStandingEnv(**env_kwargs)
     try:
         obs, _ = env.reset(seed=42)
         total_reward = 0.0

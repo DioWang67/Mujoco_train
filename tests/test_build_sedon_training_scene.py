@@ -4,7 +4,9 @@ import xml.etree.ElementTree as ET
 
 from tools.build_sedon_training_scene import (
     _add_training_proxy_geoms,
+    _apply_inertial_z_offset,
     _build_base_body,
+    _scale_stance_width,
     _replace_actuators,
     _set_mesh_geoms_visual_only,
 )
@@ -52,11 +54,38 @@ def test_training_proxy_geoms_hide_base_mesh_and_add_stable_contacts() -> None:
     ET.SubElement(left_foot, "geom", {"type": "mesh", "mesh": "L_link_ankle_pitch"})
 
     _set_mesh_geoms_visual_only(root)
-    _add_training_proxy_geoms(root)
+    _add_training_proxy_geoms(
+        root,
+        foot_size=(0.28, 0.16, 0.025),
+        foot_friction="0.6 0.005 0.0001",
+    )
 
     assert base.find("geom[@mesh='base_link']") is None
     assert base.find("geom[@name='base_proxy']").attrib["type"] == "ellipsoid"
     assert right_foot.find("geom[@name='R_foot_collision']").attrib["type"] == "box"
     assert left_foot.find("geom[@name='L_foot_collision']").attrib["type"] == "box"
+    assert right_foot.find("geom[@name='R_foot_collision']").attrib["size"] == "0.28 0.16 0.025"
+    assert right_foot.find("geom[@name='R_foot_collision']").attrib["friction"] == "0.6 0.005 0.0001"
     assert right_foot.find("geom[@name='R_foot_collision']").attrib["rgba"].endswith(" 0")
     assert right_foot.find("geom[@mesh='R_link_ankle_pitch']").attrib["contype"] == "0"
+
+
+def test_apply_inertial_z_offset_adjusts_base_com_height() -> None:
+    inertial = ET.Element("inertial", {"pos": "0.1 0.2 0.3", "mass": "1"})
+
+    adjusted = _apply_inertial_z_offset(inertial, -0.05)
+
+    assert adjusted.attrib["pos"] == "0.1 0.2 0.25"
+    assert inertial.attrib["pos"] == "0.1 0.2 0.3"
+
+
+def test_scale_stance_width_updates_mirrored_hip_roots() -> None:
+    root = ET.Element("mujoco")
+    worldbody = ET.SubElement(root, "worldbody")
+    ET.SubElement(worldbody, "body", {"name": "R_link_hip_yaw", "pos": "0 -0.1 0"})
+    ET.SubElement(worldbody, "body", {"name": "L_link_hip_yaw", "pos": "0 0.1 0"})
+
+    _scale_stance_width(root, 1.2)
+
+    assert root.find(".//body[@name='R_link_hip_yaw']").attrib["pos"] == "0 -0.12 0"
+    assert root.find(".//body[@name='L_link_hip_yaw']").attrib["pos"] == "0 0.12 0"

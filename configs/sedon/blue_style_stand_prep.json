@@ -1,0 +1,14 @@
+{
+  "target_base_height": 0.434,
+  "gait_hip_roll_amp": 0.0,
+  "gait_hip_pitch_amp": 0.0,
+  "gait_knee_pitch_amp": 0.0,
+  "gait_ankle_pitch_amp": 0.0,
+  "nominal_hip_pitch_offset": -0.02,
+  "nominal_knee_pitch_offset": -0.02,
+  "nominal_ankle_pitch_offset": 0.02,
+  "right_knee_safe_lower": -1.575,
+  "right_knee_safe_upper": 0.0,
+  "left_knee_safe_lower": -1.575,
+  "left_knee_safe_upper": 0.0
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "action_joint_delta_scale": 0.03,
+    "gait_hip_roll_amp": 0.0,
+    "upright_weight": 5.0,
+    "height_weight": 3.5,
+    "low_forward_velocity_penalty_weight": 2.0,
+    "progress_reward_weight": 1.5
+  },
+  {
+    "action_joint_delta_scale": 0.03,
+    "gait_hip_roll_amp": 0.005,
+    "upright_weight": 5.0,
+    "height_weight": 3.5,
+    "low_forward_velocity_penalty_weight": 2.0,
+    "progress_reward_weight": 3.0
+  },
+  {
+    "action_joint_delta_scale": 0.05,
+    "gait_hip_roll_amp": 0.0,
+    "upright_weight": 6.0,
+    "height_weight": 4.0,
+    "low_forward_velocity_penalty_weight": 3.0,
+    "progress_reward_weight": 1.5
+  },
+  {
+    "action_joint_delta_scale": 0.05,
+    "gait_hip_roll_amp": 0.005,
+    "upright_weight": 6.0,
+    "height_weight": 4.0,
+    "low_forward_velocity_penalty_weight": 3.0,
+    "progress_reward_weight": 3.0
+  }
+]

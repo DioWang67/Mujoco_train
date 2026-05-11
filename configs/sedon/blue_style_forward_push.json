@@ -1,0 +1,23 @@
+{
+  "target_base_height": 0.434,
+  "target_forward_velocity": 0.035,
+  "min_rewarded_forward_velocity": 0.02,
+  "low_forward_velocity_penalty_weight": 10.0,
+  "progress_reward_weight": 7.0,
+  "forward_velocity_weight": 6.0,
+  "pose_weight": 0.03,
+  "action_joint_delta_scale": 0.1,
+  "gait_mode": "fsm",
+  "gait_cycle_steps": 520,
+  "gait_hip_roll_amp": 0.01,
+  "gait_hip_pitch_amp": -0.015,
+  "gait_knee_pitch_amp": -0.012,
+  "gait_ankle_pitch_amp": 0.012,
+  "nominal_hip_pitch_offset": -0.02,
+  "nominal_knee_pitch_offset": -0.02,
+  "nominal_ankle_pitch_offset": 0.02,
+  "right_knee_safe_lower": -1.575,
+  "right_knee_safe_upper": 0.0,
+  "left_knee_safe_lower": -1.575,
+  "left_knee_safe_upper": 0.0
+}

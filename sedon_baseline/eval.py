@@ -22,7 +22,7 @@ from gymnasium.wrappers import TimeLimit
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
-from sedon_baseline.env import SedonStandingEnv
+from sedon_baseline.env import SedonStandingConfig, SedonStandingEnv, load_sedon_config_from_env
 from sedon_baseline.train import MAX_EPISODE_STEPS
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -61,6 +61,11 @@ class SedonEvalEpisode:
     final_upright: float
     final_base_x: float
     mean_forward_velocity: float
+    right_knee_violation_steps: int
+    left_knee_violation_steps: int
+    total_knee_violation_steps: int
+    max_right_knee_violation: float
+    max_left_knee_violation: float
 
 
 def resolve_model_path(models_root: Path, explicit_model_path: Path | None) -> Path:
@@ -133,11 +138,46 @@ def resolve_vecnorm_path(
     )
 
 
-def _make_eval_env(seed: int, render_mode: str | None):
+def _parse_optional_range(raw_value: str | None, *, option_name: str) -> tuple[float, float] | None:
+    """Parse a `lower,upper` string into an optional float tuple."""
+    if raw_value is None:
+        return None
+    parts = [part.strip() for part in raw_value.split(",")]
+    if len(parts) != 2:
+        raise argparse.ArgumentTypeError(f"{option_name} must be 'lower,upper'.")
+    lower, upper = float(parts[0]), float(parts[1])
+    if lower > upper:
+        raise argparse.ArgumentTypeError(f"{option_name} lower must be <= upper.")
+    return (lower, upper)
+
+
+def _build_reward_config_with_safe_ranges(
+    right_knee_safe_range: tuple[float, float] | None,
+    left_knee_safe_range: tuple[float, float] | None,
+) -> SedonStandingConfig:
+    """Return the active Sedon config with optional eval-only knee-safe overrides."""
+    config = load_sedon_config_from_env()
+    overrides: dict[str, float] = {}
+    if right_knee_safe_range is not None:
+        overrides["right_knee_safe_lower"] = right_knee_safe_range[0]
+        overrides["right_knee_safe_upper"] = right_knee_safe_range[1]
+    if left_knee_safe_range is not None:
+        overrides["left_knee_safe_lower"] = left_knee_safe_range[0]
+        overrides["left_knee_safe_upper"] = left_knee_safe_range[1]
+    if not overrides:
+        return config
+    return SedonStandingConfig(**{**config.__dict__, **overrides})
+
+
+def _make_eval_env(seed: int, render_mode: str | None, reward_config: SedonStandingConfig):
     """Build one deterministic monitored eval environment."""
 
     def _thunk():
-        env = SedonStandingEnv(reset_noise_scale=0.0, render_mode=render_mode)
+        env = SedonStandingEnv(
+            reset_noise_scale=0.0,
+            render_mode=render_mode,
+            reward_config=reward_config,
+        )
         env = TimeLimit(env, max_episode_steps=MAX_EPISODE_STEPS)
         env.reset(seed=seed)
         return env
@@ -145,9 +185,14 @@ def _make_eval_env(seed: int, render_mode: str | None):
     return _thunk
 
 
-def build_eval_vec_env(vecnorm_path: Path, seed: int, render_mode: str | None) -> VecNormalize:
+def build_eval_vec_env(
+    vecnorm_path: Path,
+    seed: int,
+    render_mode: str | None,
+    reward_config: SedonStandingConfig,
+) -> VecNormalize:
     """Create a normalized Sedon eval environment."""
-    vec_env = DummyVecEnv([_make_eval_env(seed, render_mode)])
+    vec_env = DummyVecEnv([_make_eval_env(seed, render_mode, reward_config)])
     eval_env = VecNormalize.load(str(vecnorm_path), vec_env)
     eval_env.training = False
     eval_env.norm_reward = False
@@ -207,6 +252,8 @@ def evaluate_policy(
     render: bool = False,
     record_path: Path | None = None,
     fps: int = SedonStandingEnv.metadata["render_fps"],
+    right_knee_safe_range: tuple[float, float] | None = None,
+    left_knee_safe_range: tuple[float, float] | None = None,
 ) -> list[SedonEvalEpisode]:
     """Run deterministic Sedon policy evaluation episodes."""
     if episodes <= 0:
@@ -217,7 +264,11 @@ def evaluate_policy(
         raise ValueError("--render and --record cannot be used together.")
 
     render_mode = "rgb_array" if record_path is not None else ("human" if render else None)
-    eval_env = build_eval_vec_env(vecnorm_path, seed, render_mode)
+    reward_config = _build_reward_config_with_safe_ranges(
+        right_knee_safe_range,
+        left_knee_safe_range,
+    )
+    eval_env = build_eval_vec_env(vecnorm_path, seed, render_mode, reward_config)
     model = PPO.load(str(model_path), env=eval_env)
     results: list[SedonEvalEpisode] = []
     frames: list[np.ndarray] = []
@@ -227,6 +278,10 @@ def evaluate_policy(
             episode_reward = 0.0
             episode_length = 0
             forward_velocity_sum = 0.0
+            right_knee_violation_steps = 0
+            left_knee_violation_steps = 0
+            max_right_knee_violation = 0.0
+            max_left_knee_violation = 0.0
             final_info: dict = {}
             if record_path is not None:
                 frame = _capture_rgb_frame(eval_env)
@@ -240,6 +295,12 @@ def evaluate_policy(
                 episode_length += 1
                 final_info = infos[0]
                 forward_velocity_sum += float(final_info.get("forward_velocity", 0.0))
+                right_violation = float(final_info.get("right_knee_safe_violation", 0.0))
+                left_violation = float(final_info.get("left_knee_safe_violation", 0.0))
+                right_knee_violation_steps += int(right_violation > 0.0)
+                left_knee_violation_steps += int(left_violation > 0.0)
+                max_right_knee_violation = max(max_right_knee_violation, right_violation)
+                max_left_knee_violation = max(max_left_knee_violation, left_violation)
                 if record_path is not None:
                     frame = _capture_rgb_frame(eval_env)
                     if frame is not None:
@@ -261,6 +322,13 @@ def evaluate_policy(
                     final_upright=float(final_info.get("upright", np.nan)),
                     final_base_x=float(final_info.get("base_x_position", np.nan)),
                     mean_forward_velocity=forward_velocity_sum / max(1, episode_length),
+                    right_knee_violation_steps=right_knee_violation_steps,
+                    left_knee_violation_steps=left_knee_violation_steps,
+                    total_knee_violation_steps=(
+                        right_knee_violation_steps + left_knee_violation_steps
+                    ),
+                    max_right_knee_violation=max_right_knee_violation,
+                    max_left_knee_violation=max_left_knee_violation,
                 )
             )
         if record_path is not None:
@@ -287,6 +355,11 @@ def write_csv(path: Path, episodes: list[SedonEvalEpisode]) -> None:
                 "final_upright",
                 "final_base_x",
                 "mean_forward_velocity",
+                "right_knee_violation_steps",
+                "left_knee_violation_steps",
+                "total_knee_violation_steps",
+                "max_right_knee_violation",
+                "max_left_knee_violation",
             ],
         )
         writer.writeheader()
@@ -306,6 +379,18 @@ def print_summary(episodes: list[SedonEvalEpisode]) -> None:
         [episode.mean_forward_velocity for episode in episodes],
         dtype=np.float64,
     )
+    knee_violation_steps = np.array(
+        [episode.total_knee_violation_steps for episode in episodes],
+        dtype=np.float64,
+    )
+    right_knee_violation = np.array(
+        [episode.max_right_knee_violation for episode in episodes],
+        dtype=np.float64,
+    )
+    left_knee_violation = np.array(
+        [episode.max_left_knee_violation for episode in episodes],
+        dtype=np.float64,
+    )
 
     print("Sedon eval summary")
     print(f"episodes          : {len(episodes)}")
@@ -316,6 +401,9 @@ def print_summary(episodes: list[SedonEvalEpisode]) -> None:
     print(f"mean_final_upright: {float(np.nanmean(uprights)):.3f}")
     print(f"mean_final_base_x : {float(np.nanmean(base_x)):.3f}")
     print(f"mean_forward_vel  : {float(np.nanmean(forward_velocities)):.3f}")
+    print(f"mean_knee_violation_steps: {float(np.nanmean(knee_violation_steps)):.1f}")
+    print(f"max_right_knee_violation : {float(np.nanmax(right_knee_violation)):.4f}")
+    print(f"max_left_knee_violation  : {float(np.nanmax(left_knee_violation)):.4f}")
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -331,6 +419,24 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--model-path", type=Path, default=None)
     parser.add_argument("--vecnorm-path", type=Path, default=None)
+    parser.add_argument(
+        "--right-knee-safe-range",
+        type=lambda value: _parse_optional_range(
+            value,
+            option_name="--right-knee-safe-range",
+        ),
+        default=None,
+        help="Optional right-knee soft-safe qpos range as 'lower,upper'.",
+    )
+    parser.add_argument(
+        "--left-knee-safe-range",
+        type=lambda value: _parse_optional_range(
+            value,
+            option_name="--left-knee-safe-range",
+        ),
+        default=None,
+        help="Optional left-knee soft-safe qpos range as 'lower,upper'.",
+    )
     parser.add_argument(
         "--out-csv",
         type=Path,
@@ -373,6 +479,8 @@ def main(argv: list[str] | None = None) -> int:
         render=args.render,
         record_path=args.video_path if args.record else None,
         fps=args.fps,
+        right_knee_safe_range=args.right_knee_safe_range,
+        left_knee_safe_range=args.left_knee_safe_range,
     )
     write_csv(args.out_csv, episodes)
     print_summary(episodes)
