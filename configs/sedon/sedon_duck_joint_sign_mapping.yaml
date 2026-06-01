@@ -1,0 +1,382 @@
+{
+  "schema_version": 1,
+  "tool_version": "sedon-duck-joint-axis-sign-validation-v1",
+  "generated_at": "2026-06-01T07:21:28+00:00",
+  "purpose": "Read-only Sedon/Duck semantic joint axis and sign readiness gate.",
+  "sources": {
+    "semantic_mapping": "D:\\Git\\robotlearning\\h1_mujoco\\references\\open_duck_mini\\sedon_duck_joint_mapping.yaml",
+    "sedon_parameters": "configs/sedon/sedon_robot_parameters.yaml",
+    "duck_parameters": "references/open_duck_mini/duck_robot_parameters.yaml"
+  },
+  "summary": {
+    "status": "NOT_READY",
+    "mapped_joint_count": 10,
+    "sign_validated_count": 0,
+    "manual_required_count": 10,
+    "direct_joint_trajectory_transfer_allowed": false,
+    "reason": "Duck leg-joint axes are unknown/null in the selected XML, so sign relation remains unknown."
+  },
+  "joint_sign_mappings": [
+    {
+      "semantic_joint": "right_hip_yaw",
+      "side": "right",
+      "sedon_joint": "R_joint_hip_yaw",
+      "duck_joint": "right_hip_yaw",
+      "sedon_axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "duck_axis": null,
+      "sedon_axis_status": "explicit",
+      "duck_axis_status": "unknown",
+      "sedon_range": [
+        -0.175,
+        0.175
+      ],
+      "duck_range": [
+        -0.523598775598297,
+        0.5235987755983006
+      ],
+      "sedon_range_status": "explicit",
+      "duck_range_status": "explicit",
+      "semantic_mapping_confidence": "medium",
+      "sign_relation": "unknown",
+      "sign_validated": false,
+      "validation_status": "manual_required",
+      "source": {
+        "mapping_file": "D:\\Git\\robotlearning\\h1_mujoco\\references\\open_duck_mini\\sedon_duck_joint_mapping.yaml",
+        "sedon_axis": "semantic mapping extracted from Sedon XML",
+        "duck_axis": "not explicit in selected Duck XML"
+      },
+      "confidence": "low",
+      "notes": "Do not transfer sign or trajectory until simulation perturbation validates this mapping."
+    },
+    {
+      "semantic_joint": "right_hip_roll",
+      "side": "right",
+      "sedon_joint": "R_joint_hip_roll",
+      "duck_joint": "right_hip_roll",
+      "sedon_axis": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "duck_axis": null,
+      "sedon_axis_status": "explicit",
+      "duck_axis_status": "unknown",
+      "sedon_range": [
+        -0.2625,
+        0.2625
+      ],
+      "duck_range": [
+        -0.4363323129985797,
+        0.43633231299858505
+      ],
+      "sedon_range_status": "explicit",
+      "duck_range_status": "explicit",
+      "semantic_mapping_confidence": "medium",
+      "sign_relation": "unknown",
+      "sign_validated": false,
+      "validation_status": "manual_required",
+      "source": {
+        "mapping_file": "D:\\Git\\robotlearning\\h1_mujoco\\references\\open_duck_mini\\sedon_duck_joint_mapping.yaml",
+        "sedon_axis": "semantic mapping extracted from Sedon XML",
+        "duck_axis": "not explicit in selected Duck XML"
+      },
+      "confidence": "low",
+      "notes": "Do not transfer sign or trajectory until simulation perturbation validates this mapping."
+    },
+    {
+      "semantic_joint": "right_hip_pitch",
+      "side": "right",
+      "sedon_joint": "R_joint_hip_pitch",
+      "duck_joint": "right_hip_pitch",
+      "sedon_axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "duck_axis": null,
+      "sedon_axis_status": "explicit",
+      "duck_axis_status": "unknown",
+      "sedon_range": [
+        -1.05,
+        1.575
+      ],
+      "duck_range": [
+        -0.5235987755982988,
+        1.2217304763960306
+      ],
+      "sedon_range_status": "explicit",
+      "duck_range_status": "explicit",
+      "semantic_mapping_confidence": "medium",
+      "sign_relation": "unknown",
+      "sign_validated": false,
+      "validation_status": "manual_required",
+      "source": {
+        "mapping_file": "D:\\Git\\robotlearning\\h1_mujoco\\references\\open_duck_mini\\sedon_duck_joint_mapping.yaml",
+        "sedon_axis": "semantic mapping extracted from Sedon XML",
+        "duck_axis": "not explicit in selected Duck XML"
+      },
+      "confidence": "low",
+      "notes": "Do not transfer sign or trajectory until simulation perturbation validates this mapping."
+    },
+    {
+      "semantic_joint": "right_knee_pitch",
+      "side": "right",
+      "sedon_joint": "R_joint_knee_pitch",
+      "duck_joint": "right_knee",
+      "sedon_axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "duck_axis": null,
+      "sedon_axis_status": "explicit",
+      "duck_axis_status": "unknown",
+      "sedon_range": [
+        -1.575,
+        1.575
+      ],
+      "duck_range": [
+        -1.5707963267948966,
+        1.5707963267948966
+      ],
+      "sedon_range_status": "explicit",
+      "duck_range_status": "explicit",
+      "semantic_mapping_confidence": "medium",
+      "sign_relation": "unknown",
+      "sign_validated": false,
+      "validation_status": "manual_required",
+      "source": {
+        "mapping_file": "D:\\Git\\robotlearning\\h1_mujoco\\references\\open_duck_mini\\sedon_duck_joint_mapping.yaml",
+        "sedon_axis": "semantic mapping extracted from Sedon XML",
+        "duck_axis": "not explicit in selected Duck XML"
+      },
+      "confidence": "low",
+      "notes": "Do not transfer sign or trajectory until simulation perturbation validates this mapping."
+    },
+    {
+      "semantic_joint": "right_ankle_pitch",
+      "side": "right",
+      "sedon_joint": "R_joint_ankle_pitch",
+      "duck_joint": "right_ankle",
+      "sedon_axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "duck_axis": null,
+      "sedon_axis_status": "explicit",
+      "duck_axis_status": "unknown",
+      "sedon_range": [
+        -1.05,
+        1.575
+      ],
+      "duck_range": [
+        -1.5707963267948957,
+        1.5707963267948974
+      ],
+      "sedon_range_status": "explicit",
+      "duck_range_status": "explicit",
+      "semantic_mapping_confidence": "medium",
+      "sign_relation": "unknown",
+      "sign_validated": false,
+      "validation_status": "manual_required",
+      "source": {
+        "mapping_file": "D:\\Git\\robotlearning\\h1_mujoco\\references\\open_duck_mini\\sedon_duck_joint_mapping.yaml",
+        "sedon_axis": "semantic mapping extracted from Sedon XML",
+        "duck_axis": "not explicit in selected Duck XML"
+      },
+      "confidence": "low",
+      "notes": "Do not transfer sign or trajectory until simulation perturbation validates this mapping."
+    },
+    {
+      "semantic_joint": "left_hip_yaw",
+      "side": "left",
+      "sedon_joint": "L_joint_hip_yaw",
+      "duck_joint": "left_hip_yaw",
+      "sedon_axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "duck_axis": null,
+      "sedon_axis_status": "explicit",
+      "duck_axis_status": "unknown",
+      "sedon_range": [
+        -0.175,
+        0.175
+      ],
+      "duck_range": [
+        -0.5235987755982979,
+        0.5235987755982997
+      ],
+      "sedon_range_status": "explicit",
+      "duck_range_status": "explicit",
+      "semantic_mapping_confidence": "medium",
+      "sign_relation": "unknown",
+      "sign_validated": false,
+      "validation_status": "manual_required",
+      "source": {
+        "mapping_file": "D:\\Git\\robotlearning\\h1_mujoco\\references\\open_duck_mini\\sedon_duck_joint_mapping.yaml",
+        "sedon_axis": "semantic mapping extracted from Sedon XML",
+        "duck_axis": "not explicit in selected Duck XML"
+      },
+      "confidence": "low",
+      "notes": "Do not transfer sign or trajectory until simulation perturbation validates this mapping."
+    },
+    {
+      "semantic_joint": "left_hip_roll",
+      "side": "left",
+      "sedon_joint": "L_joint_hip_roll",
+      "duck_joint": "left_hip_roll",
+      "sedon_axis": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "duck_axis": null,
+      "sedon_axis_status": "explicit",
+      "duck_axis_status": "unknown",
+      "sedon_range": [
+        -0.2625,
+        0.2625
+      ],
+      "duck_range": [
+        -0.4363323129985815,
+        0.43633231299858327
+      ],
+      "sedon_range_status": "explicit",
+      "duck_range_status": "explicit",
+      "semantic_mapping_confidence": "medium",
+      "sign_relation": "unknown",
+      "sign_validated": false,
+      "validation_status": "manual_required",
+      "source": {
+        "mapping_file": "D:\\Git\\robotlearning\\h1_mujoco\\references\\open_duck_mini\\sedon_duck_joint_mapping.yaml",
+        "sedon_axis": "semantic mapping extracted from Sedon XML",
+        "duck_axis": "not explicit in selected Duck XML"
+      },
+      "confidence": "low",
+      "notes": "Do not transfer sign or trajectory until simulation perturbation validates this mapping."
+    },
+    {
+      "semantic_joint": "left_hip_pitch",
+      "side": "left",
+      "sedon_joint": "L_joint_hip_pitch",
+      "duck_joint": "left_hip_pitch",
+      "sedon_axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "duck_axis": null,
+      "sedon_axis_status": "explicit",
+      "duck_axis_status": "unknown",
+      "sedon_range": [
+        -1.05,
+        1.575
+      ],
+      "duck_range": [
+        -1.2217304763960306,
+        0.5235987755982988
+      ],
+      "sedon_range_status": "explicit",
+      "duck_range_status": "explicit",
+      "semantic_mapping_confidence": "medium",
+      "sign_relation": "unknown",
+      "sign_validated": false,
+      "validation_status": "manual_required",
+      "source": {
+        "mapping_file": "D:\\Git\\robotlearning\\h1_mujoco\\references\\open_duck_mini\\sedon_duck_joint_mapping.yaml",
+        "sedon_axis": "semantic mapping extracted from Sedon XML",
+        "duck_axis": "not explicit in selected Duck XML"
+      },
+      "confidence": "low",
+      "notes": "Do not transfer sign or trajectory until simulation perturbation validates this mapping."
+    },
+    {
+      "semantic_joint": "left_knee_pitch",
+      "side": "left",
+      "sedon_joint": "L_joint_knee_pitch",
+      "duck_joint": "left_knee",
+      "sedon_axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "duck_axis": null,
+      "sedon_axis_status": "explicit",
+      "duck_axis_status": "unknown",
+      "sedon_range": [
+        -1.575,
+        1.575
+      ],
+      "duck_range": [
+        -1.5707963267948966,
+        1.5707963267948966
+      ],
+      "sedon_range_status": "explicit",
+      "duck_range_status": "explicit",
+      "semantic_mapping_confidence": "medium",
+      "sign_relation": "unknown",
+      "sign_validated": false,
+      "validation_status": "manual_required",
+      "source": {
+        "mapping_file": "D:\\Git\\robotlearning\\h1_mujoco\\references\\open_duck_mini\\sedon_duck_joint_mapping.yaml",
+        "sedon_axis": "semantic mapping extracted from Sedon XML",
+        "duck_axis": "not explicit in selected Duck XML"
+      },
+      "confidence": "low",
+      "notes": "Do not transfer sign or trajectory until simulation perturbation validates this mapping."
+    },
+    {
+      "semantic_joint": "left_ankle_pitch",
+      "side": "left",
+      "sedon_joint": "L_joint_ankle_pitch",
+      "duck_joint": "left_ankle",
+      "sedon_axis": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "duck_axis": null,
+      "sedon_axis_status": "explicit",
+      "duck_axis_status": "unknown",
+      "sedon_range": [
+        -1.05,
+        1.575
+      ],
+      "duck_range": [
+        -1.5707963267948957,
+        1.5707963267948974
+      ],
+      "sedon_range_status": "explicit",
+      "duck_range_status": "explicit",
+      "semantic_mapping_confidence": "medium",
+      "sign_relation": "unknown",
+      "sign_validated": false,
+      "validation_status": "manual_required",
+      "source": {
+        "mapping_file": "D:\\Git\\robotlearning\\h1_mujoco\\references\\open_duck_mini\\sedon_duck_joint_mapping.yaml",
+        "sedon_axis": "semantic mapping extracted from Sedon XML",
+        "duck_axis": "not explicit in selected Duck XML"
+      },
+      "confidence": "low",
+      "notes": "Do not transfer sign or trajectory until simulation perturbation validates this mapping."
+    }
+  ],
+  "required_next_diagnostics": [
+    "Load compiled Sedon and Duck models or equivalent simulation state.",
+    "Apply small positive and negative perturbations to each mapped joint.",
+    "Record semantic motion direction for hip yaw/roll/pitch, knee pitch, and ankle pitch.",
+    "Only then fill sign_relation with same/opposite and raise confidence."
+  ],
+  "safety_notes": [
+    "This file is a validation gate, not a controller.",
+    "Do not apply Duck joint trajectories to Sedon.",
+    "Do not infer Duck joint axes from XML omissions in this report."
+  ]
+}
