@@ -65,18 +65,27 @@ manual Windows/Linux operation.
 - `install_vscode_server_offline.bat`  
   Upload and install the local VS Code Server archive on an offline remote host.
 - `h1_deploy_remote.bat`  
-  Deploy the current committed release for H1 and run H1 smoke verify.
+  Deploy and smoke-check H1 through `remote_auto_deploy.bat`.
 - `grasp_deploy_remote.bat`  
-  Deploy the current committed release for grasp and run grasp smoke verify.
-- `sedon_deploy_remote.bat`  
-  Deploy the current committed release for Sedon, include private assets, and
-  run Sedon smoke verify.
+  Deploy and smoke-check grasp through `remote_auto_deploy.bat`.
 - `deploy_release.bat`  
   Wrapper for `python -m tools.deploy_release`.
-- `deploy_remote_release.bat`  
-  Wrapper for `deploy_remote_release.ps1`.
-- `deploy_remote_release.ps1`  
-  Build, upload, extract, activate, and optionally smoke-test a remote release.
+- `remote_auto_deploy.bat`
+  Build from the current worktree by default, upload, activate, and smoke-check
+  using `.env.remote` or process environment variables. This is the preferred
+  non-interactive path when using `REMOTE_PASSWORD`.
+- `sedon_remote_deploy_and_check.bat`
+  One-command Sedon deploy and smoke check. Uses `.env.remote`; no arguments
+  needed for the normal workflow.
+- `sedon_remote_check.bat`
+  One-command Sedon remote health/smoke check without uploading a new release.
+- `sedon_remote_resume_training.bat`
+  Thin Sedon wrapper over the generic `tools.remote_training` module. Starts
+  background training from the latest available checkpoint and VecNormalize
+  stats.
+- `sedon_remote_training_status.bat`
+  Thin Sedon wrapper over the generic `tools.remote_training` module. Shows
+  training processes and tails the latest project log.
 - `prepare_package.bat`  
   Wrapper for `python -m tools.prepare_package`.
 - `check_remote.sh`  
@@ -90,6 +99,57 @@ defaults:
 ```bat
 set REMOTE_HOST=root@10.6.243.55
 set REMOTE_ROOT=/root/anaconda3/mujoco-train-system
+```
+
+For password-based non-interactive deploys, copy `.env.remote.example` to
+`.env.remote` and set `REMOTE_PASSWORD`. `.env.remote` is ignored by git.
+On Windows, use `REMOTE_SSH_BACKEND=askpass` so the tool can drive
+`C:\Windows\System32\OpenSSH\ssh.exe` and `scp.exe` while reading the password
+from `.env.remote`. SSH-key mode can use `REMOTE_SSH_BACKEND=openssh` with no
+password.
+
+```bat
+scripts\remote_auto_deploy.bat
+```
+
+Use `--source-mode git-ref` when deploying only committed content. The default
+`working-tree` mode includes tracked and untracked non-ignored files, which is
+better for fast Sedon experiment iteration.
+
+Keep `REMOTE_INCLUDE_PRIVATE_ASSETS=0` after the first successful asset deploy;
+including Sedon private assets makes each archive several hundred MB.
+
+For repeatable ad-hoc content deploys, put files under `deploy_content/` using
+repo-relative paths, then run `scripts\sedon_remote_deploy_and_check.bat`.
+Example: `deploy_content/configs/sedon/foo.json` deploys to
+`configs/sedon/foo.json` in the remote release.
+
+The normal operator path is:
+
+```bat
+scripts\sedon_remote_deploy_and_check.bat
+scripts\sedon_remote_resume_training.bat
+scripts\sedon_remote_training_status.bat
+```
+
+`sedon_remote_resume_training.bat` starts training in the background through
+the generic `tools.remote_training` module. It uses these optional `.env.remote`
+values:
+
+```env
+SEDON_RESUME_CONFIG=configs/sedon/blue_dynamic_support_gait.json
+SEDON_RESUME_TOTAL_TIMESTEPS=2000000
+SEDON_RESUME_N_ENVS=128
+SEDON_RESUME_RESET_NOISE_SCALE=0.005
+```
+
+For Sedon release directories, `code/current` is not a Git worktree. If the
+generic dispatcher is confusing a debug session, run the Sedon module directly
+from the remote release:
+
+```bash
+export SEDON_CONFIG_OVERRIDES=configs/sedon/reverse_knee_no_tiptoe_walk.json
+python -m sedon_baseline.train --total-timesteps 10000000 --n-envs 128 --reset-noise-scale 0.01
 ```
 
 PowerShell scripts also expose equivalent parameters such as `-RemoteHost` and
@@ -118,5 +178,5 @@ If a robot needs ignored assets on the remote host, define `private_asset_dir`
 in `configs/<slug>/project.json` and deploy with:
 
 ```bat
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts\deploy_remote_release.ps1 -ProjectSlug <slug> -VerifyProject <slug> -IncludePrivateAssets
+scripts\remote_auto_deploy.bat --project-slug <slug> --verify-project <slug> --include-private-assets
 ```

@@ -16,9 +16,11 @@ import argparse
 import io
 import re
 import shlex
+import shutil
 import subprocess
 import tarfile
-import tempfile
+import time
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from shutil import copy2, copytree
@@ -28,6 +30,8 @@ from robot_learning.projects import get_robot_project
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_ARTIFACT_DIR = REPO_ROOT / "artifacts" / "sync"
+DEFAULT_TEMP_DIR = REPO_ROOT / "artifacts" / "tmp"
+DEFAULT_DEPLOY_CONTENT_DIR = REPO_ROOT / "deploy_content"
 DEFAULT_REMOTE_ROOT = "/root/anaconda3/mujoco-train-system"
 DEFAULT_PROJECT_SLUG = "h1"
 VALID_PROJECT_SLUG = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
@@ -157,6 +161,29 @@ def resolve_commit(ref: str) -> str:
     return result.stdout.strip()
 
 
+def has_worktree_changes() -> bool:
+    """Return whether the repository has tracked or untracked changes."""
+    result = run_command(
+        ["git", "status", "--porcelain"],
+        capture_output=True,
+    )
+    return bool(result.stdout.strip())
+
+
+def build_worktree_release_id(ref: str = "HEAD") -> str:
+    """Return a deterministic-looking release id for the current worktree.
+
+    The prefix remains tied to the current commit, while the timestamp makes
+    dirty working-tree releases repeatable in layout without overwriting a
+    previous deployment.
+    """
+    commit = resolve_commit(ref)
+    suffix = time.strftime("%Y%m%d%H%M%S")
+    if has_worktree_changes():
+        return f"{commit}-worktree-{suffix}"
+    return commit
+
+
 def iter_existing_extra_release_paths() -> list[Path]:
     """Return non-git release assets that should be bundled when present."""
     return [REPO_ROOT / relative for relative in EXTRA_RELEASE_PATHS if (REPO_ROOT / relative).exists()]
@@ -198,19 +225,62 @@ def _copy_path(source: Path, destination: Path) -> None:
         copy2(source, destination)
 
 
+def iter_deploy_overlay_files(deploy_content_dir: Path = DEFAULT_DEPLOY_CONTENT_DIR) -> list[Path]:
+    """Return files from the local deployment overlay directory."""
+    if not deploy_content_dir.exists():
+        return []
+    if not deploy_content_dir.is_dir():
+        raise ValueError(f"Deploy content path is not a directory: {deploy_content_dir}")
+    return [
+        path
+        for path in deploy_content_dir.rglob("*")
+        if path.is_file() and path.name not in {".gitkeep", "README.md"}
+    ]
+
+
+def copy_deploy_overlay(staging_root: Path, deploy_content_dir: Path = DEFAULT_DEPLOY_CONTENT_DIR) -> int:
+    """Copy deployment overlay files into the staging tree.
+
+    Files are copied relative to ``deploy_content_dir`` so the directory acts as
+    an overlay on top of the release root.
+    """
+    copied = 0
+    for source_path in iter_deploy_overlay_files(deploy_content_dir):
+        destination = staging_root / source_path.relative_to(deploy_content_dir)
+        _copy_path(source_path, destination)
+        copied += 1
+    return copied
+
+
+def make_staging_root(prefix: str) -> Path:
+    """Create a writable staging root under the ignored artifact directory."""
+    DEFAULT_TEMP_DIR.mkdir(parents=True, exist_ok=True)
+    staging_root = DEFAULT_TEMP_DIR / f"{prefix}_{uuid.uuid4().hex}" / "staging"
+    staging_root.mkdir(parents=True, exist_ok=False)
+    return staging_root
+
+
+def remove_staging_root(staging_root: Path) -> None:
+    """Remove a staging tree created by ``make_staging_root``."""
+    temp_parent = DEFAULT_TEMP_DIR.resolve()
+    cleanup_root = staging_root.parent.resolve()
+    if temp_parent not in cleanup_root.parents and cleanup_root != temp_parent:
+        raise ValueError(f"Refusing to clean staging path outside artifact temp: {cleanup_root}")
+    shutil.rmtree(cleanup_root, ignore_errors=True)
+
+
 def build_archive(
     ref: str,
     archive_path: Path,
     *,
     project_slug: str,
     include_private_assets: bool = False,
+    include_extra_release_paths: bool = True,
 ) -> Path:
     """Build a clean release archive and include required local assets."""
     archive_path.parent.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="deploy_release_") as temp_dir:
-        staging_root = Path(temp_dir) / "staging"
-        staging_root.mkdir(parents=True, exist_ok=True)
-
+    staging_root = make_staging_root("deploy_release")
+    try:
         archive_bytes = subprocess.check_output(
             ["git", "archive", "--format=tar", ref],
             cwd=REPO_ROOT,
@@ -218,17 +288,74 @@ def build_archive(
         with tarfile.open(fileobj=io.BytesIO(archive_bytes), mode="r:") as tar:
             tar.extractall(staging_root)
 
-        for extra_path in iter_existing_extra_release_paths():
-            _copy_path(extra_path, staging_root / extra_path.name)
+        if include_extra_release_paths:
+            for extra_path in iter_existing_extra_release_paths():
+                _copy_path(extra_path, staging_root / extra_path.name)
         for private_path in iter_private_release_paths(
             project_slug,
             include_private_assets=include_private_assets,
         ):
             destination = staging_root / private_path.relative_to(REPO_ROOT)
             _copy_path(private_path, destination)
+        copy_deploy_overlay(staging_root)
 
         with tarfile.open(archive_path, mode="w:gz") as tar:
             tar.add(staging_root, arcname=".")
+    finally:
+        remove_staging_root(staging_root)
+    return archive_path
+
+
+def iter_worktree_release_files() -> list[Path]:
+    """Return tracked and untracked non-ignored files for a worktree release."""
+    result = run_command(
+        ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+        capture_output=True,
+    )
+    paths: list[Path] = []
+    for raw_path in result.stdout.split("\0"):
+        if not raw_path:
+            continue
+        path = REPO_ROOT / raw_path
+        if path.is_file():
+            paths.append(path)
+    return paths
+
+
+def build_worktree_archive(
+    archive_path: Path,
+    *,
+    project_slug: str,
+    include_private_assets: bool = False,
+    include_extra_release_paths: bool = True,
+) -> Path:
+    """Build a release archive from the current tracked/untracked worktree.
+
+    Ignored outputs such as models, logs, artifacts, caches, and local env files
+    stay out of the archive through ``git ls-files --exclude-standard``.
+    """
+    archive_path.parent.mkdir(parents=True, exist_ok=True)
+    staging_root = make_staging_root("deploy_release_worktree")
+    try:
+        for source_path in iter_worktree_release_files():
+            destination = staging_root / source_path.relative_to(REPO_ROOT)
+            _copy_path(source_path, destination)
+
+        if include_extra_release_paths:
+            for extra_path in iter_existing_extra_release_paths():
+                _copy_path(extra_path, staging_root / extra_path.name)
+        for private_path in iter_private_release_paths(
+            project_slug,
+            include_private_assets=include_private_assets,
+        ):
+            destination = staging_root / private_path.relative_to(REPO_ROOT)
+            _copy_path(private_path, destination)
+        copy_deploy_overlay(staging_root)
+
+        with tarfile.open(archive_path, mode="w:gz") as tar:
+            tar.add(staging_root, arcname=".")
+    finally:
+        remove_staging_root(staging_root)
     return archive_path
 
 

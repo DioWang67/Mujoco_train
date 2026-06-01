@@ -7,7 +7,7 @@ import os
 import sys
 import time
 from collections import deque
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 
 import numpy as np
@@ -22,6 +22,11 @@ from sedon_baseline.env import (
     SedonStandingConfig,
     SedonStandingEnv,
     load_sedon_config_from_env,
+)
+from sedon_baseline.checkpoint_selection import (
+    ForwardCheckpointThresholds,
+    is_safe_forward_candidate,
+    is_stable_forward_candidate,
 )
 from robot_learning.training_config import load_sedon_train_config
 from robot_learning.training_paths import resolve_training_paths
@@ -60,6 +65,8 @@ STABLE_FORWARD_BEST_VECNORM_PATH = os.path.join(
 LATEST_MODEL_PATH = os.path.join(MODEL_ROOT, "latest_model")
 CONFIG_PATH = os.path.join(LOG_ROOT, "train_config.json")
 MANIFEST_PATH = os.path.join(LOG_ROOT, "run_manifest.json")
+EFFECTIVE_REWARD_CONFIG_PATH = os.path.join(LOG_ROOT, "effective_reward_config.json")
+TEACHER_AUDIT_DIR = os.path.join(MODEL_ROOT, "teacher_audit")
 
 N_ENVS_DEFAULT = int(os.environ.get("SEDON_N_ENVS", str(SEDON_CONFIG.n_envs_default)))
 TOTAL_TIMESTEPS = SEDON_CONFIG.total_timesteps
@@ -200,6 +207,185 @@ class SedonBestVecNormalizeCallback(BaseCallback):
         return True
 
 
+def parse_pose_weight_schedule(raw_schedule: str) -> list[tuple[int, float]]:
+    """Parse ``step:pose_weight`` schedule entries.
+
+    Args:
+        raw_schedule: Comma-separated entries such as ``25000:6,50000:4``.
+
+    Returns:
+        Step-sorted schedule pairs.
+
+    Raises:
+        ValueError: If an entry is malformed or steps are not positive.
+    """
+    if not raw_schedule.strip():
+        return []
+    schedule: list[tuple[int, float]] = []
+    for raw_entry in raw_schedule.split(","):
+        entry = raw_entry.strip()
+        if not entry:
+            continue
+        if ":" not in entry:
+            raise ValueError(f"Invalid pose schedule entry: {entry}")
+        raw_step, raw_weight = entry.split(":", 1)
+        step = int(raw_step)
+        weight = float(raw_weight)
+        if step <= 0:
+            raise ValueError("pose weight schedule steps must be positive.")
+        if weight <= 0.0:
+            raise ValueError("pose weights must be positive.")
+        schedule.append((step, weight))
+    return sorted(schedule)
+
+
+class SedonPoseWeightAnnealCallback(BaseCallback):
+    """Anneal pose tracking weight during a curriculum run."""
+
+    def __init__(
+        self,
+        *,
+        schedule: list[tuple[int, float]],
+        base_config: SedonStandingConfig,
+        config_path: str,
+        eval_env: VecNormalize,
+    ) -> None:
+        super().__init__(0)
+        self._schedule = schedule
+        self._base_config = base_config
+        self._config_path = config_path
+        self._eval_env = eval_env
+        self._next_index = 0
+
+    def _on_training_start(self) -> None:
+        write_json(self._config_path, asdict(self._base_config))
+        print(f"Pose weight starts at {self._base_config.pose_weight:.3f}")
+
+    def _on_step(self) -> bool:
+        while (
+            self._next_index < len(self._schedule)
+            and self.num_timesteps >= self._schedule[self._next_index][0]
+        ):
+            step, pose_weight = self._schedule[self._next_index]
+            self._base_config = replace(self._base_config, pose_weight=pose_weight)
+            self.training_env.env_method("set_reward_config", self._base_config)
+            self._eval_env.env_method("set_reward_config", self._base_config)
+            write_json(self._config_path, asdict(self._base_config))
+            print(f"Pose weight annealed to {pose_weight:.3f} at {self.num_timesteps} steps")
+            self._next_index += 1
+        return True
+
+
+class SedonTeacherAuditStopCallback(BaseCallback):
+    """Stop teacher-imitation training when a checkpoint breaks the teacher gait."""
+
+    def __init__(
+        self,
+        *,
+        audit_freq: int,
+        config_path: str,
+        baseline_config_path: str | None,
+        steps: int,
+        seed: int,
+        audit_warmup_steps: int = 20,
+        landing_impact_limit: float = 1.56,
+        tracking_error_multiplier: float = 1.5,
+    ) -> None:
+        super().__init__(0)
+        self._audit_freq = audit_freq
+        self._config_path = Path(config_path)
+        self._strict_teacher_comparison = baseline_config_path is not None
+        self._baseline_config_path = Path(baseline_config_path) if baseline_config_path else Path(config_path)
+        self._steps = steps
+        self._seed = seed
+        self._audit_warmup_steps = audit_warmup_steps
+        self._landing_impact_limit = landing_impact_limit
+        self._tracking_error_multiplier = tracking_error_multiplier
+        self._teacher_landing_impact = float("inf")
+        self._teacher_base_height_drop = float("inf")
+        self._teacher_tracking_limit = float("inf")
+
+    def _on_training_start(self) -> None:
+        from tools.audit_sedon_shuffle_v0 import audit_shuffle
+
+        baseline = audit_shuffle(
+            self._baseline_config_path,
+            None,
+            None,
+            self._steps,
+            self._seed,
+            audit_warmup_steps=self._audit_warmup_steps,
+        )
+        self._teacher_landing_impact = baseline.landing_impact
+        self._teacher_base_height_drop = baseline.base_height_drop
+        self._teacher_tracking_limit = (
+            baseline.mean_tracking_error * self._tracking_error_multiplier
+        )
+        print(
+            "Teacher audit baseline: "
+            f"support={baseline.peak_support_ratio:.3f}, "
+            f"clearance={baseline.max_clearance:.6f}, "
+            f"drop_post={baseline.base_height_drop_post_warmup:.5f} "
+            f"raw_drop={baseline.base_height_drop_raw:.5f}, "
+            f"impact_post={baseline.landing_impact_post_warmup:.3f} "
+            f"raw_impact={baseline.landing_impact_raw:.3f}, "
+            f"force_post={baseline.max_contact_force_post_warmup:.2f}, "
+            f"foot_v_post={baseline.foot_velocity_near_contact_post_warmup:.6f}, "
+            f"track={baseline.mean_tracking_error:.5f}; "
+            f"tracking_limit={self._teacher_tracking_limit:.5f}",
+        )
+
+    def _on_step(self) -> bool:
+        if self.n_calls % self._audit_freq != 0:
+            return True
+
+        from tools.audit_sedon_shuffle_v0 import audit_shuffle, teacher_relative_gate
+
+        os.makedirs(TEACHER_AUDIT_DIR, exist_ok=True)
+        stem = f"teacher_audit_{self.num_timesteps}_steps"
+        model_path = Path(TEACHER_AUDIT_DIR) / f"{stem}.zip"
+        vecnorm_path = Path(TEACHER_AUDIT_DIR) / f"{stem}_vecnorm.pkl"
+        self.model.save(model_path)
+        self.training_env.save(str(vecnorm_path))
+        summary = audit_shuffle(
+            self._config_path,
+            model_path,
+            vecnorm_path,
+            self._steps,
+            self._seed,
+            audit_warmup_steps=self._audit_warmup_steps,
+        )
+        baseline = audit_shuffle(
+            self._baseline_config_path,
+            None,
+            None,
+            self._steps,
+            self._seed,
+            audit_warmup_steps=self._audit_warmup_steps,
+        )
+        gate = teacher_relative_gate(
+            baseline,
+            summary,
+            tracking_error_multiplier=self._tracking_error_multiplier,
+        )
+        print(
+            "Teacher checkpoint audit "
+            f"@ {self.num_timesteps} steps: "
+            f"pass={gate.passed}, none={summary.contact_none_ratio:.3f}, "
+            f"jump={summary.jump_count}, support={summary.peak_support_ratio:.3f}, "
+            f"clearance={summary.max_clearance:.6f}, "
+            f"drop_post={summary.base_height_drop_post_warmup:.5f} "
+            f"raw_drop={summary.base_height_drop_raw:.5f}, "
+            f"impact_post={summary.landing_impact_post_warmup:.3f} "
+            f"raw_impact={summary.landing_impact_raw:.3f}, "
+            f"force_post={summary.max_contact_force_post_warmup:.2f}, "
+            f"foot_v_post={summary.foot_velocity_near_contact_post_warmup:.6f}, "
+            f"track={summary.mean_tracking_error:.5f}/{summary.max_tracking_error:.5f}, "
+            f"failed={','.join(gate.reasons) or 'none'}",
+        )
+        return gate.passed
+
+
 class SedonForwardEvalCallback(BaseCallback):
     """Save checkpoints selected by forward progress instead of reward only."""
 
@@ -216,6 +402,10 @@ class SedonForwardEvalCallback(BaseCallback):
         self._n_eval_episodes = n_eval_episodes
         self._best_forward_velocity = -np.inf
         self._best_stable_forward_velocity = -np.inf
+        self._standing_thresholds = SedonStandingConfig()
+        self._forward_thresholds = ForwardCheckpointThresholds(
+            min_mean_length=0.9 * MAX_EPISODE_STEPS,
+        )
 
     def _on_step(self) -> bool:
         if self.n_calls % self._eval_freq != 0:
@@ -227,9 +417,13 @@ class SedonForwardEvalCallback(BaseCallback):
         self.logger.record("eval_forward/mean_final_base_z", metrics["mean_final_base_z"])
         self.logger.record("eval_forward/mean_final_upright", metrics["mean_final_upright"])
         self.logger.record("eval_forward/fall_rate", metrics["fall_rate"])
+        self.logger.record("eval_forward/both_contact_ratio", metrics["both_contact_ratio"])
+        self.logger.record("eval_forward/single_contact_ratio", metrics["single_contact_ratio"])
+        self.logger.record("eval_forward/no_contact_ratio", metrics["no_contact_ratio"])
 
         mean_forward_velocity = metrics["mean_forward_velocity"]
-        if mean_forward_velocity > 0.0 and mean_forward_velocity > self._best_forward_velocity:
+        safe_forward = is_safe_forward_candidate(metrics, self._forward_thresholds)
+        if safe_forward and mean_forward_velocity > self._best_forward_velocity:
             self._best_forward_velocity = mean_forward_velocity
             self._save_checkpoint(
                 FORWARD_BEST_MODEL_DIR,
@@ -240,15 +434,16 @@ class SedonForwardEvalCallback(BaseCallback):
                 "New best forward checkpoint: "
                 f"FwdV={mean_forward_velocity:.3f}, "
                 f"Fall={metrics['fall_rate']:.1%}, "
-                f"Len={metrics['mean_length']:.1f}",
+                f"Len={metrics['mean_length']:.1f}, "
+                f"NoContact={metrics['no_contact_ratio']:.1%}",
             )
 
-        stable = (
-            metrics["fall_rate"] == 0.0
-            and metrics["mean_length"] >= MAX_EPISODE_STEPS
-            and metrics["mean_final_base_z"] >= SedonStandingConfig().min_base_height
-            and metrics["mean_final_upright"] >= SedonStandingConfig().min_upright
-            and mean_forward_velocity > 0.0
+        stable = is_stable_forward_candidate(
+            metrics,
+            self._forward_thresholds,
+            min_base_height=self._standing_thresholds.min_base_height,
+            min_upright=self._standing_thresholds.min_upright,
+            max_episode_steps=MAX_EPISODE_STEPS,
         )
         if stable and mean_forward_velocity > self._best_stable_forward_velocity:
             self._best_stable_forward_velocity = mean_forward_velocity
@@ -260,7 +455,8 @@ class SedonForwardEvalCallback(BaseCallback):
             print(
                 "New best stable-forward checkpoint: "
                 f"FwdV={mean_forward_velocity:.3f}, "
-                f"X={metrics['mean_final_base_x']:.3f}",
+                f"X={metrics['mean_final_base_x']:.3f}, "
+                f"BothContact={metrics['both_contact_ratio']:.1%}",
             )
         return True
 
@@ -270,18 +466,32 @@ class SedonForwardEvalCallback(BaseCallback):
         final_base_z: list[float] = []
         final_upright: list[float] = []
         forward_velocities: list[float] = []
+        both_contact_ratios: list[float] = []
+        single_contact_ratios: list[float] = []
+        no_contact_ratios: list[float] = []
         falls = 0
 
         for _ in range(self._n_eval_episodes):
             obs = self._eval_env.reset()
             last_info: dict = {}
             forward_velocity_sum = 0.0
+            both_contact_steps = 0
+            single_contact_steps = 0
+            no_contact_steps = 0
             length = 0
             while length < MAX_EPISODE_STEPS:
                 action, _ = self.model.predict(obs, deterministic=True)
                 obs, _, dones, infos = self._eval_env.step(action)
                 last_info = infos[0]
                 forward_velocity_sum += float(last_info.get("forward_velocity", 0.0))
+                left_contact = bool(last_info.get("left_contact", False))
+                right_contact = bool(last_info.get("right_contact", False))
+                if left_contact and right_contact:
+                    both_contact_steps += 1
+                elif left_contact or right_contact:
+                    single_contact_steps += 1
+                else:
+                    no_contact_steps += 1
                 length += 1
                 if bool(dones[0]):
                     break
@@ -290,9 +500,12 @@ class SedonForwardEvalCallback(BaseCallback):
             final_base_z.append(float(last_info.get("base_height", 0.0)))
             final_upright.append(float(last_info.get("upright", 0.0)))
             forward_velocities.append(forward_velocity_sum / max(1, length))
+            both_contact_ratios.append(both_contact_steps / max(1, length))
+            single_contact_ratios.append(single_contact_steps / max(1, length))
+            no_contact_ratios.append(no_contact_steps / max(1, length))
             unhealthy_final_state = (
-                final_base_z[-1] < SedonStandingConfig().min_base_height
-                or final_upright[-1] < SedonStandingConfig().min_upright
+                final_base_z[-1] < self._standing_thresholds.min_base_height
+                or final_upright[-1] < self._standing_thresholds.min_upright
             )
             if length < MAX_EPISODE_STEPS or unhealthy_final_state:
                 falls += 1
@@ -304,6 +517,9 @@ class SedonForwardEvalCallback(BaseCallback):
             "mean_final_base_z": float(np.mean(final_base_z)),
             "mean_final_upright": float(np.mean(final_upright)),
             "mean_forward_velocity": float(np.mean(forward_velocities)),
+            "both_contact_ratio": float(np.mean(both_contact_ratios)),
+            "single_contact_ratio": float(np.mean(single_contact_ratios)),
+            "no_contact_ratio": float(np.mean(no_contact_ratios)),
         }
 
     def _save_checkpoint(
@@ -440,9 +656,17 @@ def _save_config(args: argparse.Namespace, n_envs: int, batch_size: int) -> None
         "resume_vecnorm": args.resume_vecnorm,
         "resume_action_std": args.resume_action_std,
         "action_std": args.action_std,
+        "log_std_init": args.log_std_init,
+        "checkpoint_freq_steps": args.checkpoint_freq_steps,
+        "teacher_audit_freq_steps": args.teacher_audit_freq_steps,
+        "teacher_audit_steps": args.teacher_audit_steps,
+        "teacher_audit_warmup_steps": args.teacher_audit_warmup_steps,
+        "pose_weight_schedule": args.pose_weight_schedule,
+        "teacher_baseline_config": args.teacher_baseline_config,
         "reward_config": asdict(load_sedon_config_from_env()),
     }
     write_json(CONFIG_PATH, cfg)
+    write_json(EFFECTIVE_REWARD_CONFIG_PATH, cfg["reward_config"])
 
 
 def _write_manifest() -> None:
@@ -505,6 +729,48 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help="Stochastic policy action std to use after creating or loading a model.",
     )
+    parser.add_argument(
+        "--log-std-init",
+        type=float,
+        default=None,
+        help="Initial PPO policy log std for new models, e.g. log(0.1)=-2.3026.",
+    )
+    parser.add_argument(
+        "--checkpoint-freq-steps",
+        type=int,
+        default=SEDON_CONFIG.checkpoint_freq_steps,
+        help="Environment timesteps between checkpoint saves.",
+    )
+    parser.add_argument(
+        "--teacher-audit-freq-steps",
+        type=int,
+        default=0,
+        help="Run teacher safety audit every N environment timesteps; 0 disables it.",
+    )
+    parser.add_argument(
+        "--teacher-audit-steps",
+        type=int,
+        default=480,
+        help="Rollout steps for each teacher checkpoint audit.",
+    )
+    parser.add_argument(
+        "--teacher-audit-warmup-steps",
+        type=int,
+        default=20,
+        help="Initial audit rollout steps excluded from landing/drop strict gates.",
+    )
+    parser.add_argument(
+        "--teacher-baseline-config",
+        type=str,
+        default=None,
+        help="Config used as the baseline for strict teacher-relative audit gates.",
+    )
+    parser.add_argument(
+        "--pose-weight-schedule",
+        type=str,
+        default="",
+        help="Comma-separated step:pose_weight schedule, e.g. 25000:6,50000:4.",
+    )
     return parser.parse_args(argv)
 
 
@@ -528,6 +794,17 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError("--resume-action-std must be positive.")
     if args.action_std is not None and args.action_std <= 0.0:
         raise ValueError("--action-std must be positive.")
+    if args.checkpoint_freq_steps <= 0:
+        raise ValueError("--checkpoint-freq-steps must be positive.")
+    if args.teacher_audit_freq_steps < 0:
+        raise ValueError("--teacher-audit-freq-steps must be non-negative.")
+    if args.teacher_audit_steps <= 0:
+        raise ValueError("--teacher-audit-steps must be positive.")
+    if args.teacher_audit_warmup_steps < 0:
+        raise ValueError("--teacher-audit-warmup-steps must be non-negative.")
+    pose_weight_schedule = parse_pose_weight_schedule(args.pose_weight_schedule)
+    if args.teacher_baseline_config is not None and not Path(args.teacher_baseline_config).is_file():
+        raise FileNotFoundError(f"--teacher-baseline-config not found: {args.teacher_baseline_config}")
     if not SCENE_PATH.is_file():
         raise FileNotFoundError(
             f"Sedon training scene not found: {SCENE_PATH}. "
@@ -541,12 +818,14 @@ def main(argv: list[str] | None = None) -> int:
         BEST_MODEL_DIR,
         FORWARD_BEST_MODEL_DIR,
         STABLE_FORWARD_BEST_MODEL_DIR,
+        TEACHER_AUDIT_DIR,
         TB_ROOT,
     )
 
     total_timesteps = _resolve_total_timesteps(args)
     batch_size = _compute_batch_size(args.n_envs)
     resume_vecnorm_path = _resolve_resume_vecnorm_path(args.resume, args.resume_vecnorm)
+    base_reward_config = load_sedon_config_from_env()
     _save_config(args, args.n_envs, batch_size)
     _write_manifest()
     print(f"Artifacts: models={MODEL_ROOT} logs={LOG_ROOT} tb={TB_ROOT}")
@@ -569,11 +848,28 @@ def main(argv: list[str] | None = None) -> int:
         train_env=train_env,
     )
 
-    checkpoint_save_freq = max(1, SEDON_CONFIG.checkpoint_freq_steps // args.n_envs)
+    checkpoint_save_freq = max(1, args.checkpoint_freq_steps // args.n_envs)
     eval_freq = max(1, SEDON_CONFIG.eval_freq_steps // args.n_envs)
+    teacher_audit_freq = (
+        max(1, args.teacher_audit_freq_steps // args.n_envs)
+        if args.teacher_audit_freq_steps > 0
+        else 0
+    )
 
-    callback_list = [
+    callback_list: list[BaseCallback] = [
         SedonMetricsCallback(total_timesteps=total_timesteps),
+    ]
+    if pose_weight_schedule:
+        callback_list.append(
+            SedonPoseWeightAnnealCallback(
+                schedule=pose_weight_schedule,
+                base_config=base_reward_config,
+                config_path=EFFECTIVE_REWARD_CONFIG_PATH,
+                eval_env=eval_env,
+            )
+        )
+    callback_list.extend(
+        [
         CheckpointCallback(
             save_freq=checkpoint_save_freq,
             save_path=MODEL_ROOT,
@@ -595,8 +891,23 @@ def main(argv: list[str] | None = None) -> int:
             n_eval_episodes=SEDON_CONFIG.eval_episodes,
         ),
         SedonBestVecNormalizeCallback(BEST_MODEL_DIR, eval_env),
-    ]
+        ]
+    )
+    if teacher_audit_freq:
+        callback_list.append(
+            SedonTeacherAuditStopCallback(
+                audit_freq=teacher_audit_freq,
+                config_path=EFFECTIVE_REWARD_CONFIG_PATH,
+                baseline_config_path=args.teacher_baseline_config,
+                steps=args.teacher_audit_steps,
+                seed=args.seed,
+                audit_warmup_steps=args.teacher_audit_warmup_steps,
+            )
+        )
 
+    policy_kwargs = {"net_arch": NET_ARCH}
+    if args.log_std_init is not None:
+        policy_kwargs["log_std_init"] = args.log_std_init
     model_kwargs = dict(
         policy="MlpPolicy",
         env=train_env,
@@ -610,7 +921,7 @@ def main(argv: list[str] | None = None) -> int:
         ent_coef=ENT_COEF,
         vf_coef=VF_COEF,
         max_grad_norm=MAX_GRAD_NORM,
-        policy_kwargs={"net_arch": NET_ARCH},
+        policy_kwargs=policy_kwargs,
         tensorboard_log=TB_ROOT,
         verbose=0,
         seed=args.seed,

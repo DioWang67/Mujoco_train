@@ -28,6 +28,20 @@ train.py          Unified training entrypoint, defaults to H1
 eval.py           Unified evaluation entrypoint, defaults to H1
 ```
 
+## Start Here
+
+The repo now has three short orientation documents:
+
+- `docs/PROJECT_GUIDE.md`  
+  Canonical project map, active entrypoints, tool maturity, cleanup policy.
+- `docs/TRAINING_RUNBOOK.md`  
+  Short operator commands for H1, grasp, Sedon, eval, and remote runs.
+- `docs/SEDON_WORKFLOW.md`  
+  Current Sedon reverse-knee/no-tiptoe workflow, remote command, viewer/audit
+  checks, and troubleshooting.
+
+For Sedon config selection, use `configs/sedon/README.md`.
+
 Generated runtime outputs should stay out of Git unless they are deliberate
 fixtures:
 
@@ -57,7 +71,19 @@ Run quick checks:
 ```bash
 python -m pytest
 python -m tools.preflight_check
+python -m tools.project_inventory
 ```
+
+Create a sanitized debug workspace for AI-assisted code inspection:
+
+```bash
+python -m tools.agent_workspace --name sedon_debug --force
+```
+
+The generated workspace lives under `artifacts/agent_workspace/` and excludes
+`private_assets/`, complete XML/MJCF/URDF/mesh files, local env files, models,
+logs, and generated outputs. Share that workspace or its manifest with AI tools
+instead of exposing the full repository.
 
 List available Python tools:
 
@@ -89,6 +115,13 @@ python -m tools.convert_urdf_to_mjcf
 python -m tools.build_sedon_training_scene
 python -m tools.smoke_sedon_env --steps 20
 python train.py --project sedon --smoke --n-envs 1
+```
+
+Current Sedon reverse-knee/no-tiptoe experiment:
+
+```powershell
+$env:SEDON_CONFIG_OVERRIDES='configs\sedon\reverse_knee_no_tiptoe_walk.json'
+python train.py --project sedon --total-timesteps 10000000 --n-envs 4 --reset-noise-scale 0.01
 ```
 
 Evaluate Sedon:
@@ -159,29 +192,36 @@ Remote deployment uses the generic layout described in
 For wrapper script details, see `scripts/README.md`; for Python tool details,
 see `tools/README.md`.
 
-Create a clean source archive from the current commit:
+Create a clean source archive from the current commit when you need a manual
+artifact:
 
 ```bash
 python -m tools.deploy_release --project-slug h1
 ```
 
-Upload and switch the remote `current` release when SSH is configured:
-
-```bash
-python -m tools.deploy_release --project-slug h1 --remote-host root@10.6.243.55 --upload
-```
-
-For robots that require ignored private assets on the remote host, explicitly
-include them:
-
-```bash
-python -m tools.deploy_release --project-slug sedon --include-private-assets
-```
-
-The operator wrapper for Sedon uses the same opt-in behavior:
+For normal remote work, use the env-driven deployer. It packages the current
+worktree plus optional `deploy_content/` overlay, uploads it, switches
+`code/current`, and smoke-checks the target project:
 
 ```bat
-scripts\sedon_deploy_remote.bat
+scripts\remote_auto_deploy.bat
+```
+
+Sedon has a one-command wrapper:
+
+```bat
+scripts\sedon_remote_deploy_and_check.bat
+```
+
+Put one-off deployment payloads under `deploy_content/` using repo-relative
+paths. Example: `deploy_content/configs/sedon/foo.json` deploys as
+`configs/sedon/foo.json`.
+
+Private assets are not resent during normal deploys. Refresh them only when the
+robot asset files changed:
+
+```bat
+scripts\remote_auto_deploy.bat --include-private-assets
 ```
 
 ## Current Cleanup Rules

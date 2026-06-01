@@ -20,6 +20,7 @@ from tools.sedon_debug_common import (
     apply_foot_size_override,
     contact_pairs,
     geom_id,
+    require_scene,
     snapshot_geom,
 )
 
@@ -186,10 +187,11 @@ def _run_static_pose(
     hip_lift: float,
     knee_lift: float,
     ankle_lift: float,
+    scene_path: Path,
 ) -> PoseResult:
     """Run one static single-leg pose test."""
     env = SedonStandingEnv(
-        scene_path=DEFAULT_SCENE_PATH,
+        scene_path=scene_path,
         reset_noise_scale=0.0,
         reward_config=SedonStandingConfig(gait_mode="fsm"),
     )
@@ -258,10 +260,10 @@ def _run_static_pose(
         env.close()
 
 
-def _print_reset_report(foot_size: tuple[float, float, float]) -> None:
+def _print_reset_report(foot_size: tuple[float, float, float], scene_path: Path) -> None:
     """Print COM and support polygon diagnostics at reset."""
     env = SedonStandingEnv(
-        scene_path=DEFAULT_SCENE_PATH,
+        scene_path=scene_path,
         reset_noise_scale=0.0,
         reward_config=SedonStandingConfig(gait_mode="fsm"),
     )
@@ -454,6 +456,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ramp-steps", type=int, default=40)
     parser.add_argument("--hold-steps", type=int, default=100)
     parser.add_argument("--support-roll", type=float, default=0.06)
+    parser.add_argument("--scene-path", type=Path, default=DEFAULT_SCENE_PATH)
     parser.add_argument(
         "--support-rolls",
         type=_parse_float_list,
@@ -490,6 +493,7 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError("--hold-steps must be positive.")
 
     foot_sizes = [RELAXED_FOOT_SIZE] if args.relaxed_foot else args.foot_sizes
+    scene_path = require_scene(args.scene_path)
     cases = _validation_cases(
         plan=args.plan,
         foot_sizes=foot_sizes,
@@ -502,7 +506,7 @@ def main(argv: list[str] | None = None) -> int:
 
     for case in cases:
         if case.foot_size not in reported_reset_sizes:
-            _print_reset_report(case.foot_size)
+            _print_reset_report(case.foot_size, scene_path)
             reported_reset_sizes.add(case.foot_size)
         print(f"\nscenario: {case.scenario}")
         print(f"support_roll: {case.support_roll:.5f}")
@@ -516,6 +520,7 @@ def main(argv: list[str] | None = None) -> int:
                 hip_lift=args.hip_lift,
                 knee_lift=args.knee_lift,
                 ankle_lift=args.ankle_lift,
+                scene_path=scene_path,
             )
             rows.append(
                 _result_rows(

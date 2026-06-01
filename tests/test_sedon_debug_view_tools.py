@@ -9,7 +9,12 @@ sys.modules.setdefault("mujoco", types.ModuleType("mujoco"))
 
 from sedon_baseline.env import JOINT_NAMES
 from tools.debug_sedon_gait_viewer import _load_gait_seed, _seed_target_at_step
-from tools.debug_sedon_pose_editor import PoseEntry, _write_pose_entries
+from tools.debug_sedon_pose_editor import (
+    PoseEntry,
+    _foot_force_state,
+    _support_side_guess,
+    _write_pose_entries,
+)
 
 
 def test_pose_entry_defaults_duration_for_legacy_pose() -> None:
@@ -95,3 +100,30 @@ def test_gait_seed_interpolates_between_keyframes(tmp_path) -> None:
     assert support_mode == "double"
     assert np.all(target > 0.0)
     assert np.all(target < 1.0)
+
+
+def test_foot_force_state_uses_requested_ratio_formula() -> None:
+    state = _foot_force_state(left_force=30.0, right_force=10.0)
+
+    assert state.left_force == 30.0
+    assert state.right_force == 10.0
+    assert state.force_ratio_left == pytest.approx(30.0 / (30.0 + 10.0 + 1e-6))
+    assert state.force_ratio_right == pytest.approx(10.0 / (30.0 + 10.0 + 1e-6))
+    assert state.support_side_guess == "double"
+
+
+@pytest.mark.parametrize(
+    ("left_force_z", "right_force_z", "expected"),
+    [
+        (6.0, 2.0, "left"),
+        (2.0, 6.0, "right"),
+        (6.0, 7.0, "double"),
+        (5.0, 5.0, "none"),
+    ],
+)
+def test_support_side_guess_uses_strict_five_newton_threshold(
+    left_force_z: float,
+    right_force_z: float,
+    expected: str,
+) -> None:
+    assert _support_side_guess(left_force_z, right_force_z) == expected

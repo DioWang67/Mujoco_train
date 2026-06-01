@@ -6,10 +6,33 @@ Run this to print the same index from the command line:
 python -m tools
 ```
 
+## How To Read This Directory
+
+`tools/` contains both standard operator commands and narrow diagnostic
+experiments. Use this order before reaching for one-off scripts:
+
+| Tier | Use for | First tools to try |
+|---|---|---|
+| Standard | Normal smoke/eval/view/audit workflows. | `smoke_sedon_env`, `sedon_eval`, `debug_sedon_gait_viewer`, `debug_sedon_gait_audit` |
+| Diagnostic | Answer one mechanical or reward question. | `debug_sedon_*`, `preview_sedon_*`, `trace_*` |
+| Sweep | Compare many parameters and write artifacts. | `sweep_sedon_*`, `sedon_gait_sweep` |
+| Packaging | Build and deploy releases. | `deploy_release`, `remote_auto_deploy`, `prepare_package` |
+
+For the current Sedon workflow, start with `docs/SEDON_WORKFLOW.md`.
+
 ## Checks
 
 - `python -m tools.preflight_check`  
   Check local runtime prerequisites before training.
+- `python -m tools.project_inventory`  
+  Print the canonical directory map, tool/script counts, and disposable local
+  output directories without deleting anything.
+- `python -m tools.agent_workspace --name sedon_debug --force`  
+  Create an ignored, source-only debug workspace under
+  `artifacts/agent_workspace/` for AI-assisted inspection. It copies code,
+  tests, docs, and lightweight configs while excluding `private_assets/`,
+  complete XML/MJCF/URDF/mesh files, models, logs, local env files, and
+  generated artifacts. The output includes `SANITIZED_MANIFEST.json`.
 
 ## Evaluation
 
@@ -156,6 +179,15 @@ python -m tools
 
 - `python -m tools.deploy_release`  
   Create and optionally upload a clean source release archive.
+- `python -m tools.remote_auto_deploy`  
+  Build from `.env.remote` settings, upload, activate `code/current`, and run a
+  remote smoke check. Defaults to working-tree packaging for fast experiment
+  iteration.
+  Daily Sedon wrappers: `scripts\sedon_remote_deploy_and_check.bat` and
+  `scripts\sedon_remote_check.bat`.
+- `python -m tools.remote_training --project sedon --status`  
+  Start or inspect remote project training from the shared remote layout.
+  Project-specific wrappers should stay thin and call this module.
 - `python -m tools.prepare_package`  
   Build an offline dependency/source bundle for a remote host.
 

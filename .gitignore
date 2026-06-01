@@ -9,6 +9,9 @@ __pycache__/
 .venv/
 venv/
 env/
+.env.remote
+.env.remote.*
+!.env.remote.example
 
 # Large archives & extracted dirs
 *.tar.gz
@@ -22,6 +25,15 @@ models/
 logs/
 reports/
 artifacts/sync/
+*.log
+*.csv
+artifacts/
+_verify_*/
+
+# Local deployment overlay content.
+deploy_content/*
+!deploy_content/.gitkeep
+!deploy_content/README.md
 
 # Private robot assets
 private_assets/

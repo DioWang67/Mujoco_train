@@ -13,12 +13,14 @@ import numpy as np
 
 from sedon_baseline.env import SedonStandingEnv, load_sedon_config_from_env
 from tools.sedon_debug_common import (
+    DEFAULT_SCENE_PATH,
     DEBUG_OUT_DIR,
     LEFT_FOOT_GEOM,
     RIGHT_FOOT_GEOM,
     apply_foot_size_override,
     contact_pairs,
     geom_id,
+    require_scene,
 )
 
 
@@ -231,6 +233,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--support-roll", type=float, default=0.10)
     parser.add_argument("--steps", type=int, default=120)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--scene-path", type=Path, default=DEFAULT_SCENE_PATH)
     parser.add_argument("--out-csv", type=Path, default=DEFAULT_OUT_CSV)
     return parser
 
@@ -242,6 +245,7 @@ def _run_case(
     support_roll: float,
     steps: int,
     seed: int,
+    scene_path: Path,
 ) -> FootContactSweepResult:
     """Run one scenario/support-side pair and return contact/geometry metrics."""
     base_config = load_sedon_config_from_env()
@@ -249,7 +253,11 @@ def _run_case(
         base_config,
         target_base_height=base_config.target_base_height + scenario.base_height_delta,
     )
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=reward_config)
+    env = SedonStandingEnv(
+        scene_path=scene_path,
+        reset_noise_scale=0.0,
+        reward_config=reward_config,
+    )
     try:
         env.reset(seed=seed)
         if scenario.foot_size is not None:
@@ -374,6 +382,7 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError(f"Unsupported support side: {side}")
 
     scenarios = _build_scenarios()
+    scene_path = require_scene(args.scene_path)
     rows: list[FootContactSweepResult] = []
     print(
         "scenario side initLz initRz initLc initRc max_com_dy max_roll "
@@ -387,6 +396,7 @@ def main(argv: list[str] | None = None) -> int:
                 support_roll=args.support_roll,
                 steps=args.steps,
                 seed=args.seed,
+                scene_path=scene_path,
             )
             rows.append(row)
             print(

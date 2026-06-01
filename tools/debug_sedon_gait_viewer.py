@@ -97,6 +97,25 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional pose-editor gait seed JSON for --mode scripted playback.",
     )
+    parser.add_argument(
+        "--seed-playback",
+        choices=("pd", "kinematic", "kinematic-grounded"),
+        default="pd",
+        help=(
+            "How to play pose-editor seeds. 'pd' runs dynamic PD tracking; "
+            "'kinematic' directly sets qpos like the pose editor paused view; "
+            "'kinematic-grounded' also shifts base height so the support foot stays on the floor."
+        ),
+    )
+    parser.add_argument(
+        "--seed-interpolation",
+        choices=("smooth", "hold"),
+        default="smooth",
+        help=(
+            "Interpolate between seed keyframes or hold each keyframe for its duration. "
+            "'hold' matches the pose editor sequence preview."
+        ),
+    )
     parser.add_argument("--steps", type=int, default=400)
     parser.add_argument("--speed", type=float, default=1.0, help="Playback speed multiplier.")
     parser.add_argument("--pause-start", type=float, default=0.0, help="Seconds to pause before starting rollout.")
@@ -162,14 +181,23 @@ def _load_gait_seed(path: Path) -> GaitSeed:
     return GaitSeed(keyframes=tuple(keyframes), target_type=target_type)
 
 
-def _seed_target_at_step(seed: GaitSeed, step: int) -> tuple[np.ndarray, str, str]:
+def _seed_target_at_step(
+    seed: GaitSeed,
+    step: int,
+    *,
+    interpolation: str = "smooth",
+) -> tuple[np.ndarray, str, str]:
     """Return interpolated joint targets, phase name, and support mode for a seed step."""
+    if interpolation not in ("smooth", "hold"):
+        raise ValueError("interpolation must be either 'smooth' or 'hold'.")
     total_steps = sum(keyframe.duration_steps for keyframe in seed.keyframes)
     phase_step = (step - 1) % max(1, total_steps)
     cursor = 0
     for index, keyframe in enumerate(seed.keyframes):
         next_cursor = cursor + keyframe.duration_steps
         if phase_step < next_cursor:
+            if interpolation == "hold":
+                return keyframe.joint_targets.copy(), keyframe.name, keyframe.support_mode
             local_step = phase_step - cursor
             next_keyframe = seed.keyframes[(index + 1) % len(seed.keyframes)]
             alpha = local_step / max(1, keyframe.duration_steps - 1)
@@ -417,6 +445,44 @@ def _step_seed_reference(
     return obs, 0.0, bool(terminated), False, info
 
 
+def _step_seed_kinematic_reference(
+    env: SedonStandingEnv,
+    target_positions: np.ndarray,
+    support_hint: str | None = None,
+    *,
+    ground_support: bool = False,
+) -> tuple[np.ndarray, float, bool, bool, dict[str, object]]:
+    """Set a seed target directly, matching the pose editor paused preview."""
+    target_qpos = env._default_qpos.copy()
+    env._set_base_pose(target_qpos)
+    for joint_id, joint_target in zip(env._joint_ids, target_positions):
+        target_qpos[env.model.jnt_qposadr[joint_id]] = float(joint_target)
+    env.set_state(target_qpos, np.zeros_like(env.data.qvel))
+    mujoco.mj_forward(env.model, env.data)
+    if ground_support:
+        foot_bottoms = env._foot_bottom_heights()
+        if support_hint == "right":
+            ground_offset = float(foot_bottoms[0])
+        elif support_hint == "left":
+            ground_offset = float(foot_bottoms[1])
+        else:
+            ground_offset = float(np.min(foot_bottoms))
+        if np.isfinite(ground_offset):
+            target_qpos[2] -= ground_offset
+            env.set_state(target_qpos, np.zeros_like(env.data.qvel))
+            mujoco.mj_forward(env.model, env.data)
+    env._gait_step += 1
+    obs = env._get_obs()
+    joint_positions = env._joint_positions()
+    info = {
+        "base_height": env._base_height(),
+        "upright": env._base_upright(),
+        "right_knee_qpos": float(joint_positions[3]),
+        "left_knee_qpos": float(joint_positions[8]),
+    }
+    return obs, 0.0, False, False, info
+
+
 def _write_csv(path: Path, rows: list[GaitViewerStep]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if not rows:
@@ -481,11 +547,23 @@ def main(argv: list[str] | None = None) -> int:
             phase_name = None
             support_hint = None
             if gait_seed is not None:
-                target_positions, phase_name, support_hint = _seed_target_at_step(gait_seed, step)
+                target_positions, phase_name, support_hint = _seed_target_at_step(
+                    gait_seed,
+                    step,
+                    interpolation=args.seed_interpolation,
+                )
                 if gait_seed.target_type == "offset":
                     target_positions = env._nominal_joint_qpos + target_positions
                 action = np.zeros(env.action_space.shape, dtype=np.float64)
-                obs, reward, terminated, truncated, info = _step_seed_reference(env, target_positions)
+                if args.seed_playback in ("kinematic", "kinematic-grounded"):
+                    obs, reward, terminated, truncated, info = _step_seed_kinematic_reference(
+                        env,
+                        target_positions,
+                        support_hint,
+                        ground_support=args.seed_playback == "kinematic-grounded",
+                    )
+                else:
+                    obs, reward, terminated, truncated, info = _step_seed_reference(env, target_positions)
             else:
                 action = action_provider(obs)
                 obs, reward, terminated, truncated, info = env.step(action)

@@ -11,7 +11,7 @@ import mujoco
 import numpy as np
 
 from sedon_baseline.env import SedonStandingEnv, load_sedon_config_from_env
-from tools.sedon_debug_common import DEBUG_OUT_DIR, contact_pairs
+from tools.sedon_debug_common import DEFAULT_SCENE_PATH, DEBUG_OUT_DIR, contact_pairs, require_scene
 
 
 DEFAULT_OUT_CSV = DEBUG_OUT_DIR / "single_support_load_transfer.csv"
@@ -268,6 +268,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--support-side", choices=("left", "right"), default="left")
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--scene-path", type=Path, default=DEFAULT_SCENE_PATH)
     parser.add_argument("--load-steps", type=int, default=120)
     parser.add_argument("--lift-steps", type=int, default=80)
     parser.add_argument("--support-roll", type=float, default=0.10)
@@ -292,7 +293,11 @@ def main(argv: list[str] | None = None) -> int:
         raise ValueError("--print-every must be positive.")
 
     reward_config = load_sedon_config_from_env()
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=reward_config)
+    env = SedonStandingEnv(
+        scene_path=require_scene(args.scene_path),
+        reset_noise_scale=0.0,
+        reward_config=reward_config,
+    )
     rows: list[LoadTransferRow] = []
     lift_stage_started = False
     gate_row: LoadTransferRow | None = None

@@ -1,0 +1,163 @@
+{
+  "schema": "sedon_gait_seed.v1",
+  "target_type": "absolute",
+  "description": "Mirrored left/right gait seed generated from pose editor pose_1..pose_4.",
+  "joint_names": [
+    "R_joint_hip_yaw",
+    "R_joint_hip_roll",
+    "R_joint_hip_pitch",
+    "R_joint_knee_pitch",
+    "R_joint_ankle_pitch",
+    "L_joint_hip_yaw",
+    "L_joint_hip_roll",
+    "L_joint_hip_pitch",
+    "L_joint_knee_pitch",
+    "L_joint_ankle_pitch"
+  ],
+  "keyframes": [
+    {
+      "name": "pose_1_right_swing",
+      "support_mode": "double",
+      "joint_targets": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_steps": 60,
+      "note": "right swing source pose_1"
+    },
+    {
+      "name": "pose_2_right_swing",
+      "support_mode": "left",
+      "joint_targets": [
+        0.0,
+        0.0,
+        0.40121951219512186,
+        -0.7554878048780487,
+        0.3371951219512195,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_steps": 60,
+      "note": "right swing source pose_2"
+    },
+    {
+      "name": "pose_3_right_swing",
+      "support_mode": "left",
+      "joint_targets": [
+        0.0,
+        0.027743902439024415,
+        0.28384146341463423,
+        -0.6146341463414634,
+        0.3371951219512195,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_steps": 60,
+      "note": "right swing source pose_3"
+    },
+    {
+      "name": "pose_4_right_swing",
+      "support_mode": "double",
+      "joint_targets": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_steps": 60,
+      "note": "right swing source pose_4"
+    },
+    {
+      "name": "pose_1_left_swing_mirror",
+      "support_mode": "double",
+      "joint_targets": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -0.0,
+        -0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_steps": 60,
+      "note": "mirrored from right swing pose_1"
+    },
+    {
+      "name": "pose_2_left_swing_mirror",
+      "support_mode": "right",
+      "joint_targets": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -0.0,
+        -0.0,
+        0.40121951219512186,
+        -0.7554878048780487,
+        0.3371951219512195
+      ],
+      "duration_steps": 60,
+      "note": "mirrored from right swing pose_2"
+    },
+    {
+      "name": "pose_3_left_swing_mirror",
+      "support_mode": "right",
+      "joint_targets": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -0.0,
+        -0.027743902439024415,
+        0.28384146341463423,
+        -0.6146341463414634,
+        0.3371951219512195
+      ],
+      "duration_steps": 60,
+      "note": "mirrored from right swing pose_3"
+    },
+    {
+      "name": "pose_4_left_swing_mirror",
+      "support_mode": "double",
+      "joint_targets": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -0.0,
+        -0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "duration_steps": 60,
+      "note": "mirrored from right swing pose_4"
+    }
+  ]
+}

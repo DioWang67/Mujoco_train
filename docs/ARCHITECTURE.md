@@ -109,17 +109,18 @@ private_assets/sedon/training_scene.xml
 Only commit reproducible tools and non-secret config. Do not commit company
 robot geometry unless explicitly approved.
 
-Private assets are not included in normal release archives. To deploy a robot
-that requires ignored assets, use the explicit opt-in flag:
-
-```bash
-python -m tools.deploy_release --project-slug sedon --include-private-assets
-```
-
-The Windows wrapper exposes the same behavior:
+Private assets are not included in normal release archives. The current
+deployment path reuses already uploaded private assets through symlinks. To
+refresh private assets after they change, use the explicit opt-in flag:
 
 ```bat
-scripts\sedon_deploy_remote.bat
+scripts\remote_auto_deploy.bat --include-private-assets
+```
+
+Normal Windows deployment uses the env-driven deployer:
+
+```bat
+scripts\remote_auto_deploy.bat
 ```
 
 ## Tooling Policy
@@ -138,6 +139,7 @@ generic command already works:
 
 ```bat
 scripts\run_remote_train.bat <project-slug> [args...]
+python -m tools.remote_training --project <project-slug> --status
 scripts\tensorboard_tunnel.bat <project> <job> <port>
 ```
 

@@ -12,6 +12,7 @@ import numpy as np
 from sedon_baseline.env import SedonStandingConfig, SedonStandingEnv, load_sedon_config_from_env
 from tools.sedon_debug_common import (
     BASE_PROXY_GEOM,
+    DEFAULT_SCENE_PATH,
     DEBUG_OUT_DIR,
     FLOOR_GEOM,
     LEFT_FOOT_GEOM,
@@ -22,6 +23,7 @@ from tools.sedon_debug_common import (
     count_contacts,
     is_base_floor_contact,
     is_expected_floor_contact,
+    require_scene,
 )
 
 
@@ -48,6 +50,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--print-every", type=int, default=25)
     parser.add_argument("--out-csv", type=Path, default=DEFAULT_OUT_CSV)
+    parser.add_argument("--scene-path", type=Path, default=DEFAULT_SCENE_PATH)
     parser.add_argument(
         "--relaxed-foot",
         action="store_true",
@@ -148,7 +151,11 @@ def main(argv: list[str] | None = None) -> int:
         overrides["left_knee_safe_lower"] = args.left_knee_safe_range[0]
         overrides["left_knee_safe_upper"] = args.left_knee_safe_range[1]
     reward_config = SedonStandingConfig(**{**base_config.__dict__, **overrides})
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=reward_config)
+    env = SedonStandingEnv(
+        scene_path=require_scene(args.scene_path),
+        reset_noise_scale=0.0,
+        reward_config=reward_config,
+    )
     rows: list[dict[str, object]] = []
     pair_counter: Counter[tuple[str, str]] = Counter()
     unexpected_counter: Counter[str] = Counter()

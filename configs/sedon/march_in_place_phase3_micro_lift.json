@@ -1,0 +1,15 @@
+{
+  "task_mode": "march_in_place",
+  "march_curriculum_phase": 3,
+  "target_forward_velocity": 0.0,
+  "march_phase_steps": 60,
+  "march_load_transfer_ratio": 0.67,
+  "march_swing_unload_ratio": 0.22,
+  "march_micro_lift_height": 0.005,
+  "com_shift_lateral_target_magnitude": 0.022,
+  "com_shift_support_roll_amp": 0.032,
+  "com_shift_unload_hip_pitch_amp": 0.055,
+  "com_shift_unload_knee_pitch_amp": -0.065,
+  "com_shift_unload_ankle_pitch_amp": -0.028,
+  "action_joint_delta_scale": 0.06
+}

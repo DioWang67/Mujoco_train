@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
-import zipfile
+import json
+import os
 import re
+import zipfile
 from pathlib import Path
+
+from sedon_baseline.env import DEFAULT_SCENE_PATH, SedonStandingConfig
 
 
 def _extract_function_source(path: Path, function_name: str) -> str:
@@ -34,15 +38,24 @@ def _extract_function_source(path: Path, function_name: str) -> str:
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "sedon_baseline" / "eval.py"
 MODULE_GLOBALS = {
+    "json": json,
+    "os": os,
     "Path": Path,
+    "DEFAULT_SCENE_PATH": DEFAULT_SCENE_PATH,
+    "SedonStandingConfig": SedonStandingConfig,
     "zipfile": zipfile,
     "STEP_CHECKPOINT_RE": re.compile(r"sedon_ppo_(\d+)_steps\.zip$"),
 }
 exec(_extract_function_source(MODULE_PATH, "_is_valid_sb3_checkpoint"), MODULE_GLOBALS)
 exec(_extract_function_source(MODULE_PATH, "resolve_model_path"), MODULE_GLOBALS)
 exec(_extract_function_source(MODULE_PATH, "resolve_vecnorm_path"), MODULE_GLOBALS)
+exec(_extract_function_source(MODULE_PATH, "_load_train_config"), MODULE_GLOBALS)
+exec(_extract_function_source(MODULE_PATH, "_load_reward_config_from_train_config"), MODULE_GLOBALS)
+exec(_extract_function_source(MODULE_PATH, "_resolve_scene_path"), MODULE_GLOBALS)
 resolve_model_path = MODULE_GLOBALS["resolve_model_path"]
 resolve_vecnorm_path = MODULE_GLOBALS["resolve_vecnorm_path"]
+load_reward_config_from_train_config = MODULE_GLOBALS["_load_reward_config_from_train_config"]
+resolve_scene_path = MODULE_GLOBALS["_resolve_scene_path"]
 
 
 def _write_good_checkpoint(path: Path) -> None:
@@ -108,3 +121,58 @@ def test_resolve_vecnorm_path_prefers_best_model_vecnorm(tmp_path: Path) -> None
     resolved = resolve_vecnorm_path(models_root, model_path, explicit_vecnorm_path=None)
 
     assert resolved == best_vecnorm_path
+
+
+def test_load_reward_config_from_train_config_restores_gait_values(tmp_path: Path) -> None:
+    train_config_path = tmp_path / "train_config.json"
+    reward_config = SedonStandingConfig(
+        target_forward_velocity=0.03,
+        gait_hip_pitch_amp=-0.045,
+        action_joint_delta_scale=0.035,
+    )
+    train_config_path.write_text(
+        json.dumps({"reward_config": reward_config.__dict__}),
+        encoding="utf-8",
+    )
+
+    resolved = load_reward_config_from_train_config(train_config_path, required=True)
+
+    assert resolved.target_forward_velocity == 0.03
+    assert resolved.gait_hip_pitch_amp == -0.045
+    assert resolved.action_joint_delta_scale == 0.035
+
+
+def test_resolve_scene_path_prefers_explicit_path(tmp_path: Path) -> None:
+    train_config_path = tmp_path / "train_config.json"
+    train_scene = tmp_path / "from_train.xml"
+    explicit_scene = tmp_path / "explicit.xml"
+    train_config_path.write_text(
+        json.dumps({"scene_path": str(train_scene)}),
+        encoding="utf-8",
+    )
+
+    resolved = resolve_scene_path(
+        explicit_scene_path=explicit_scene,
+        train_config_path=train_config_path,
+        ignore_train_config=False,
+    )
+
+    assert resolved == explicit_scene
+
+
+def test_resolve_scene_path_uses_train_config_by_default(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.delenv("SEDON_SCENE_PATH", raising=False)
+    train_config_path = tmp_path / "train_config.json"
+    train_scene = tmp_path / "from_train.xml"
+    train_config_path.write_text(
+        json.dumps({"scene_path": str(train_scene)}),
+        encoding="utf-8",
+    )
+
+    resolved = resolve_scene_path(
+        explicit_scene_path=None,
+        train_config_path=train_config_path,
+        ignore_train_config=False,
+    )
+
+    assert resolved == train_scene
