@@ -1,0 +1,729 @@
+{
+  "schema_version": 1,
+  "tool_version": "duck-gait-reference-metadata-v1",
+  "generated_at": "2026-06-01T07:28:40+00:00",
+  "purpose": "Identify local Duck gait/reference motion source metadata for Sedon Duck-like gait preparation.",
+  "search_root": "D:\\Git\\robotlearning\\h1_mujoco\\references\\open_duck_mini",
+  "summary": {
+    "status": "NOT_FOUND",
+    "files_scanned": 69,
+    "candidate_count": 0,
+    "gait_period_available": false,
+    "clearance_available": false,
+    "joint_trajectory_available": false,
+    "task_space_reference_available": false,
+    "reason": "No validated gait/reference motion source found in local Duck reference files."
+  },
+  "candidates": [],
+  "scanned_files": [
+    {
+      "path": "references/open_duck_mini/duck_extraction_report.md",
+      "extension": ".md",
+      "size_bytes": 1124,
+      "classification": "not_candidate",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "No gait/reference keyword or supported motion data extension."
+    },
+    {
+      "path": "references/open_duck_mini/duck_robot_parameters.yaml",
+      "extension": ".yaml",
+      "size_bytes": 79864,
+      "classification": "not_candidate",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "No gait/reference keyword or supported motion data extension."
+    },
+    {
+      "path": "references/open_duck_mini/sedon_duck_joint_mapping.yaml",
+      "extension": ".yaml",
+      "size_bytes": 5153,
+      "classification": "not_candidate",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "No gait/reference keyword or supported motion data extension."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/antenna.part",
+      "extension": ".part",
+      "size_bytes": 386,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/antenna.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/body_back.part",
+      "extension": ".part",
+      "size_bytes": 388,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/body_back.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/body_front.part",
+      "extension": ".part",
+      "size_bytes": 389,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/body_front.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/body_middle_bottom.part",
+      "extension": ".part",
+      "size_bytes": 397,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/body_middle_bottom.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/body_middle_top.part",
+      "extension": ".part",
+      "size_bytes": 394,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/body_middle_top.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/foot_bottom_pla.part",
+      "extension": ".part",
+      "size_bytes": 394,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/foot_bottom_pla.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/foot_bottom_tpu.part",
+      "extension": ".part",
+      "size_bytes": 394,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/foot_bottom_tpu.stl",
+      "extension": ".stl",
+      "size_bytes": 1684,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/foot_side.part",
+      "extension": ".part",
+      "size_bytes": 388,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/foot_side.stl",
+      "extension": ".stl",
+      "size_bytes": 5184,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/foot_top.part",
+      "extension": ".part",
+      "size_bytes": 387,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/foot_top.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/head.part",
+      "extension": ".part",
+      "size_bytes": 383,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/head.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/head_bot_sheet.part",
+      "extension": ".part",
+      "size_bytes": 393,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/head_bot_sheet.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/head_pitch_to_yaw.part",
+      "extension": ".part",
+      "size_bytes": 396,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/head_pitch_to_yaw.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/head_yaw_to_roll.part",
+      "extension": ".part",
+      "size_bytes": 395,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/head_yaw_to_roll.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/hfield.png",
+      "extension": ".png",
+      "size_bytes": 169681,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/left_antenna_holder.part",
+      "extension": ".part",
+      "size_bytes": 398,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/left_antenna_holder.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/left_cache.part",
+      "extension": ".part",
+      "size_bytes": 389,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/left_cache.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/left_knee_to_ankle_left_sheet.part",
+      "extension": ".part",
+      "size_bytes": 408,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/left_knee_to_ankle_left_sheet.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/left_knee_to_ankle_right_sheet.part",
+      "extension": ".part",
+      "size_bytes": 409,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/left_knee_to_ankle_right_sheet.stl",
+      "extension": ".stl",
+      "size_bytes": 5084,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/left_roll_to_pitch.part",
+      "extension": ".part",
+      "size_bytes": 397,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/left_roll_to_pitch.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/leg_spacer.part",
+      "extension": ".part",
+      "size_bytes": 389,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/leg_spacer.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/neck_left_sheet.part",
+      "extension": ".part",
+      "size_bytes": 394,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/neck_left_sheet.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/neck_right_sheet.part",
+      "extension": ".part",
+      "size_bytes": 395,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/neck_right_sheet.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/right_antenna_holder.part",
+      "extension": ".part",
+      "size_bytes": 399,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/right_antenna_holder.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/right_cache.part",
+      "extension": ".part",
+      "size_bytes": 390,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/right_cache.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/right_roll_to_pitch.part",
+      "extension": ".part",
+      "size_bytes": 398,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/right_roll_to_pitch.stl",
+      "extension": ".stl",
+      "size_bytes": 5184,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/roll_motor_bottom.part",
+      "extension": ".part",
+      "size_bytes": 396,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/roll_motor_bottom.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/roll_motor_top.part",
+      "extension": ".part",
+      "size_bytes": 393,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/roll_motor_top.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/trunk_bottom.part",
+      "extension": ".part",
+      "size_bytes": 391,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/trunk_bottom.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/trunk_top.part",
+      "extension": ".part",
+      "size_bytes": 388,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/assets/trunk_top.stl",
+      "extension": ".stl",
+      "size_bytes": 5284,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/config.json",
+      "extension": ".json",
+      "size_bytes": 1595,
+      "classification": "not_candidate",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "No gait/reference keyword or supported motion data extension."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/joints_properties.xml",
+      "extension": ".xml",
+      "size_bytes": 481,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/open_duck_mini_v2.xml",
+      "extension": ".xml",
+      "size_bytes": 32837,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/open_duck_mini_v2_backlash.xml",
+      "extension": ".xml",
+      "size_bytes": 33917,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/scene_flat_terrain.xml",
+      "extension": ".xml",
+      "size_bytes": 2241,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/scene_flat_terrain_backlash.xml",
+      "extension": ".xml",
+      "size_bytes": 2286,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/scene_rough_terrain_backlash.xml",
+      "extension": ".xml",
+      "size_bytes": 1886,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/sensors.xml",
+      "extension": ".xml",
+      "size_bytes": 1045,
+      "classification": "robot_structure_or_asset",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "Robot XML/mesh/asset file; no motion timing or trajectory evidence."
+    },
+    {
+      "path": "references/open_duck_mini/source_manifest.yaml",
+      "extension": ".yaml",
+      "size_bytes": 596,
+      "classification": "not_candidate",
+      "candidate": false,
+      "source": "local repository file scan",
+      "confidence": "high",
+      "reason": "No gait/reference keyword or supported motion data extension."
+    }
+  ],
+  "manual_required": [
+    {
+      "field": "duck_gait_period",
+      "reason": "Not present in robot XML/source files scanned."
+    },
+    {
+      "field": "duck_step_clearance",
+      "reason": "Not present in robot XML/source files scanned."
+    },
+    {
+      "field": "duck_reference_motion",
+      "reason": "No validated local trajectory/controller/reference file identified."
+    }
+  ],
+  "safety_notes": [
+    "Do not infer gait period or clearance from robot morphology XML.",
+    "Do not treat scene XML files as gait references.",
+    "Do not transfer any Duck joint trajectory without a validated source."
+  ]
+}
