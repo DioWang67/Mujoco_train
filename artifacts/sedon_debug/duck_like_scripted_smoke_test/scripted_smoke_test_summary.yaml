@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "tool_version": "sedon-duck-like-scripted-smoke-test-v1",
+  "generated_at": "2026-06-01T07:35:21+00:00",
+  "purpose": "Gated scripted MuJoCo smoke test for Sedon Duck-like gait readiness.",
+  "sources": {
+    "ik_feasibility_summary": "D:\\Git\\robotlearning\\h1_mujoco\\artifacts\\sedon_debug\\duck_like_ik_feasibility\\ik_feasibility_summary.yaml"
+  },
+  "summary": {
+    "status": "BLOCKED",
+    "mujoco_executed": false,
+    "walking_success": false,
+    "blockers": [
+      "duck_gait_reference_source_missing",
+      "joint_sign_validation_missing",
+      "sedon_contact_simulation_validation_missing",
+      "task_space_foot_path_missing",
+      "ik_feasibility_missing"
+    ],
+    "reason": "Smoke test was not run because IK feasibility is not available."
+  },
+  "checks": [
+    {
+      "name": "ik_feasible",
+      "value": false,
+      "passed": false,
+      "confidence": "high",
+      "source": "D:\\Git\\robotlearning\\h1_mujoco\\artifacts\\sedon_debug\\duck_like_ik_feasibility\\ik_feasibility_summary.yaml"
+    },
+    {
+      "name": "mujoco_smoke_execution",
+      "value": null,
+      "passed": false,
+      "confidence": "manual_required",
+      "source": null,
+      "reason": "Blocked before simulation execution."
+    }
+  ],
+  "required_before_smoke_test": [
+    "IK feasible task-space reference",
+    "validated contact patch behavior",
+    "scripted non-training controller target"
+  ],
+  "safety_notes": [
+    "No walking success is claimed.",
+    "No PPO/reward/training code is modified.",
+    "No Duck joint trajectory is applied."
+  ]
+}
