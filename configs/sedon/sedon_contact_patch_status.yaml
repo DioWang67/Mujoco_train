@@ -1,0 +1,323 @@
+{
+  "schema_version": 1,
+  "tool_version": "sedon-contact-patch-readiness-v1",
+  "generated_at": "2026-06-01T07:26:31+00:00",
+  "purpose": "Read-only Sedon foot contact patch readiness for Duck-like gait preparation.",
+  "sources": {
+    "sedon_parameters": "D:\\Git\\robotlearning\\h1_mujoco\\configs\\sedon\\sedon_robot_parameters.yaml",
+    "source_xml": "D:\\Git\\robotlearning\\h1_mujoco\\private_assets\\sedon\\training_scene.xml"
+  },
+  "summary": {
+    "status": "INCONCLUSIVE",
+    "total_geoms": 14,
+    "foot_related_geoms": 4,
+    "candidate_support_patches": 2,
+    "candidate_support_sides": [
+      "left",
+      "right"
+    ],
+    "bilateral_candidate_support": true,
+    "contact_simulation_validated": false,
+    "reason": "Bilateral explicit foot collision boxes exist, but actual support/contact patch behavior is not validated by XML-only inspection."
+  },
+  "geoms": [
+    {
+      "name": "floor",
+      "body": "worldbody",
+      "side": "unknown",
+      "type": "plane",
+      "size": [
+        2.0,
+        2.0,
+        0.05
+      ],
+      "box_full_extents_m": null,
+      "pos": null,
+      "contype": null,
+      "conaffinity": null,
+      "foot_related": false,
+      "role": "non_foot",
+      "readiness": "not_applicable",
+      "confidence": "high",
+      "source": "Sedon extracted geom fields from XML.",
+      "reason": "Not selected by foot-related name heuristic."
+    },
+    {
+      "name": "base_proxy",
+      "body": "base_link",
+      "side": "unknown",
+      "type": "ellipsoid",
+      "size": [
+        0.17,
+        0.11,
+        0.1
+      ],
+      "box_full_extents_m": null,
+      "pos": [
+        -0.02,
+        0.0,
+        -0.08
+      ],
+      "contype": null,
+      "conaffinity": null,
+      "foot_related": false,
+      "role": "non_foot",
+      "readiness": "not_applicable",
+      "confidence": "high",
+      "source": "Sedon extracted geom fields from XML.",
+      "reason": "Not selected by foot-related name heuristic."
+    },
+    {
+      "name": "R_link_hip_yaw",
+      "body": "R_link_hip_yaw",
+      "side": "right",
+      "type": "mesh",
+      "size": null,
+      "box_full_extents_m": null,
+      "pos": null,
+      "contype": 0.0,
+      "conaffinity": 0.0,
+      "foot_related": false,
+      "role": "non_foot",
+      "readiness": "not_applicable",
+      "confidence": "high",
+      "source": "Sedon extracted geom fields from XML.",
+      "reason": "Not selected by foot-related name heuristic."
+    },
+    {
+      "name": "R_link_hip_roll",
+      "body": "R_link_hip_roll",
+      "side": "right",
+      "type": "mesh",
+      "size": null,
+      "box_full_extents_m": null,
+      "pos": null,
+      "contype": 0.0,
+      "conaffinity": 0.0,
+      "foot_related": false,
+      "role": "non_foot",
+      "readiness": "not_applicable",
+      "confidence": "high",
+      "source": "Sedon extracted geom fields from XML.",
+      "reason": "Not selected by foot-related name heuristic."
+    },
+    {
+      "name": "R_link_hip_pitch",
+      "body": "R_link_hip_pitch",
+      "side": "right",
+      "type": "mesh",
+      "size": null,
+      "box_full_extents_m": null,
+      "pos": null,
+      "contype": 0.0,
+      "conaffinity": 0.0,
+      "foot_related": false,
+      "role": "non_foot",
+      "readiness": "not_applicable",
+      "confidence": "high",
+      "source": "Sedon extracted geom fields from XML.",
+      "reason": "Not selected by foot-related name heuristic."
+    },
+    {
+      "name": "R_link_knee_pitch",
+      "body": "R_link_knee_pitch",
+      "side": "right",
+      "type": "mesh",
+      "size": null,
+      "box_full_extents_m": null,
+      "pos": null,
+      "contype": 0.0,
+      "conaffinity": 0.0,
+      "foot_related": false,
+      "role": "non_foot",
+      "readiness": "not_applicable",
+      "confidence": "high",
+      "source": "Sedon extracted geom fields from XML.",
+      "reason": "Not selected by foot-related name heuristic."
+    },
+    {
+      "name": "R_link_ankle_pitch",
+      "body": "R_link_ankle_pitch",
+      "side": "right",
+      "type": "mesh",
+      "size": null,
+      "box_full_extents_m": null,
+      "pos": null,
+      "contype": 0.0,
+      "conaffinity": 0.0,
+      "foot_related": true,
+      "role": "foot_related_non_support_or_visual_candidate",
+      "readiness": "manual_required",
+      "confidence": "low",
+      "source": "Sedon extracted geom fields from XML.",
+      "reason": "Name heuristic marks this foot-related, but it is not an explicit foot collision box."
+    },
+    {
+      "name": "R_foot_collision",
+      "body": "R_link_ankle_pitch",
+      "side": "right",
+      "type": "box",
+      "size": [
+        0.07,
+        0.04,
+        0.025
+      ],
+      "box_full_extents_m": [
+        0.14,
+        0.08,
+        0.05
+      ],
+      "pos": [
+        0.025,
+        0.025,
+        -0.054
+      ],
+      "contype": null,
+      "conaffinity": null,
+      "foot_related": true,
+      "role": "candidate_support_patch",
+      "readiness": "needs_sim_contact_validation",
+      "confidence": "medium",
+      "source": "Sedon extracted geom fields from XML.",
+      "reason": "Explicit foot collision box is likely support contact, but contact behavior has not been simulated in this phase."
+    },
+    {
+      "name": "L_link_hip_yaw",
+      "body": "L_link_hip_yaw",
+      "side": "left",
+      "type": "mesh",
+      "size": null,
+      "box_full_extents_m": null,
+      "pos": null,
+      "contype": 0.0,
+      "conaffinity": 0.0,
+      "foot_related": false,
+      "role": "non_foot",
+      "readiness": "not_applicable",
+      "confidence": "high",
+      "source": "Sedon extracted geom fields from XML.",
+      "reason": "Not selected by foot-related name heuristic."
+    },
+    {
+      "name": "L_link_hip_roll",
+      "body": "L_link_hip_roll",
+      "side": "left",
+      "type": "mesh",
+      "size": null,
+      "box_full_extents_m": null,
+      "pos": null,
+      "contype": 0.0,
+      "conaffinity": 0.0,
+      "foot_related": false,
+      "role": "non_foot",
+      "readiness": "not_applicable",
+      "confidence": "high",
+      "source": "Sedon extracted geom fields from XML.",
+      "reason": "Not selected by foot-related name heuristic."
+    },
+    {
+      "name": "L_link_hip_pitch",
+      "body": "L_link_hip_pitch",
+      "side": "left",
+      "type": "mesh",
+      "size": null,
+      "box_full_extents_m": null,
+      "pos": null,
+      "contype": 0.0,
+      "conaffinity": 0.0,
+      "foot_related": false,
+      "role": "non_foot",
+      "readiness": "not_applicable",
+      "confidence": "high",
+      "source": "Sedon extracted geom fields from XML.",
+      "reason": "Not selected by foot-related name heuristic."
+    },
+    {
+      "name": "L_link_knee_pitch",
+      "body": "L_link_knee_pitch",
+      "side": "left",
+      "type": "mesh",
+      "size": null,
+      "box_full_extents_m": null,
+      "pos": null,
+      "contype": 0.0,
+      "conaffinity": 0.0,
+      "foot_related": false,
+      "role": "non_foot",
+      "readiness": "not_applicable",
+      "confidence": "high",
+      "source": "Sedon extracted geom fields from XML.",
+      "reason": "Not selected by foot-related name heuristic."
+    },
+    {
+      "name": "L_link_ankle_pitch",
+      "body": "L_link_ankle_pitch",
+      "side": "left",
+      "type": "mesh",
+      "size": null,
+      "box_full_extents_m": null,
+      "pos": null,
+      "contype": 0.0,
+      "conaffinity": 0.0,
+      "foot_related": true,
+      "role": "foot_related_non_support_or_visual_candidate",
+      "readiness": "manual_required",
+      "confidence": "low",
+      "source": "Sedon extracted geom fields from XML.",
+      "reason": "Name heuristic marks this foot-related, but it is not an explicit foot collision box."
+    },
+    {
+      "name": "L_foot_collision",
+      "body": "L_link_ankle_pitch",
+      "side": "left",
+      "type": "box",
+      "size": [
+        0.07,
+        0.04,
+        0.025
+      ],
+      "box_full_extents_m": [
+        0.14,
+        0.08,
+        0.05
+      ],
+      "pos": [
+        0.025,
+        -0.025,
+        -0.054
+      ],
+      "contype": null,
+      "conaffinity": null,
+      "foot_related": true,
+      "role": "candidate_support_patch",
+      "readiness": "needs_sim_contact_validation",
+      "confidence": "medium",
+      "source": "Sedon extracted geom fields from XML.",
+      "reason": "Explicit foot collision box is likely support contact, but contact behavior has not been simulated in this phase."
+    }
+  ],
+  "manual_required": [
+    {
+      "field": "support_contact_behavior",
+      "reason": "Requires MuJoCo contact inspection under stance/swing states."
+    },
+    {
+      "field": "contact_patch_extent_world_frame",
+      "reason": "XML local box dimensions do not prove world-frame contact footprint under pose."
+    },
+    {
+      "field": "duck_contact_patch_equivalence",
+      "reason": "Duck foot is mesh based; Sedon box support cannot be assumed equivalent."
+    }
+  ],
+  "safe_reference_fields": [
+    "Sedon foot collision geom names",
+    "Sedon foot collision box full extents",
+    "left/right candidate support patch existence"
+  ],
+  "not_safe_to_claim": [
+    "stable contact",
+    "Duck-equivalent contact patch",
+    "walking success"
+  ]
+}
