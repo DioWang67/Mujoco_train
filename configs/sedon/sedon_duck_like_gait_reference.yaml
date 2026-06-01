@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "tool_version": "sedon-duck-like-task-space-reference-v1",
+  "generated_at": "2026-06-01T07:30:57+00:00",
+  "purpose": "Duck-like task-space gait reference skeleton for Sedon readiness workflow.",
+  "sources": {
+    "scale_mapping": "D:\\Git\\robotlearning\\h1_mujoco\\configs\\sedon\\sedon_duck_scale_mapping.yaml",
+    "joint_sign_mapping": "D:\\Git\\robotlearning\\h1_mujoco\\configs\\sedon\\sedon_duck_joint_sign_mapping.yaml",
+    "contact_patch_status": "D:\\Git\\robotlearning\\h1_mujoco\\configs\\sedon\\sedon_contact_patch_status.yaml",
+    "duck_gait_reference_metadata": "D:\\Git\\robotlearning\\h1_mujoco\\references\\open_duck_mini\\duck_gait_reference_metadata.yaml"
+  },
+  "summary": {
+    "status": "BLOCKED",
+    "direct_joint_trajectory_transfer_allowed": false,
+    "training_or_reward_change_allowed": false,
+    "blockers": [
+      "duck_gait_reference_source_missing",
+      "joint_sign_validation_missing",
+      "sedon_contact_simulation_validation_missing"
+    ],
+    "reason": "Reference remains a skeleton because required Duck gait source/sign/contact validations are incomplete."
+  },
+  "normalization_references": {
+    "explicit_body_mass_ratio_sedon_to_duck": {
+      "value": 4.767319,
+      "source": "configs/sedon/sedon_duck_scale_mapping.yaml",
+      "confidence": "high"
+    },
+    "base_height_ratio_sedon_to_duck": {
+      "value": 2.090909,
+      "source": "configs/sedon/sedon_duck_scale_mapping.yaml",
+      "confidence": "medium"
+    },
+    "hip_lateral_spacing_ratio_sedon_to_duck": {
+      "value": 1.735714,
+      "source": "configs/sedon/sedon_duck_scale_mapping.yaml",
+      "confidence": "medium"
+    },
+    "local_leg_chain_path_ratio_sedon_to_duck": {
+      "value": 1.426835,
+      "source": "configs/sedon/sedon_duck_scale_mapping.yaml",
+      "confidence": "low"
+    }
+  },
+  "task_space_reference": {
+    "gait_period_s": {
+      "value": null,
+      "source": null,
+      "confidence": "manual_required",
+      "reason": "No validated Duck gait/reference motion source found."
+    },
+    "stance_ratio": {
+      "value": null,
+      "source": null,
+      "confidence": "manual_required",
+      "reason": "No validated Duck gait/reference motion source found."
+    },
+    "swing_clearance_m": {
+      "value": null,
+      "source": null,
+      "confidence": "manual_required",
+      "reason": "No validated Duck gait/reference motion source found."
+    },
+    "foot_path": {
+      "value": null,
+      "source": null,
+      "confidence": "manual_required",
+      "reason": "No validated Duck task-space foot path source found."
+    },
+    "body_motion_targets": {
+      "value": null,
+      "source": null,
+      "confidence": "manual_required",
+      "reason": "No validated Duck body motion source found."
+    }
+  },
+  "required_before_use": [
+    "validated Duck gait/reference motion source",
+    "joint sign validation",
+    "Sedon contact simulation validation",
+    "scripted smoke test"
+  ],
+  "safety_notes": [
+    "This file is not a controller.",
+    "Do not use this skeleton as a joint trajectory.",
+    "Do not modify PPO/reward/training from this skeleton."
+  ]
+}
