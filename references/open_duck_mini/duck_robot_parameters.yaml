@@ -1,0 +1,3633 @@
+{
+  "schema_version": 1,
+  "tool_version": "sedon-parameter-extractor-v1",
+  "extracted_at": "2026-06-01T06:42:42+00:00",
+  "robot_name": "open_duck_mini",
+  "source_xml": "references\\open_duck_mini\\source\\playground_open_duck_mini_v2\\xmls\\open_duck_mini_v2.xml",
+  "model": "open_duck_mini_v2",
+  "compiler": {
+    "angle": "radian",
+    "meshdir": "assets"
+  },
+  "option": {
+    "iterations": "1",
+    "ls_iterations": "5"
+  },
+  "defaults": {
+    "actuators": {
+      "open_duck_mini_v2": {
+        "position": {
+          "kp": 50.0,
+          "dampratio": 1.0
+        }
+      },
+      "visual": {},
+      "collision": {},
+      "sts3215": {
+        "position": {
+          "kp": 13.37,
+          "kv": 0.0,
+          "forcerange": [
+            -3.23,
+            3.23
+          ]
+        }
+      },
+      "backlash": {}
+    }
+  },
+  "counts": {
+    "bodies": 16,
+    "joints": 15,
+    "geoms": 46,
+    "actuators": 14,
+    "foot_related_bodies": 6,
+    "foot_related_joints": 6,
+    "foot_related_geoms": 28
+  },
+  "summary": {
+    "total_explicit_body_mass": 2.1071407,
+    "body_mass_count": 15,
+    "joint_types": {
+      "freejoint": 1,
+      "hinge": 14
+    },
+    "geom_types": {
+      "mesh": 46
+    },
+    "actuator_kinds": {
+      "position": 14
+    },
+    "unknown_notes": [
+      "Values omitted by the source MJCF are null.",
+      "MuJoCo defaults and compiled inertias are not inferred by this XML extractor.",
+      "Foot-related fields use a name heuristic and should be manually reviewed."
+    ]
+  },
+  "bodies": [
+    {
+      "name": "base",
+      "parent": "worldbody",
+      "depth": 0,
+      "pos": [
+        0.0,
+        0.0,
+        0.22
+      ],
+      "quat": null,
+      "euler": null,
+      "mocap": null,
+      "inertial": {
+        "pos": null,
+        "mass": null,
+        "diaginertia": null,
+        "fullinertia": null,
+        "quat": null
+      },
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "trunk_assembly",
+      "parent": "base",
+      "depth": 1,
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "quat": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "euler": null,
+      "mocap": null,
+      "inertial": {
+        "pos": [
+          -0.0483259,
+          -9.97823e-05,
+          0.0384971
+        ],
+        "mass": 0.698526,
+        "diaginertia": null,
+        "fullinertia": [
+          0.00167701,
+          0.00344479,
+          0.00292635,
+          -1.31662e-05,
+          -3.24953e-05,
+          -2.15581e-06
+        ],
+        "quat": null
+      },
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "hip_roll_assembly",
+      "parent": "trunk_assembly",
+      "depth": 2,
+      "pos": [
+        -0.019,
+        0.035,
+        0.0459409
+      ],
+      "quat": [
+        1.0,
+        -1.17663e-16,
+        -1.09357e-14,
+        2.77556e-17
+      ],
+      "euler": null,
+      "mocap": null,
+      "inertial": {
+        "pos": [
+          0.000795081,
+          -5.46541e-06,
+          -0.03306
+        ],
+        "mass": 0.06648,
+        "diaginertia": null,
+        "fullinertia": [
+          2.44411e-05,
+          2.81818e-05,
+          1.42687e-05,
+          2.35658e-09,
+          -3.81059e-07,
+          -7.50036e-09
+        ],
+        "quat": null
+      },
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "left_roll_to_pitch_assembly",
+      "parent": "hip_roll_assembly",
+      "depth": 3,
+      "pos": [
+        0.01905,
+        4.61436e-15,
+        -0.046015
+      ],
+      "quat": [
+        0.5,
+        -0.5,
+        -0.5,
+        0.5
+      ],
+      "euler": null,
+      "mocap": null,
+      "inertial": {
+        "pos": [
+          0.0508042,
+          -0.00041105,
+          0.0204704
+        ],
+        "mass": 0.07516,
+        "diaginertia": null,
+        "fullinertia": [
+          2.52335e-05,
+          4.13855e-05,
+          2.8127e-05,
+          1.22133e-07,
+          -5.90499e-07,
+          -1.07544e-07
+        ],
+        "quat": null
+      },
+      "foot_related": false,
+      "side": "left"
+    },
+    {
+      "name": "knee_and_ankle_assembly",
+      "parent": "left_roll_to_pitch_assembly",
+      "depth": 4,
+      "pos": [
+        0.07415,
+        -3.25261e-17,
+        0.03511
+      ],
+      "quat": [
+        8.49887e-24,
+        -0.707107,
+        -1.11022e-16,
+        0.707107
+      ],
+      "euler": null,
+      "mocap": null,
+      "inertial": {
+        "pos": [
+          0.00253369,
+          -0.0390636,
+          0.0102776
+        ],
+        "mass": 0.12407,
+        "diaginertia": null,
+        "fullinertia": [
+          0.000211406,
+          7.83759e-05,
+          0.000225619,
+          -2.68706e-05,
+          3.81906e-06,
+          2.08009e-05
+        ],
+        "quat": null
+      },
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "knee_and_ankle_assembly_2",
+      "parent": "knee_and_ankle_assembly",
+      "depth": 5,
+      "pos": [
+        0.0,
+        -0.07865,
+        0.0001
+      ],
+      "quat": [
+        1.0,
+        1.11022e-16,
+        1.11022e-16,
+        -2.64698e-23
+      ],
+      "euler": null,
+      "mocap": null,
+      "inertial": {
+        "pos": [
+          5.01859e-06,
+          -0.0577465,
+          0.0181136
+        ],
+        "mass": 0.07259,
+        "diaginertia": null,
+        "fullinertia": [
+          4.99575e-05,
+          1.87273e-05,
+          4.23932e-05,
+          1.03817e-08,
+          2.25175e-09,
+          8.81049e-08
+        ],
+        "quat": null
+      },
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "foot_assembly",
+      "parent": "knee_and_ankle_assembly_2",
+      "depth": 6,
+      "pos": [
+        1.8735e-16,
+        -0.07865,
+        0.0001
+      ],
+      "quat": [
+        1.0,
+        2.77556e-16,
+        5.55112e-16,
+        1.52656e-16
+      ],
+      "euler": null,
+      "mocap": null,
+      "inertial": {
+        "pos": [
+          0.0110718,
+          -0.0246608,
+          0.0190626
+        ],
+        "mass": 0.07524,
+        "diaginertia": null,
+        "fullinertia": [
+          1.87482e-05,
+          6.74427e-05,
+          6.061e-05,
+          1.58839e-06,
+          -6.52354e-09,
+          5.67391e-08
+        ],
+        "quat": null
+      },
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "neck_pitch_assembly",
+      "parent": "trunk_assembly",
+      "depth": 2,
+      "pos": [
+        0.001,
+        0.01915,
+        0.0900009
+      ],
+      "quat": [
+        0.707107,
+        0.707107,
+        -7.88258e-15,
+        7.79925e-15
+      ],
+      "euler": null,
+      "mocap": null,
+      "inertial": {
+        "pos": [
+          -5.63137e-06,
+          0.0492968,
+          0.0181786
+        ],
+        "mass": 0.06618,
+        "diaginertia": null,
+        "fullinertia": [
+          3.49456e-05,
+          1.70231e-05,
+          2.80043e-05,
+          8.75633e-09,
+          -2.15592e-09,
+          -1.85188e-08
+        ],
+        "quat": null
+      },
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "head_pitch_to_yaw",
+      "parent": "neck_pitch_assembly",
+      "depth": 3,
+      "pos": [
+        -2.9924e-17,
+        0.066,
+        -6.93889e-18
+      ],
+      "quat": [
+        1.0,
+        -1.7203e-16,
+        0.0,
+        1.10553e-17
+      ],
+      "euler": null,
+      "mocap": null,
+      "inertial": {
+        "pos": [
+          -0.00766247,
+          0.026015,
+          0.0186681
+        ],
+        "mass": 0.0169378,
+        "diaginertia": null,
+        "fullinertia": [
+          9.43036e-06,
+          4.64763e-06,
+          8.02915e-06,
+          1.35195e-06,
+          3.05899e-08,
+          -8.42802e-08
+        ],
+        "quat": null
+      },
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "neck_yaw_assembly",
+      "parent": "head_pitch_to_yaw",
+      "depth": 4,
+      "pos": [
+        -4.33681e-19,
+        0.057,
+        0.01905
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        1.11022e-16,
+        -5.88785e-17
+      ],
+      "euler": null,
+      "mocap": null,
+      "inertial": {
+        "pos": [
+          0.00412907,
+          3.95745e-06,
+          -0.0222828
+        ],
+        "mass": 0.0918099,
+        "diaginertia": null,
+        "fullinertia": [
+          3.11706e-05,
+          6.94935e-05,
+          7.04025e-05,
+          4.29429e-09,
+          -4.41251e-06,
+          -3.82028e-09
+        ],
+        "quat": null
+      },
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "head_assembly",
+      "parent": "neck_yaw_assembly",
+      "depth": 5,
+      "pos": [
+        0.04095,
+        2.1764e-16,
+        -0.01915
+      ],
+      "quat": [
+        0.707107,
+        2.89132e-14,
+        -0.707107,
+        -2.86438e-14
+      ],
+      "euler": null,
+      "mocap": null,
+      "inertial": {
+        "pos": [
+          0.00815416,
+          -0.00390754,
+          0.0227726
+        ],
+        "mass": 0.406607,
+        "diaginertia": null,
+        "fullinertia": [
+          0.00244627,
+          0.0016864,
+          0.00108002,
+          -2.02404e-06,
+          9.2382e-05,
+          -1.84944e-05
+        ],
+        "quat": null
+      },
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "hip_roll_assembly_2",
+      "parent": "trunk_assembly",
+      "depth": 2,
+      "pos": [
+        -0.019,
+        -0.035,
+        0.0459409
+      ],
+      "quat": [
+        1.0,
+        -4.25414e-16,
+        -1.07137e-14,
+        2.77556e-17
+      ],
+      "euler": null,
+      "mocap": null,
+      "inertial": {
+        "pos": [
+          0.000795081,
+          -5.46541e-06,
+          -0.03306
+        ],
+        "mass": 0.06648,
+        "diaginertia": null,
+        "fullinertia": [
+          2.44411e-05,
+          2.81818e-05,
+          1.42687e-05,
+          2.35658e-09,
+          -3.81059e-07,
+          -7.50036e-09
+        ],
+        "quat": null
+      },
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "right_roll_to_pitch_assembly",
+      "parent": "hip_roll_assembly_2",
+      "depth": 3,
+      "pos": [
+        0.01905,
+        4.05787e-14,
+        -0.046015
+      ],
+      "quat": [
+        0.5,
+        -0.5,
+        -0.5,
+        0.5
+      ],
+      "euler": null,
+      "mocap": null,
+      "inertial": {
+        "pos": [
+          -0.0508042,
+          -0.000420742,
+          0.0204704
+        ],
+        "mass": 0.07516,
+        "diaginertia": null,
+        "fullinertia": [
+          2.52329e-05,
+          4.13855e-05,
+          2.81264e-05,
+          -1.30528e-07,
+          5.90499e-07,
+          -9.13427e-08
+        ],
+        "quat": null
+      },
+      "foot_related": false,
+      "side": "right"
+    },
+    {
+      "name": "knee_and_ankle_assembly_3",
+      "parent": "right_roll_to_pitch_assembly",
+      "depth": 4,
+      "pos": [
+        -0.07415,
+        2.48437e-15,
+        0.03511
+      ],
+      "quat": [
+        0.707107,
+        6.41892e-22,
+        0.707107,
+        -2.22045e-16
+      ],
+      "euler": null,
+      "mocap": null,
+      "inertial": {
+        "pos": [
+          0.00253369,
+          0.0390636,
+          0.010809
+        ],
+        "mass": 0.12407,
+        "diaginertia": null,
+        "fullinertia": [
+          0.000212363,
+          7.93324e-05,
+          0.000225619,
+          2.68706e-05,
+          3.9656e-06,
+          -2.17407e-05
+        ],
+        "quat": null
+      },
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "knee_and_ankle_assembly_4",
+      "parent": "knee_and_ankle_assembly_3",
+      "depth": 5,
+      "pos": [
+        1.38778e-16,
+        0.07865,
+        0.037
+      ],
+      "quat": [
+        1.32068e-16,
+        1.0,
+        -1.10334e-26,
+        3.55346e-22
+      ],
+      "euler": null,
+      "mocap": null,
+      "inertial": {
+        "pos": [
+          5.01859e-06,
+          -0.0577465,
+          0.0181136
+        ],
+        "mass": 0.07259,
+        "diaginertia": null,
+        "fullinertia": [
+          4.99575e-05,
+          1.87273e-05,
+          4.23932e-05,
+          1.03817e-08,
+          2.25175e-09,
+          8.81049e-08
+        ],
+        "quat": null
+      },
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "foot_assembly_2",
+      "parent": "knee_and_ankle_assembly_4",
+      "depth": 6,
+      "pos": [
+        1.32533e-15,
+        -0.07865,
+        0.0001
+      ],
+      "quat": [
+        1.0,
+        3.88578e-16,
+        -3.33067e-16,
+        5.55111e-16
+      ],
+      "euler": null,
+      "mocap": null,
+      "inertial": {
+        "pos": [
+          0.0110718,
+          -0.0246608,
+          0.0190626
+        ],
+        "mass": 0.07524,
+        "diaginertia": null,
+        "fullinertia": [
+          1.87482e-05,
+          6.74427e-05,
+          6.061e-05,
+          1.58839e-06,
+          -6.52354e-09,
+          5.67391e-08
+        ],
+        "quat": null
+      },
+      "foot_related": true,
+      "side": "unknown"
+    }
+  ],
+  "joints": [
+    {
+      "name": "floating_base",
+      "body": "base",
+      "kind": "freejoint",
+      "type": "freejoint",
+      "axis": null,
+      "range": null,
+      "pos": null,
+      "limited": null,
+      "actuatorfrcrange": null,
+      "damping": null,
+      "stiffness": null,
+      "armature": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "left_hip_yaw",
+      "body": "hip_roll_assembly",
+      "kind": "joint",
+      "type": "hinge",
+      "axis": null,
+      "range": [
+        -0.5235987755982979,
+        0.5235987755982997
+      ],
+      "pos": null,
+      "limited": null,
+      "actuatorfrcrange": null,
+      "damping": null,
+      "stiffness": null,
+      "armature": null,
+      "foot_related": false,
+      "side": "left"
+    },
+    {
+      "name": "left_hip_roll",
+      "body": "left_roll_to_pitch_assembly",
+      "kind": "joint",
+      "type": "hinge",
+      "axis": null,
+      "range": [
+        -0.4363323129985815,
+        0.43633231299858327
+      ],
+      "pos": null,
+      "limited": null,
+      "actuatorfrcrange": null,
+      "damping": null,
+      "stiffness": null,
+      "armature": null,
+      "foot_related": false,
+      "side": "left"
+    },
+    {
+      "name": "left_hip_pitch",
+      "body": "knee_and_ankle_assembly",
+      "kind": "joint",
+      "type": "hinge",
+      "axis": null,
+      "range": [
+        -1.2217304763960306,
+        0.5235987755982988
+      ],
+      "pos": null,
+      "limited": null,
+      "actuatorfrcrange": null,
+      "damping": null,
+      "stiffness": null,
+      "armature": null,
+      "foot_related": true,
+      "side": "left"
+    },
+    {
+      "name": "left_knee",
+      "body": "knee_and_ankle_assembly_2",
+      "kind": "joint",
+      "type": "hinge",
+      "axis": null,
+      "range": [
+        -1.5707963267948966,
+        1.5707963267948966
+      ],
+      "pos": null,
+      "limited": null,
+      "actuatorfrcrange": null,
+      "damping": null,
+      "stiffness": null,
+      "armature": null,
+      "foot_related": true,
+      "side": "left"
+    },
+    {
+      "name": "left_ankle",
+      "body": "foot_assembly",
+      "kind": "joint",
+      "type": "hinge",
+      "axis": null,
+      "range": [
+        -1.5707963267948957,
+        1.5707963267948974
+      ],
+      "pos": null,
+      "limited": null,
+      "actuatorfrcrange": null,
+      "damping": null,
+      "stiffness": null,
+      "armature": null,
+      "foot_related": true,
+      "side": "left"
+    },
+    {
+      "name": "neck_pitch",
+      "body": "neck_pitch_assembly",
+      "kind": "joint",
+      "type": "hinge",
+      "axis": null,
+      "range": [
+        -0.3490658503988437,
+        1.1344640137963364
+      ],
+      "pos": null,
+      "limited": null,
+      "actuatorfrcrange": null,
+      "damping": null,
+      "stiffness": null,
+      "armature": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "head_pitch",
+      "body": "head_pitch_to_yaw",
+      "kind": "joint",
+      "type": "hinge",
+      "axis": null,
+      "range": [
+        -0.7853981633974483,
+        0.7853981633974483
+      ],
+      "pos": null,
+      "limited": null,
+      "actuatorfrcrange": null,
+      "damping": null,
+      "stiffness": null,
+      "armature": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "head_yaw",
+      "body": "neck_yaw_assembly",
+      "kind": "joint",
+      "type": "hinge",
+      "axis": null,
+      "range": [
+        -2.792526803190927,
+        2.792526803190927
+      ],
+      "pos": null,
+      "limited": null,
+      "actuatorfrcrange": null,
+      "damping": null,
+      "stiffness": null,
+      "armature": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "head_roll",
+      "body": "head_assembly",
+      "kind": "joint",
+      "type": "hinge",
+      "axis": null,
+      "range": [
+        -0.523598775598218,
+        0.5235987755983796
+      ],
+      "pos": null,
+      "limited": null,
+      "actuatorfrcrange": null,
+      "damping": null,
+      "stiffness": null,
+      "armature": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "right_hip_yaw",
+      "body": "hip_roll_assembly_2",
+      "kind": "joint",
+      "type": "hinge",
+      "axis": null,
+      "range": [
+        -0.523598775598297,
+        0.5235987755983006
+      ],
+      "pos": null,
+      "limited": null,
+      "actuatorfrcrange": null,
+      "damping": null,
+      "stiffness": null,
+      "armature": null,
+      "foot_related": false,
+      "side": "right"
+    },
+    {
+      "name": "right_hip_roll",
+      "body": "right_roll_to_pitch_assembly",
+      "kind": "joint",
+      "type": "hinge",
+      "axis": null,
+      "range": [
+        -0.4363323129985797,
+        0.43633231299858505
+      ],
+      "pos": null,
+      "limited": null,
+      "actuatorfrcrange": null,
+      "damping": null,
+      "stiffness": null,
+      "armature": null,
+      "foot_related": false,
+      "side": "right"
+    },
+    {
+      "name": "right_hip_pitch",
+      "body": "knee_and_ankle_assembly_3",
+      "kind": "joint",
+      "type": "hinge",
+      "axis": null,
+      "range": [
+        -0.5235987755982988,
+        1.2217304763960306
+      ],
+      "pos": null,
+      "limited": null,
+      "actuatorfrcrange": null,
+      "damping": null,
+      "stiffness": null,
+      "armature": null,
+      "foot_related": true,
+      "side": "right"
+    },
+    {
+      "name": "right_knee",
+      "body": "knee_and_ankle_assembly_4",
+      "kind": "joint",
+      "type": "hinge",
+      "axis": null,
+      "range": [
+        -1.5707963267948966,
+        1.5707963267948966
+      ],
+      "pos": null,
+      "limited": null,
+      "actuatorfrcrange": null,
+      "damping": null,
+      "stiffness": null,
+      "armature": null,
+      "foot_related": true,
+      "side": "right"
+    },
+    {
+      "name": "right_ankle",
+      "body": "foot_assembly_2",
+      "kind": "joint",
+      "type": "hinge",
+      "axis": null,
+      "range": [
+        -1.5707963267948957,
+        1.5707963267948974
+      ],
+      "pos": null,
+      "limited": null,
+      "actuatorfrcrange": null,
+      "damping": null,
+      "stiffness": null,
+      "armature": null,
+      "foot_related": true,
+      "side": "right"
+    }
+  ],
+  "geoms": [
+    {
+      "name": "body_front",
+      "body": "trunk_assembly",
+      "type": "mesh",
+      "mesh": "body_front",
+      "pos": [
+        -0.019,
+        0.0,
+        0.0648909
+      ],
+      "quat": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "body_back",
+      "body": "trunk_assembly",
+      "type": "mesh",
+      "mesh": "body_back",
+      "pos": [
+        -0.019,
+        3.46945e-18,
+        0.0648909
+      ],
+      "quat": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "body_middle_bottom",
+      "body": "trunk_assembly",
+      "type": "mesh",
+      "mesh": "body_middle_bottom",
+      "pos": [
+        -0.019,
+        -3.46945e-18,
+        0.0648909
+      ],
+      "quat": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "body_middle_top",
+      "body": "trunk_assembly",
+      "type": "mesh",
+      "mesh": "body_middle_top",
+      "pos": [
+        -0.019,
+        0.0,
+        0.0648909
+      ],
+      "quat": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "trunk_bottom",
+      "body": "trunk_assembly",
+      "type": "mesh",
+      "mesh": "trunk_bottom",
+      "pos": [
+        -0.019,
+        9.1073e-18,
+        0.0648909
+      ],
+      "quat": [
+        1.0,
+        -0.0,
+        -0.0,
+        5.42101e-20
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "trunk_top",
+      "body": "trunk_assembly",
+      "type": "mesh",
+      "mesh": "trunk_top",
+      "pos": [
+        -0.019,
+        -2.42428e-16,
+        0.0648909
+      ],
+      "quat": [
+        1.0,
+        -4.82108e-17,
+        -5.5355e-15,
+        2.77556e-17
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "roll_motor_bottom",
+      "body": "hip_roll_assembly",
+      "type": "mesh",
+      "mesh": "roll_motor_bottom",
+      "pos": [
+        -3.33067e-16,
+        -0.035,
+        0.01905
+      ],
+      "quat": [
+        1.0,
+        -4.38499e-16,
+        2.22045e-16,
+        -3.34802e-16
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "roll_motor_top",
+      "body": "hip_roll_assembly",
+      "type": "mesh",
+      "mesh": "roll_motor_top",
+      "pos": [
+        0.0,
+        -0.035,
+        0.01905
+      ],
+      "quat": [
+        1.0,
+        -0.0,
+        -1.80411e-16,
+        -4.16334e-17
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "left_roll_to_pitch",
+      "body": "left_roll_to_pitch_assembly",
+      "type": "mesh",
+      "mesh": "left_roll_to_pitch",
+      "pos": [
+        -0.035,
+        -0.065,
+        0.01905
+      ],
+      "quat": [
+        0.5,
+        0.5,
+        0.5,
+        -0.5
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "left"
+    },
+    {
+      "name": "left_cache",
+      "body": "knee_and_ankle_assembly",
+      "type": "mesh",
+      "mesh": "left_cache",
+      "pos": [
+        0.01606,
+        0.065,
+        0.10915
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        3.33067e-16,
+        5.76761e-16
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "left"
+    },
+    {
+      "name": "leg_spacer",
+      "body": "knee_and_ankle_assembly",
+      "type": "mesh",
+      "mesh": "leg_spacer",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10925
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        3.33067e-16,
+        5.94711e-16
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "left_knee_to_ankle_right_sheet",
+      "body": "knee_and_ankle_assembly",
+      "type": "mesh",
+      "mesh": "left_knee_to_ankle_right_sheet",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10915
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        0.0,
+        -5.93802e-24
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "left"
+    },
+    {
+      "name": "left_knee_to_ankle_left_sheet",
+      "body": "knee_and_ankle_assembly",
+      "type": "mesh",
+      "mesh": "left_knee_to_ankle_left_sheet",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10915
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        0.0,
+        5.12923e-30
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "left"
+    },
+    {
+      "name": "leg_spacer",
+      "body": "knee_and_ankle_assembly_2",
+      "type": "mesh",
+      "mesh": "leg_spacer",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10925
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        3.33067e-16,
+        5.72905e-16
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "left_knee_to_ankle_right_sheet",
+      "body": "knee_and_ankle_assembly_2",
+      "type": "mesh",
+      "mesh": "left_knee_to_ankle_right_sheet",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10915
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        0.0,
+        1.33119e-24
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "left"
+    },
+    {
+      "name": "left_knee_to_ankle_left_sheet",
+      "body": "knee_and_ankle_assembly_2",
+      "type": "mesh",
+      "mesh": "left_knee_to_ankle_left_sheet",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10915
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        0.0,
+        -5.36743e-30
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "left"
+    },
+    {
+      "name": "foot_side",
+      "body": "foot_assembly",
+      "type": "mesh",
+      "mesh": "foot_side",
+      "pos": [
+        0.01606,
+        0.2223,
+        0.10905
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        -0.0,
+        -4.61924e-30
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "foot_bottom_tpu",
+      "body": "foot_assembly",
+      "type": "mesh",
+      "mesh": "foot_bottom_tpu",
+      "pos": [
+        0.01656,
+        0.2228,
+        0.10955
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        -0.0,
+        1.72496e-18
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "left_foot_bottom_tpu",
+      "body": "foot_assembly",
+      "type": "mesh",
+      "mesh": "foot_bottom_tpu",
+      "pos": [
+        0.01656,
+        0.2228,
+        0.10955
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        -0.0,
+        1.72496e-18
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "left"
+    },
+    {
+      "name": "foot_bottom_pla",
+      "body": "foot_assembly",
+      "type": "mesh",
+      "mesh": "foot_bottom_pla",
+      "pos": [
+        0.01656,
+        0.2228,
+        0.10955
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        -0.0,
+        1.72496e-18
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "foot_top",
+      "body": "foot_assembly",
+      "type": "mesh",
+      "mesh": "foot_top",
+      "pos": [
+        0.01606,
+        0.2223,
+        0.10905
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        -0.0,
+        -4.61924e-30
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "neck_left_sheet",
+      "body": "neck_pitch_assembly",
+      "type": "mesh",
+      "mesh": "neck_left_sheet",
+      "pos": [
+        -0.02,
+        -0.02511,
+        0.01905
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        0.0,
+        -5.1423e-31
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "left"
+    },
+    {
+      "name": "neck_right_sheet",
+      "body": "neck_pitch_assembly",
+      "type": "mesh",
+      "mesh": "neck_right_sheet",
+      "pos": [
+        -0.02,
+        -0.02511,
+        0.01905
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        -0.0,
+        3.06492e-17
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "right"
+    },
+    {
+      "name": "head_pitch_to_yaw",
+      "body": "head_pitch_to_yaw",
+      "type": "mesh",
+      "mesh": "head_pitch_to_yaw",
+      "pos": [
+        -0.02,
+        -0.09111,
+        0.01905
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        0.0,
+        1.82143e-39
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "head_yaw_to_roll",
+      "body": "neck_yaw_assembly",
+      "type": "mesh",
+      "mesh": "head_yaw_to_roll",
+      "pos": [
+        -0.02,
+        1.4985e-16,
+        -0.14821
+      ],
+      "quat": [
+        1.0,
+        6.93889e-18,
+        -5.55112e-17,
+        7.04614e-17
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "right_antenna_holder",
+      "body": "head_assembly",
+      "type": "mesh",
+      "mesh": "right_antenna_holder",
+      "pos": [
+        -0.12906,
+        -2.4549e-16,
+        0.06095
+      ],
+      "quat": [
+        0.707107,
+        5.22659e-16,
+        0.707107,
+        3.88578e-15
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "right"
+    },
+    {
+      "name": "antenna",
+      "body": "head_assembly",
+      "type": "mesh",
+      "mesh": "antenna",
+      "pos": [
+        -0.0830595,
+        0.182212,
+        0.06095
+      ],
+      "quat": [
+        0.685585,
+        0.173128,
+        0.685585,
+        -0.173128
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "antenna",
+      "body": "head_assembly",
+      "type": "mesh",
+      "mesh": "antenna",
+      "pos": [
+        -0.12808,
+        0.000247519,
+        0.06095
+      ],
+      "quat": [
+        0.707107,
+        5.42285e-16,
+        0.707107,
+        4.21885e-15
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "left_antenna_holder",
+      "body": "head_assembly",
+      "type": "mesh",
+      "mesh": "left_antenna_holder",
+      "pos": [
+        -0.12906,
+        3.26887e-17,
+        0.06095
+      ],
+      "quat": [
+        0.707107,
+        2.12052e-15,
+        0.707107,
+        4.996e-15
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "left"
+    },
+    {
+      "name": "head_bot_sheet",
+      "body": "head_assembly",
+      "type": "mesh",
+      "mesh": "head_bot_sheet",
+      "pos": [
+        -0.12906,
+        1.72388e-17,
+        0.06095
+      ],
+      "quat": [
+        0.707107,
+        2.48509e-16,
+        0.707107,
+        5.27356e-16
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "head",
+      "body": "head_assembly",
+      "type": "mesh",
+      "mesh": "head",
+      "pos": [
+        -0.12906,
+        1.92717e-17,
+        0.06095
+      ],
+      "quat": [
+        0.707107,
+        2.80428e-16,
+        0.707107,
+        5.82867e-16
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "roll_motor_bottom",
+      "body": "hip_roll_assembly_2",
+      "type": "mesh",
+      "mesh": "roll_motor_bottom",
+      "pos": [
+        -3.64292e-16,
+        -0.035,
+        0.01905
+      ],
+      "quat": [
+        1.0,
+        -0.0,
+        -0.0,
+        -1.52656e-16
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "roll_motor_top",
+      "body": "hip_roll_assembly_2",
+      "type": "mesh",
+      "mesh": "roll_motor_top",
+      "pos": [
+        3.46945e-18,
+        -0.035,
+        0.01905
+      ],
+      "quat": [
+        1.0,
+        0.0,
+        2.22045e-16,
+        -1.11022e-16
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "right_roll_to_pitch",
+      "body": "right_roll_to_pitch_assembly",
+      "type": "mesh",
+      "mesh": "right_roll_to_pitch",
+      "pos": [
+        0.035,
+        -0.065,
+        0.01905
+      ],
+      "quat": [
+        0.5,
+        0.5,
+        0.5,
+        -0.5
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": false,
+      "side": "right"
+    },
+    {
+      "name": "right_cache",
+      "body": "knee_and_ankle_assembly_3",
+      "type": "mesh",
+      "mesh": "right_cache",
+      "pos": [
+        0.01606,
+        -0.065,
+        0.1092
+      ],
+      "quat": [
+        0.707107,
+        0.707107,
+        -3.33067e-16,
+        -3.92523e-16
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "right"
+    },
+    {
+      "name": "leg_spacer",
+      "body": "knee_and_ankle_assembly_3",
+      "type": "mesh",
+      "mesh": "leg_spacer",
+      "pos": [
+        0.01606,
+        -0.14365,
+        -0.07215
+      ],
+      "quat": [
+        0.707107,
+        0.707107,
+        -3.33067e-16,
+        -3.92523e-16
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "left_knee_to_ankle_right_sheet",
+      "body": "knee_and_ankle_assembly_3",
+      "type": "mesh",
+      "mesh": "left_knee_to_ankle_right_sheet",
+      "pos": [
+        0.01606,
+        -0.14365,
+        -0.07205
+      ],
+      "quat": [
+        0.707107,
+        0.707107,
+        0.0,
+        -1.74653e-29
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "left"
+    },
+    {
+      "name": "left_knee_to_ankle_left_sheet",
+      "body": "knee_and_ankle_assembly_3",
+      "type": "mesh",
+      "mesh": "left_knee_to_ankle_left_sheet",
+      "pos": [
+        0.01606,
+        -0.14365,
+        -0.07205
+      ],
+      "quat": [
+        0.707107,
+        0.707107,
+        0.0,
+        -3.2666e-25
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "left"
+    },
+    {
+      "name": "leg_spacer",
+      "body": "knee_and_ankle_assembly_4",
+      "type": "mesh",
+      "mesh": "leg_spacer",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10925
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        -3.33067e-16,
+        3.92523e-16
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "left_knee_to_ankle_right_sheet",
+      "body": "knee_and_ankle_assembly_4",
+      "type": "mesh",
+      "mesh": "left_knee_to_ankle_right_sheet",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10915
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        0.0,
+        -2.51202e-22
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "left"
+    },
+    {
+      "name": "left_knee_to_ankle_left_sheet",
+      "body": "knee_and_ankle_assembly_4",
+      "type": "mesh",
+      "mesh": "left_knee_to_ankle_left_sheet",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10915
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        0.0,
+        5.41603e-30
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "left"
+    },
+    {
+      "name": "foot_side",
+      "body": "foot_assembly_2",
+      "type": "mesh",
+      "mesh": "foot_side",
+      "pos": [
+        0.01606,
+        0.2223,
+        0.10905
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        -0.0,
+        -8.61814e-30
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "foot_bottom_tpu",
+      "body": "foot_assembly_2",
+      "type": "mesh",
+      "mesh": "foot_bottom_tpu",
+      "pos": [
+        0.01656,
+        0.2228,
+        0.10955
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        -0.0,
+        -8.61814e-30
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "right_foot_bottom_tpu",
+      "body": "foot_assembly_2",
+      "type": "mesh",
+      "mesh": "foot_bottom_tpu",
+      "pos": [
+        0.01656,
+        0.2228,
+        0.10955
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        -0.0,
+        -8.61814e-30
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "right"
+    },
+    {
+      "name": "foot_bottom_pla",
+      "body": "foot_assembly_2",
+      "type": "mesh",
+      "mesh": "foot_bottom_pla",
+      "pos": [
+        0.01656,
+        0.2228,
+        0.10955
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        -0.0,
+        -8.61814e-30
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "unknown"
+    },
+    {
+      "name": "foot_top",
+      "body": "foot_assembly_2",
+      "type": "mesh",
+      "mesh": "foot_top",
+      "pos": [
+        0.01606,
+        0.2223,
+        0.10905
+      ],
+      "quat": [
+        0.707107,
+        -0.707107,
+        -0.0,
+        -8.61814e-30
+      ],
+      "size": null,
+      "mass": null,
+      "density": null,
+      "friction": null,
+      "contype": null,
+      "conaffinity": null,
+      "group": null,
+      "rgba": null,
+      "foot_related": true,
+      "side": "unknown"
+    }
+  ],
+  "actuators": [
+    {
+      "name": "left_hip_yaw",
+      "kind": "position",
+      "class": "sts3215",
+      "joint": "left_hip_yaw",
+      "gear": null,
+      "kp": 13.37,
+      "kv": 0.0,
+      "ctrlrange": null,
+      "forcerange": [
+        -3.23,
+        3.23
+      ],
+      "ctrllimited": null,
+      "forcelimited": null,
+      "biastype": null,
+      "gaintype": null,
+      "dynprm": null,
+      "gainprm": null,
+      "biasprm": null,
+      "default_source": "class:sts3215",
+      "foot_related": false,
+      "side": "left"
+    },
+    {
+      "name": "left_hip_roll",
+      "kind": "position",
+      "class": "sts3215",
+      "joint": "left_hip_roll",
+      "gear": null,
+      "kp": 13.37,
+      "kv": 0.0,
+      "ctrlrange": null,
+      "forcerange": [
+        -3.23,
+        3.23
+      ],
+      "ctrllimited": null,
+      "forcelimited": null,
+      "biastype": null,
+      "gaintype": null,
+      "dynprm": null,
+      "gainprm": null,
+      "biasprm": null,
+      "default_source": "class:sts3215",
+      "foot_related": false,
+      "side": "left"
+    },
+    {
+      "name": "left_hip_pitch",
+      "kind": "position",
+      "class": "sts3215",
+      "joint": "left_hip_pitch",
+      "gear": null,
+      "kp": 13.37,
+      "kv": 0.0,
+      "ctrlrange": null,
+      "forcerange": [
+        -3.23,
+        3.23
+      ],
+      "ctrllimited": null,
+      "forcelimited": null,
+      "biastype": null,
+      "gaintype": null,
+      "dynprm": null,
+      "gainprm": null,
+      "biasprm": null,
+      "default_source": "class:sts3215",
+      "foot_related": false,
+      "side": "left"
+    },
+    {
+      "name": "left_knee",
+      "kind": "position",
+      "class": "sts3215",
+      "joint": "left_knee",
+      "gear": null,
+      "kp": 13.37,
+      "kv": 0.0,
+      "ctrlrange": null,
+      "forcerange": [
+        -3.23,
+        3.23
+      ],
+      "ctrllimited": null,
+      "forcelimited": null,
+      "biastype": null,
+      "gaintype": null,
+      "dynprm": null,
+      "gainprm": null,
+      "biasprm": null,
+      "default_source": "class:sts3215",
+      "foot_related": false,
+      "side": "left"
+    },
+    {
+      "name": "left_ankle",
+      "kind": "position",
+      "class": "sts3215",
+      "joint": "left_ankle",
+      "gear": null,
+      "kp": 13.37,
+      "kv": 0.0,
+      "ctrlrange": null,
+      "forcerange": [
+        -3.23,
+        3.23
+      ],
+      "ctrllimited": null,
+      "forcelimited": null,
+      "biastype": null,
+      "gaintype": null,
+      "dynprm": null,
+      "gainprm": null,
+      "biasprm": null,
+      "default_source": "class:sts3215",
+      "foot_related": true,
+      "side": "left"
+    },
+    {
+      "name": "neck_pitch",
+      "kind": "position",
+      "class": "sts3215",
+      "joint": "neck_pitch",
+      "gear": null,
+      "kp": 13.37,
+      "kv": 0.0,
+      "ctrlrange": null,
+      "forcerange": [
+        -3.23,
+        3.23
+      ],
+      "ctrllimited": null,
+      "forcelimited": null,
+      "biastype": null,
+      "gaintype": null,
+      "dynprm": null,
+      "gainprm": null,
+      "biasprm": null,
+      "default_source": "class:sts3215",
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "head_pitch",
+      "kind": "position",
+      "class": "sts3215",
+      "joint": "head_pitch",
+      "gear": null,
+      "kp": 13.37,
+      "kv": 0.0,
+      "ctrlrange": null,
+      "forcerange": [
+        -3.23,
+        3.23
+      ],
+      "ctrllimited": null,
+      "forcelimited": null,
+      "biastype": null,
+      "gaintype": null,
+      "dynprm": null,
+      "gainprm": null,
+      "biasprm": null,
+      "default_source": "class:sts3215",
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "head_yaw",
+      "kind": "position",
+      "class": "sts3215",
+      "joint": "head_yaw",
+      "gear": null,
+      "kp": 13.37,
+      "kv": 0.0,
+      "ctrlrange": null,
+      "forcerange": [
+        -3.23,
+        3.23
+      ],
+      "ctrllimited": null,
+      "forcelimited": null,
+      "biastype": null,
+      "gaintype": null,
+      "dynprm": null,
+      "gainprm": null,
+      "biasprm": null,
+      "default_source": "class:sts3215",
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "head_roll",
+      "kind": "position",
+      "class": "sts3215",
+      "joint": "head_roll",
+      "gear": null,
+      "kp": 13.37,
+      "kv": 0.0,
+      "ctrlrange": null,
+      "forcerange": [
+        -3.23,
+        3.23
+      ],
+      "ctrllimited": null,
+      "forcelimited": null,
+      "biastype": null,
+      "gaintype": null,
+      "dynprm": null,
+      "gainprm": null,
+      "biasprm": null,
+      "default_source": "class:sts3215",
+      "foot_related": false,
+      "side": "unknown"
+    },
+    {
+      "name": "right_hip_yaw",
+      "kind": "position",
+      "class": "sts3215",
+      "joint": "right_hip_yaw",
+      "gear": null,
+      "kp": 13.37,
+      "kv": 0.0,
+      "ctrlrange": null,
+      "forcerange": [
+        -3.23,
+        3.23
+      ],
+      "ctrllimited": null,
+      "forcelimited": null,
+      "biastype": null,
+      "gaintype": null,
+      "dynprm": null,
+      "gainprm": null,
+      "biasprm": null,
+      "default_source": "class:sts3215",
+      "foot_related": false,
+      "side": "right"
+    },
+    {
+      "name": "right_hip_roll",
+      "kind": "position",
+      "class": "sts3215",
+      "joint": "right_hip_roll",
+      "gear": null,
+      "kp": 13.37,
+      "kv": 0.0,
+      "ctrlrange": null,
+      "forcerange": [
+        -3.23,
+        3.23
+      ],
+      "ctrllimited": null,
+      "forcelimited": null,
+      "biastype": null,
+      "gaintype": null,
+      "dynprm": null,
+      "gainprm": null,
+      "biasprm": null,
+      "default_source": "class:sts3215",
+      "foot_related": false,
+      "side": "right"
+    },
+    {
+      "name": "right_hip_pitch",
+      "kind": "position",
+      "class": "sts3215",
+      "joint": "right_hip_pitch",
+      "gear": null,
+      "kp": 13.37,
+      "kv": 0.0,
+      "ctrlrange": null,
+      "forcerange": [
+        -3.23,
+        3.23
+      ],
+      "ctrllimited": null,
+      "forcelimited": null,
+      "biastype": null,
+      "gaintype": null,
+      "dynprm": null,
+      "gainprm": null,
+      "biasprm": null,
+      "default_source": "class:sts3215",
+      "foot_related": false,
+      "side": "right"
+    },
+    {
+      "name": "right_knee",
+      "kind": "position",
+      "class": "sts3215",
+      "joint": "right_knee",
+      "gear": null,
+      "kp": 13.37,
+      "kv": 0.0,
+      "ctrlrange": null,
+      "forcerange": [
+        -3.23,
+        3.23
+      ],
+      "ctrllimited": null,
+      "forcelimited": null,
+      "biastype": null,
+      "gaintype": null,
+      "dynprm": null,
+      "gainprm": null,
+      "biasprm": null,
+      "default_source": "class:sts3215",
+      "foot_related": false,
+      "side": "right"
+    },
+    {
+      "name": "right_ankle",
+      "kind": "position",
+      "class": "sts3215",
+      "joint": "right_ankle",
+      "gear": null,
+      "kp": 13.37,
+      "kv": 0.0,
+      "ctrlrange": null,
+      "forcerange": [
+        -3.23,
+        3.23
+      ],
+      "ctrllimited": null,
+      "forcelimited": null,
+      "biastype": null,
+      "gaintype": null,
+      "dynprm": null,
+      "gainprm": null,
+      "biasprm": null,
+      "default_source": "class:sts3215",
+      "foot_related": true,
+      "side": "right"
+    }
+  ],
+  "foot_related": {
+    "bodies": [
+      {
+        "name": "knee_and_ankle_assembly",
+        "parent": "left_roll_to_pitch_assembly",
+        "depth": 4,
+        "pos": [
+          0.07415,
+          -3.25261e-17,
+          0.03511
+        ],
+        "quat": [
+          8.49887e-24,
+          -0.707107,
+          -1.11022e-16,
+          0.707107
+        ],
+        "euler": null,
+        "mocap": null,
+        "inertial": {
+          "pos": [
+            0.00253369,
+            -0.0390636,
+            0.0102776
+          ],
+          "mass": 0.12407,
+          "diaginertia": null,
+          "fullinertia": [
+            0.000211406,
+            7.83759e-05,
+            0.000225619,
+            -2.68706e-05,
+            3.81906e-06,
+            2.08009e-05
+          ],
+          "quat": null
+        },
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "knee_and_ankle_assembly_2",
+        "parent": "knee_and_ankle_assembly",
+        "depth": 5,
+        "pos": [
+          0.0,
+          -0.07865,
+          0.0001
+        ],
+        "quat": [
+          1.0,
+          1.11022e-16,
+          1.11022e-16,
+          -2.64698e-23
+        ],
+        "euler": null,
+        "mocap": null,
+        "inertial": {
+          "pos": [
+            5.01859e-06,
+            -0.0577465,
+            0.0181136
+          ],
+          "mass": 0.07259,
+          "diaginertia": null,
+          "fullinertia": [
+            4.99575e-05,
+            1.87273e-05,
+            4.23932e-05,
+            1.03817e-08,
+            2.25175e-09,
+            8.81049e-08
+          ],
+          "quat": null
+        },
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "foot_assembly",
+        "parent": "knee_and_ankle_assembly_2",
+        "depth": 6,
+        "pos": [
+          1.8735e-16,
+          -0.07865,
+          0.0001
+        ],
+        "quat": [
+          1.0,
+          2.77556e-16,
+          5.55112e-16,
+          1.52656e-16
+        ],
+        "euler": null,
+        "mocap": null,
+        "inertial": {
+          "pos": [
+            0.0110718,
+            -0.0246608,
+            0.0190626
+          ],
+          "mass": 0.07524,
+          "diaginertia": null,
+          "fullinertia": [
+            1.87482e-05,
+            6.74427e-05,
+            6.061e-05,
+            1.58839e-06,
+            -6.52354e-09,
+            5.67391e-08
+          ],
+          "quat": null
+        },
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "knee_and_ankle_assembly_3",
+        "parent": "right_roll_to_pitch_assembly",
+        "depth": 4,
+        "pos": [
+          -0.07415,
+          2.48437e-15,
+          0.03511
+        ],
+        "quat": [
+          0.707107,
+          6.41892e-22,
+          0.707107,
+          -2.22045e-16
+        ],
+        "euler": null,
+        "mocap": null,
+        "inertial": {
+          "pos": [
+            0.00253369,
+            0.0390636,
+            0.010809
+          ],
+          "mass": 0.12407,
+          "diaginertia": null,
+          "fullinertia": [
+            0.000212363,
+            7.93324e-05,
+            0.000225619,
+            2.68706e-05,
+            3.9656e-06,
+            -2.17407e-05
+          ],
+          "quat": null
+        },
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "knee_and_ankle_assembly_4",
+        "parent": "knee_and_ankle_assembly_3",
+        "depth": 5,
+        "pos": [
+          1.38778e-16,
+          0.07865,
+          0.037
+        ],
+        "quat": [
+          1.32068e-16,
+          1.0,
+          -1.10334e-26,
+          3.55346e-22
+        ],
+        "euler": null,
+        "mocap": null,
+        "inertial": {
+          "pos": [
+            5.01859e-06,
+            -0.0577465,
+            0.0181136
+          ],
+          "mass": 0.07259,
+          "diaginertia": null,
+          "fullinertia": [
+            4.99575e-05,
+            1.87273e-05,
+            4.23932e-05,
+            1.03817e-08,
+            2.25175e-09,
+            8.81049e-08
+          ],
+          "quat": null
+        },
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "foot_assembly_2",
+        "parent": "knee_and_ankle_assembly_4",
+        "depth": 6,
+        "pos": [
+          1.32533e-15,
+          -0.07865,
+          0.0001
+        ],
+        "quat": [
+          1.0,
+          3.88578e-16,
+          -3.33067e-16,
+          5.55111e-16
+        ],
+        "euler": null,
+        "mocap": null,
+        "inertial": {
+          "pos": [
+            0.0110718,
+            -0.0246608,
+            0.0190626
+          ],
+          "mass": 0.07524,
+          "diaginertia": null,
+          "fullinertia": [
+            1.87482e-05,
+            6.74427e-05,
+            6.061e-05,
+            1.58839e-06,
+            -6.52354e-09,
+            5.67391e-08
+          ],
+          "quat": null
+        },
+        "foot_related": true,
+        "side": "unknown"
+      }
+    ],
+    "joints": [
+      {
+        "name": "left_hip_pitch",
+        "body": "knee_and_ankle_assembly",
+        "kind": "joint",
+        "type": "hinge",
+        "axis": null,
+        "range": [
+          -1.2217304763960306,
+          0.5235987755982988
+        ],
+        "pos": null,
+        "limited": null,
+        "actuatorfrcrange": null,
+        "damping": null,
+        "stiffness": null,
+        "armature": null,
+        "foot_related": true,
+        "side": "left"
+      },
+      {
+        "name": "left_knee",
+        "body": "knee_and_ankle_assembly_2",
+        "kind": "joint",
+        "type": "hinge",
+        "axis": null,
+        "range": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "pos": null,
+        "limited": null,
+        "actuatorfrcrange": null,
+        "damping": null,
+        "stiffness": null,
+        "armature": null,
+        "foot_related": true,
+        "side": "left"
+      },
+      {
+        "name": "left_ankle",
+        "body": "foot_assembly",
+        "kind": "joint",
+        "type": "hinge",
+        "axis": null,
+        "range": [
+          -1.5707963267948957,
+          1.5707963267948974
+        ],
+        "pos": null,
+        "limited": null,
+        "actuatorfrcrange": null,
+        "damping": null,
+        "stiffness": null,
+        "armature": null,
+        "foot_related": true,
+        "side": "left"
+      },
+      {
+        "name": "right_hip_pitch",
+        "body": "knee_and_ankle_assembly_3",
+        "kind": "joint",
+        "type": "hinge",
+        "axis": null,
+        "range": [
+          -0.5235987755982988,
+          1.2217304763960306
+        ],
+        "pos": null,
+        "limited": null,
+        "actuatorfrcrange": null,
+        "damping": null,
+        "stiffness": null,
+        "armature": null,
+        "foot_related": true,
+        "side": "right"
+      },
+      {
+        "name": "right_knee",
+        "body": "knee_and_ankle_assembly_4",
+        "kind": "joint",
+        "type": "hinge",
+        "axis": null,
+        "range": [
+          -1.5707963267948966,
+          1.5707963267948966
+        ],
+        "pos": null,
+        "limited": null,
+        "actuatorfrcrange": null,
+        "damping": null,
+        "stiffness": null,
+        "armature": null,
+        "foot_related": true,
+        "side": "right"
+      },
+      {
+        "name": "right_ankle",
+        "body": "foot_assembly_2",
+        "kind": "joint",
+        "type": "hinge",
+        "axis": null,
+        "range": [
+          -1.5707963267948957,
+          1.5707963267948974
+        ],
+        "pos": null,
+        "limited": null,
+        "actuatorfrcrange": null,
+        "damping": null,
+        "stiffness": null,
+        "armature": null,
+        "foot_related": true,
+        "side": "right"
+      }
+    ],
+    "geoms": [
+      {
+        "name": "body_middle_bottom",
+        "body": "trunk_assembly",
+        "type": "mesh",
+        "mesh": "body_middle_bottom",
+        "pos": [
+          -0.019,
+          -3.46945e-18,
+          0.0648909
+        ],
+        "quat": [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "trunk_bottom",
+        "body": "trunk_assembly",
+        "type": "mesh",
+        "mesh": "trunk_bottom",
+        "pos": [
+          -0.019,
+          9.1073e-18,
+          0.0648909
+        ],
+        "quat": [
+          1.0,
+          -0.0,
+          -0.0,
+          5.42101e-20
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "roll_motor_bottom",
+        "body": "hip_roll_assembly",
+        "type": "mesh",
+        "mesh": "roll_motor_bottom",
+        "pos": [
+          -3.33067e-16,
+          -0.035,
+          0.01905
+        ],
+        "quat": [
+          1.0,
+          -4.38499e-16,
+          2.22045e-16,
+          -3.34802e-16
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "left_cache",
+        "body": "knee_and_ankle_assembly",
+        "type": "mesh",
+        "mesh": "left_cache",
+        "pos": [
+          0.01606,
+          0.065,
+          0.10915
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          3.33067e-16,
+          5.76761e-16
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "left"
+      },
+      {
+        "name": "leg_spacer",
+        "body": "knee_and_ankle_assembly",
+        "type": "mesh",
+        "mesh": "leg_spacer",
+        "pos": [
+          0.01606,
+          0.14365,
+          0.10925
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          3.33067e-16,
+          5.94711e-16
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "left_knee_to_ankle_right_sheet",
+        "body": "knee_and_ankle_assembly",
+        "type": "mesh",
+        "mesh": "left_knee_to_ankle_right_sheet",
+        "pos": [
+          0.01606,
+          0.14365,
+          0.10915
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          0.0,
+          -5.93802e-24
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "left"
+      },
+      {
+        "name": "left_knee_to_ankle_left_sheet",
+        "body": "knee_and_ankle_assembly",
+        "type": "mesh",
+        "mesh": "left_knee_to_ankle_left_sheet",
+        "pos": [
+          0.01606,
+          0.14365,
+          0.10915
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          0.0,
+          5.12923e-30
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "left"
+      },
+      {
+        "name": "leg_spacer",
+        "body": "knee_and_ankle_assembly_2",
+        "type": "mesh",
+        "mesh": "leg_spacer",
+        "pos": [
+          0.01606,
+          0.14365,
+          0.10925
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          3.33067e-16,
+          5.72905e-16
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "left_knee_to_ankle_right_sheet",
+        "body": "knee_and_ankle_assembly_2",
+        "type": "mesh",
+        "mesh": "left_knee_to_ankle_right_sheet",
+        "pos": [
+          0.01606,
+          0.14365,
+          0.10915
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          0.0,
+          1.33119e-24
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "left"
+      },
+      {
+        "name": "left_knee_to_ankle_left_sheet",
+        "body": "knee_and_ankle_assembly_2",
+        "type": "mesh",
+        "mesh": "left_knee_to_ankle_left_sheet",
+        "pos": [
+          0.01606,
+          0.14365,
+          0.10915
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          0.0,
+          -5.36743e-30
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "left"
+      },
+      {
+        "name": "foot_side",
+        "body": "foot_assembly",
+        "type": "mesh",
+        "mesh": "foot_side",
+        "pos": [
+          0.01606,
+          0.2223,
+          0.10905
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          -0.0,
+          -4.61924e-30
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "foot_bottom_tpu",
+        "body": "foot_assembly",
+        "type": "mesh",
+        "mesh": "foot_bottom_tpu",
+        "pos": [
+          0.01656,
+          0.2228,
+          0.10955
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          -0.0,
+          1.72496e-18
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "left_foot_bottom_tpu",
+        "body": "foot_assembly",
+        "type": "mesh",
+        "mesh": "foot_bottom_tpu",
+        "pos": [
+          0.01656,
+          0.2228,
+          0.10955
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          -0.0,
+          1.72496e-18
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "left"
+      },
+      {
+        "name": "foot_bottom_pla",
+        "body": "foot_assembly",
+        "type": "mesh",
+        "mesh": "foot_bottom_pla",
+        "pos": [
+          0.01656,
+          0.2228,
+          0.10955
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          -0.0,
+          1.72496e-18
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "foot_top",
+        "body": "foot_assembly",
+        "type": "mesh",
+        "mesh": "foot_top",
+        "pos": [
+          0.01606,
+          0.2223,
+          0.10905
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          -0.0,
+          -4.61924e-30
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "roll_motor_bottom",
+        "body": "hip_roll_assembly_2",
+        "type": "mesh",
+        "mesh": "roll_motor_bottom",
+        "pos": [
+          -3.64292e-16,
+          -0.035,
+          0.01905
+        ],
+        "quat": [
+          1.0,
+          -0.0,
+          -0.0,
+          -1.52656e-16
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "right_cache",
+        "body": "knee_and_ankle_assembly_3",
+        "type": "mesh",
+        "mesh": "right_cache",
+        "pos": [
+          0.01606,
+          -0.065,
+          0.1092
+        ],
+        "quat": [
+          0.707107,
+          0.707107,
+          -3.33067e-16,
+          -3.92523e-16
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "right"
+      },
+      {
+        "name": "leg_spacer",
+        "body": "knee_and_ankle_assembly_3",
+        "type": "mesh",
+        "mesh": "leg_spacer",
+        "pos": [
+          0.01606,
+          -0.14365,
+          -0.07215
+        ],
+        "quat": [
+          0.707107,
+          0.707107,
+          -3.33067e-16,
+          -3.92523e-16
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "left_knee_to_ankle_right_sheet",
+        "body": "knee_and_ankle_assembly_3",
+        "type": "mesh",
+        "mesh": "left_knee_to_ankle_right_sheet",
+        "pos": [
+          0.01606,
+          -0.14365,
+          -0.07205
+        ],
+        "quat": [
+          0.707107,
+          0.707107,
+          0.0,
+          -1.74653e-29
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "left"
+      },
+      {
+        "name": "left_knee_to_ankle_left_sheet",
+        "body": "knee_and_ankle_assembly_3",
+        "type": "mesh",
+        "mesh": "left_knee_to_ankle_left_sheet",
+        "pos": [
+          0.01606,
+          -0.14365,
+          -0.07205
+        ],
+        "quat": [
+          0.707107,
+          0.707107,
+          0.0,
+          -3.2666e-25
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "left"
+      },
+      {
+        "name": "leg_spacer",
+        "body": "knee_and_ankle_assembly_4",
+        "type": "mesh",
+        "mesh": "leg_spacer",
+        "pos": [
+          0.01606,
+          0.14365,
+          0.10925
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          -3.33067e-16,
+          3.92523e-16
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "left_knee_to_ankle_right_sheet",
+        "body": "knee_and_ankle_assembly_4",
+        "type": "mesh",
+        "mesh": "left_knee_to_ankle_right_sheet",
+        "pos": [
+          0.01606,
+          0.14365,
+          0.10915
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          0.0,
+          -2.51202e-22
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "left"
+      },
+      {
+        "name": "left_knee_to_ankle_left_sheet",
+        "body": "knee_and_ankle_assembly_4",
+        "type": "mesh",
+        "mesh": "left_knee_to_ankle_left_sheet",
+        "pos": [
+          0.01606,
+          0.14365,
+          0.10915
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          0.0,
+          5.41603e-30
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "left"
+      },
+      {
+        "name": "foot_side",
+        "body": "foot_assembly_2",
+        "type": "mesh",
+        "mesh": "foot_side",
+        "pos": [
+          0.01606,
+          0.2223,
+          0.10905
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          -0.0,
+          -8.61814e-30
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "foot_bottom_tpu",
+        "body": "foot_assembly_2",
+        "type": "mesh",
+        "mesh": "foot_bottom_tpu",
+        "pos": [
+          0.01656,
+          0.2228,
+          0.10955
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          -0.0,
+          -8.61814e-30
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "right_foot_bottom_tpu",
+        "body": "foot_assembly_2",
+        "type": "mesh",
+        "mesh": "foot_bottom_tpu",
+        "pos": [
+          0.01656,
+          0.2228,
+          0.10955
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          -0.0,
+          -8.61814e-30
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "right"
+      },
+      {
+        "name": "foot_bottom_pla",
+        "body": "foot_assembly_2",
+        "type": "mesh",
+        "mesh": "foot_bottom_pla",
+        "pos": [
+          0.01656,
+          0.2228,
+          0.10955
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          -0.0,
+          -8.61814e-30
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "unknown"
+      },
+      {
+        "name": "foot_top",
+        "body": "foot_assembly_2",
+        "type": "mesh",
+        "mesh": "foot_top",
+        "pos": [
+          0.01606,
+          0.2223,
+          0.10905
+        ],
+        "quat": [
+          0.707107,
+          -0.707107,
+          -0.0,
+          -8.61814e-30
+        ],
+        "size": null,
+        "mass": null,
+        "density": null,
+        "friction": null,
+        "contype": null,
+        "conaffinity": null,
+        "group": null,
+        "rgba": null,
+        "foot_related": true,
+        "side": "unknown"
+      }
+    ]
+  }
+}
