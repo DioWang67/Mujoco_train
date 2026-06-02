@@ -1,0 +1,647 @@
+{
+  "schema_version": 1,
+  "source_xml": "references/open_duck_mini/source/playground_open_duck_mini_v2/xmls/open_duck_mini_v2.xml",
+  "source_type": "explicit_xml",
+  "safety": {
+    "network_used": false,
+    "repo_refetched": false,
+    "duck_result_directly_applied_to_sedon": false,
+    "mesh_dimensions_treated_as_measurable": false
+  },
+  "summary": {
+    "foot_related_geom_count": 24,
+    "visible_active_contact_candidate_count": 2,
+    "visible_active_contact_candidate_names": [
+      "left_foot_bottom_tpu",
+      "right_foot_bottom_tpu"
+    ],
+    "normalized_reference_status": "PARTIAL_REFERENCE"
+  },
+  "foot_related_geoms": [
+    {
+      "name": "<unnamed:knee_and_ankle_assembly:0>",
+      "parent_body": "knee_and_ankle_assembly",
+      "parent_body_parent": "left_roll_to_pitch_assembly",
+      "side": "left",
+      "category": "unknown",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        0.065,
+        0.10915
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "left_cache",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:knee_and_ankle_assembly:1>",
+      "parent_body": "knee_and_ankle_assembly",
+      "parent_body_parent": "left_roll_to_pitch_assembly",
+      "side": "left",
+      "category": "unknown",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10925
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "leg_spacer",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:knee_and_ankle_assembly:2>",
+      "parent_body": "knee_and_ankle_assembly",
+      "parent_body_parent": "left_roll_to_pitch_assembly",
+      "side": "left",
+      "category": "unknown",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10915
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "left_knee_to_ankle_right_sheet",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:knee_and_ankle_assembly:3>",
+      "parent_body": "knee_and_ankle_assembly",
+      "parent_body_parent": "left_roll_to_pitch_assembly",
+      "side": "left",
+      "category": "unknown",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10915
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "left_knee_to_ankle_left_sheet",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:knee_and_ankle_assembly_2:4>",
+      "parent_body": "knee_and_ankle_assembly_2",
+      "parent_body_parent": "knee_and_ankle_assembly",
+      "side": "left",
+      "category": "unknown",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10925
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "leg_spacer",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:knee_and_ankle_assembly_2:5>",
+      "parent_body": "knee_and_ankle_assembly_2",
+      "parent_body_parent": "knee_and_ankle_assembly",
+      "side": "left",
+      "category": "unknown",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10915
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "left_knee_to_ankle_right_sheet",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:knee_and_ankle_assembly_2:6>",
+      "parent_body": "knee_and_ankle_assembly_2",
+      "parent_body_parent": "knee_and_ankle_assembly",
+      "side": "left",
+      "category": "unknown",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10915
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "left_knee_to_ankle_left_sheet",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:foot_assembly:7>",
+      "parent_body": "foot_assembly",
+      "parent_body_parent": "knee_and_ankle_assembly_2",
+      "side": "left",
+      "category": "foot",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        0.2223,
+        0.10905
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "foot_side",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:foot_assembly:8>",
+      "parent_body": "foot_assembly",
+      "parent_body_parent": "knee_and_ankle_assembly_2",
+      "side": "left",
+      "category": "sole",
+      "type": "mesh",
+      "pos": [
+        0.01656,
+        0.2228,
+        0.10955
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "foot_bottom_tpu",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "left_foot_bottom_tpu",
+      "parent_body": "foot_assembly",
+      "parent_body_parent": "knee_and_ankle_assembly_2",
+      "side": "left",
+      "category": "sole",
+      "type": "mesh",
+      "pos": [
+        0.01656,
+        0.2228,
+        0.10955
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "collision",
+      "mesh": "foot_bottom_tpu",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": true
+    },
+    {
+      "name": "<unnamed:foot_assembly:10>",
+      "parent_body": "foot_assembly",
+      "parent_body_parent": "knee_and_ankle_assembly_2",
+      "side": "left",
+      "category": "sole",
+      "type": "mesh",
+      "pos": [
+        0.01656,
+        0.2228,
+        0.10955
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "foot_bottom_pla",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:foot_assembly:11>",
+      "parent_body": "foot_assembly",
+      "parent_body_parent": "knee_and_ankle_assembly_2",
+      "side": "left",
+      "category": "foot",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        0.2223,
+        0.10905
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "foot_top",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:knee_and_ankle_assembly_3:12>",
+      "parent_body": "knee_and_ankle_assembly_3",
+      "parent_body_parent": "right_roll_to_pitch_assembly",
+      "side": "right",
+      "category": "unknown",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        -0.065,
+        0.1092
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "right_cache",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:knee_and_ankle_assembly_3:13>",
+      "parent_body": "knee_and_ankle_assembly_3",
+      "parent_body_parent": "right_roll_to_pitch_assembly",
+      "side": "right",
+      "category": "unknown",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        -0.14365,
+        -0.07215
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "leg_spacer",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:knee_and_ankle_assembly_3:14>",
+      "parent_body": "knee_and_ankle_assembly_3",
+      "parent_body_parent": "right_roll_to_pitch_assembly",
+      "side": "right",
+      "category": "unknown",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        -0.14365,
+        -0.07205
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "left_knee_to_ankle_right_sheet",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:knee_and_ankle_assembly_3:15>",
+      "parent_body": "knee_and_ankle_assembly_3",
+      "parent_body_parent": "right_roll_to_pitch_assembly",
+      "side": "right",
+      "category": "unknown",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        -0.14365,
+        -0.07205
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "left_knee_to_ankle_left_sheet",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:knee_and_ankle_assembly_4:16>",
+      "parent_body": "knee_and_ankle_assembly_4",
+      "parent_body_parent": "knee_and_ankle_assembly_3",
+      "side": "right",
+      "category": "unknown",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10925
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "leg_spacer",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:knee_and_ankle_assembly_4:17>",
+      "parent_body": "knee_and_ankle_assembly_4",
+      "parent_body_parent": "knee_and_ankle_assembly_3",
+      "side": "right",
+      "category": "unknown",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10915
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "left_knee_to_ankle_right_sheet",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:knee_and_ankle_assembly_4:18>",
+      "parent_body": "knee_and_ankle_assembly_4",
+      "parent_body_parent": "knee_and_ankle_assembly_3",
+      "side": "right",
+      "category": "unknown",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        0.14365,
+        0.10915
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "left_knee_to_ankle_left_sheet",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:foot_assembly_2:19>",
+      "parent_body": "foot_assembly_2",
+      "parent_body_parent": "knee_and_ankle_assembly_4",
+      "side": "right",
+      "category": "foot",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        0.2223,
+        0.10905
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "foot_side",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:foot_assembly_2:20>",
+      "parent_body": "foot_assembly_2",
+      "parent_body_parent": "knee_and_ankle_assembly_4",
+      "side": "right",
+      "category": "sole",
+      "type": "mesh",
+      "pos": [
+        0.01656,
+        0.2228,
+        0.10955
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "foot_bottom_tpu",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "right_foot_bottom_tpu",
+      "parent_body": "foot_assembly_2",
+      "parent_body_parent": "knee_and_ankle_assembly_4",
+      "side": "right",
+      "category": "sole",
+      "type": "mesh",
+      "pos": [
+        0.01656,
+        0.2228,
+        0.10955
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "collision",
+      "mesh": "foot_bottom_tpu",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": true
+    },
+    {
+      "name": "<unnamed:foot_assembly_2:22>",
+      "parent_body": "foot_assembly_2",
+      "parent_body_parent": "knee_and_ankle_assembly_4",
+      "side": "right",
+      "category": "sole",
+      "type": "mesh",
+      "pos": [
+        0.01656,
+        0.2228,
+        0.10955
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "foot_bottom_pla",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    },
+    {
+      "name": "<unnamed:foot_assembly_2:23>",
+      "parent_body": "foot_assembly_2",
+      "parent_body_parent": "knee_and_ankle_assembly_4",
+      "side": "right",
+      "category": "foot",
+      "type": "mesh",
+      "pos": [
+        0.01606,
+        0.2223,
+        0.10905
+      ],
+      "size": null,
+      "friction": null,
+      "contype": "unknown",
+      "conaffinity": "unknown",
+      "class_or_default": "visual",
+      "mesh": "foot_top",
+      "source_type": "explicit_xml",
+      "category_source_type": "estimated_from_name_heuristic",
+      "size_source_type": "unknown",
+      "active_contact_visible": false
+    }
+  ],
+  "normalized_geometry_reference": {
+    "status": "PARTIAL_REFERENCE",
+    "foot_length_estimate": {
+      "value": null,
+      "source_type": "manual_required",
+      "confidence": "low",
+      "reason": "Duck XML exposes mesh foot collision geoms but no primitive size/pos toe-center-heel patches."
+    },
+    "toe_x_ratio": {
+      "value": null,
+      "source_type": "manual_required",
+      "confidence": "low",
+      "reason": "toe patch is not explicit in XML."
+    },
+    "center_x_ratio": {
+      "value": null,
+      "source_type": "manual_required",
+      "confidence": "low",
+      "reason": "center patch is not explicit in XML."
+    },
+    "heel_x_ratio": {
+      "value": null,
+      "source_type": "manual_required",
+      "confidence": "low",
+      "reason": "heel patch is not explicit in XML."
+    },
+    "toe_z_relative_to_center": {
+      "value": null,
+      "source_type": "manual_required",
+      "confidence": "low",
+      "reason": "toe and center z offsets are not explicit primitive patch fields."
+    },
+    "heel_z_relative_to_center": {
+      "value": null,
+      "source_type": "manual_required",
+      "confidence": "low",
+      "reason": "heel and center z offsets are not explicit primitive patch fields."
+    },
+    "toe_patch_size_ratio": {
+      "value": null,
+      "source_type": "manual_required",
+      "confidence": "low",
+      "reason": "mesh dimensions are not treated as measurable patch size."
+    },
+    "heel_patch_size_ratio": {
+      "value": null,
+      "source_type": "manual_required",
+      "confidence": "low",
+      "reason": "mesh dimensions are not treated as measurable patch size."
+    },
+    "inner_outer_width_ratio": {
+      "value": null,
+      "source_type": "manual_required",
+      "confidence": "low",
+      "reason": "inner/outer patches are not explicit in XML."
+    },
+    "reference_basis": {
+      "source_type": "explicit_xml",
+      "confidence": "medium",
+      "active_contact_candidate_count": 2,
+      "active_contact_candidate_names": [
+        "left_foot_bottom_tpu",
+        "right_foot_bottom_tpu"
+      ],
+      "note": "Active candidates are visible XML collision geoms, not decomposed toe/center/heel contact patches."
+    }
+  },
+  "notes": [
+    "Foot-related geoms use name and ancestor-body heuristics.",
+    "Mesh geoms are listed but their dimensions are not inferred from mesh files.",
+    "Visible active contact candidates are based on explicit XML class/contype/conaffinity only.",
+    "Duck reference is for Sedon prototype guidance only, not final mechanical design."
+  ]
+}
