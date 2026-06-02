@@ -1,0 +1,23 @@
+variant,geom_id,geom_name,body_name,side,region,is_added_patch,source,confidence,valid_for,contype,conaffinity,size
+current_box_baseline,7,R_foot_collision,R_link_ankle_pitch,right,center,False,sedon_source_scene,source_scene,existing_sedon_contact,1,1,0.07 0.04 0.025
+current_box_baseline,13,L_foot_collision,L_link_ankle_pitch,left,center,False,sedon_source_scene,source_scene,existing_sedon_contact,1,1,0.07 0.04 0.025
+simple_toe_center_heel,7,R_foot_collision,R_link_ankle_pitch,right,center,False,sedon_source_scene,source_scene,existing_sedon_contact,0,0,0.07 0.04 0.025
+simple_toe_center_heel,8,R_foot_contact_simple_toe_center_heel_heel,R_link_ankle_pitch,right,heel,True,assumption/prototype,low,simulation_prototype_only,1,1,0.0168 0.0328 0.0085
+simple_toe_center_heel,9,R_foot_contact_simple_toe_center_heel_center,R_link_ankle_pitch,right,center,True,assumption/prototype,low,simulation_prototype_only,1,1,0.021 0.0352 0.009
+simple_toe_center_heel,10,R_foot_contact_simple_toe_center_heel_toe,R_link_ankle_pitch,right,toe,True,assumption/prototype,low,simulation_prototype_only,1,1,0.0168 0.0328 0.0085
+simple_toe_center_heel,16,L_foot_collision,L_link_ankle_pitch,left,center,False,sedon_source_scene,source_scene,existing_sedon_contact,0,0,0.07 0.04 0.025
+simple_toe_center_heel,17,L_foot_contact_simple_toe_center_heel_heel,L_link_ankle_pitch,left,heel,True,assumption/prototype,low,simulation_prototype_only,1,1,0.0168 0.0328 0.0085
+simple_toe_center_heel,18,L_foot_contact_simple_toe_center_heel_center,L_link_ankle_pitch,left,center,True,assumption/prototype,low,simulation_prototype_only,1,1,0.021 0.0352 0.009
+simple_toe_center_heel,19,L_foot_contact_simple_toe_center_heel_toe,L_link_ankle_pitch,left,toe,True,assumption/prototype,low,simulation_prototype_only,1,1,0.0168 0.0328 0.0085
+duck_like_multi_patch,7,R_foot_collision,R_link_ankle_pitch,right,center,False,sedon_source_scene,source_scene,existing_sedon_contact,0,0,0.07 0.04 0.025
+duck_like_multi_patch,8,R_foot_contact_duck_like_multi_patch_heel,R_link_ankle_pitch,right,heel,True,assumption/prototype,low,simulation_prototype_only,1,1,0.0154 0.0288 0.008
+duck_like_multi_patch,9,R_foot_contact_duck_like_multi_patch_center,R_link_ankle_pitch,right,center,True,assumption/prototype,low,simulation_prototype_only,1,1,0.0182 0.0296 0.0085
+duck_like_multi_patch,10,R_foot_contact_duck_like_multi_patch_toe,R_link_ankle_pitch,right,toe,True,assumption/prototype,low,simulation_prototype_only,1,1,0.0154 0.0288 0.008
+duck_like_multi_patch,11,R_foot_contact_duck_like_multi_patch_inner,R_link_ankle_pitch,right,inner,True,assumption/prototype,low,simulation_prototype_only,1,1,0.0154 0.0096 0.0075
+duck_like_multi_patch,12,R_foot_contact_duck_like_multi_patch_outer,R_link_ankle_pitch,right,outer,True,assumption/prototype,low,simulation_prototype_only,1,1,0.0154 0.0096 0.0075
+duck_like_multi_patch,18,L_foot_collision,L_link_ankle_pitch,left,center,False,sedon_source_scene,source_scene,existing_sedon_contact,0,0,0.07 0.04 0.025
+duck_like_multi_patch,19,L_foot_contact_duck_like_multi_patch_heel,L_link_ankle_pitch,left,heel,True,assumption/prototype,low,simulation_prototype_only,1,1,0.0154 0.0288 0.008
+duck_like_multi_patch,20,L_foot_contact_duck_like_multi_patch_center,L_link_ankle_pitch,left,center,True,assumption/prototype,low,simulation_prototype_only,1,1,0.0182 0.0296 0.0085
+duck_like_multi_patch,21,L_foot_contact_duck_like_multi_patch_toe,L_link_ankle_pitch,left,toe,True,assumption/prototype,low,simulation_prototype_only,1,1,0.0154 0.0288 0.008
+duck_like_multi_patch,22,L_foot_contact_duck_like_multi_patch_inner,L_link_ankle_pitch,left,inner,True,assumption/prototype,low,simulation_prototype_only,1,1,0.0154 0.0096 0.0075
+duck_like_multi_patch,23,L_foot_contact_duck_like_multi_patch_outer,L_link_ankle_pitch,left,outer,True,assumption/prototype,low,simulation_prototype_only,1,1,0.0154 0.0096 0.0075

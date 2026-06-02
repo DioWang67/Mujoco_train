@@ -1,0 +1,268 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-06-02T05:54:31+00:00",
+  "source_scene_path": "D:\\Git\\robotlearning\\h1_mujoco\\private_assets\\sedon\\training_scene.xml",
+  "source_scene_snapshot": "D:\\Git\\robotlearning\\h1_mujoco\\artifacts\\sedon_debug\\foot_contact_variants\\source_training_scene_snapshot.xml",
+  "profile_path": "D:\\Git\\robotlearning\\h1_mujoco\\configs\\sedon\\sedon_foot_contact_prototype_profiles.yaml",
+  "duck_usage": "concept_reference_only_not_verified_geometry",
+  "safety": {
+    "modifies_source_scene": false,
+    "enters_ppo": false,
+    "claims_walking_success": false,
+    "duck_geometry_usage": "concept_reference_only"
+  },
+  "prototype_metadata": {
+    "source": "assumption/prototype",
+    "confidence": "low",
+    "valid_for": "simulation_prototype_only"
+  },
+  "variants": [
+    {
+      "name": "current_box_baseline",
+      "status": "generated",
+      "scene_path": "D:\\Git\\robotlearning\\h1_mujoco\\artifacts\\sedon_debug\\foot_contact_variants\\current_box_baseline\\training_scene_current_box_baseline.xml",
+      "source_scene_path": "D:\\Git\\robotlearning\\h1_mujoco\\private_assets\\sedon\\training_scene.xml",
+      "does_not_modify_source_scene": true,
+      "disable_original_foot_collision": false,
+      "foot_length_status": "resolved_from_sedon_foot_collision_box_size",
+      "prototype_metadata": {
+        "source": "assumption/prototype",
+        "confidence": "low",
+        "valid_for": "simulation_prototype_only"
+      },
+      "added_patches": [],
+      "compile_result": {
+        "compiled": true,
+        "nbody": 12,
+        "ngeom": 14,
+        "njnt": 11,
+        "nu": 10
+      },
+      "description": "Copy the current Sedon training scene without adding contact patches."
+    },
+    {
+      "name": "simple_toe_center_heel",
+      "status": "generated",
+      "scene_path": "D:\\Git\\robotlearning\\h1_mujoco\\artifacts\\sedon_debug\\foot_contact_variants\\simple_toe_center_heel\\training_scene_simple_toe_center_heel.xml",
+      "source_scene_path": "D:\\Git\\robotlearning\\h1_mujoco\\private_assets\\sedon\\training_scene.xml",
+      "does_not_modify_source_scene": true,
+      "disable_original_foot_collision": true,
+      "foot_length_status": "resolved_from_sedon_foot_collision_box_size",
+      "prototype_metadata": {
+        "source": "assumption/prototype",
+        "confidence": "low",
+        "valid_for": "simulation_prototype_only"
+      },
+      "added_patches": [
+        {
+          "side": "right",
+          "region": "heel",
+          "geom_name": "R_foot_contact_simple_toe_center_heel_heel",
+          "body_name": "R_link_ankle_pitch",
+          "pos": "0.0012 0.025 -0.0705",
+          "size": "0.0168 0.0328 0.0085",
+          "source": "assumption/prototype",
+          "confidence": "low",
+          "valid_for": "simulation_prototype_only"
+        },
+        {
+          "side": "right",
+          "region": "center",
+          "geom_name": "R_foot_contact_simple_toe_center_heel_center",
+          "body_name": "R_link_ankle_pitch",
+          "pos": "0.025 0.025 -0.07",
+          "size": "0.021 0.0352 0.009",
+          "source": "assumption/prototype",
+          "confidence": "low",
+          "valid_for": "simulation_prototype_only"
+        },
+        {
+          "side": "right",
+          "region": "toe",
+          "geom_name": "R_foot_contact_simple_toe_center_heel_toe",
+          "body_name": "R_link_ankle_pitch",
+          "pos": "0.0502 0.025 -0.0705",
+          "size": "0.0168 0.0328 0.0085",
+          "source": "assumption/prototype",
+          "confidence": "low",
+          "valid_for": "simulation_prototype_only"
+        },
+        {
+          "side": "left",
+          "region": "heel",
+          "geom_name": "L_foot_contact_simple_toe_center_heel_heel",
+          "body_name": "L_link_ankle_pitch",
+          "pos": "0.0012 -0.025 -0.0705",
+          "size": "0.0168 0.0328 0.0085",
+          "source": "assumption/prototype",
+          "confidence": "low",
+          "valid_for": "simulation_prototype_only"
+        },
+        {
+          "side": "left",
+          "region": "center",
+          "geom_name": "L_foot_contact_simple_toe_center_heel_center",
+          "body_name": "L_link_ankle_pitch",
+          "pos": "0.025 -0.025 -0.07",
+          "size": "0.021 0.0352 0.009",
+          "source": "assumption/prototype",
+          "confidence": "low",
+          "valid_for": "simulation_prototype_only"
+        },
+        {
+          "side": "left",
+          "region": "toe",
+          "geom_name": "L_foot_contact_simple_toe_center_heel_toe",
+          "body_name": "L_link_ankle_pitch",
+          "pos": "0.0502 -0.025 -0.0705",
+          "size": "0.0168 0.0328 0.0085",
+          "source": "assumption/prototype",
+          "confidence": "low",
+          "valid_for": "simulation_prototype_only"
+        }
+      ],
+      "compile_result": {
+        "compiled": true,
+        "nbody": 12,
+        "ngeom": 20,
+        "njnt": 11,
+        "nu": 10
+      },
+      "description": "Replace each original foot collision with heel, center, and toe box patches estimated from Sedon foot length."
+    },
+    {
+      "name": "duck_like_multi_patch",
+      "status": "generated",
+      "scene_path": "D:\\Git\\robotlearning\\h1_mujoco\\artifacts\\sedon_debug\\foot_contact_variants\\duck_like_multi_patch\\training_scene_duck_like_multi_patch.xml",
+      "source_scene_path": "D:\\Git\\robotlearning\\h1_mujoco\\private_assets\\sedon\\training_scene.xml",
+      "does_not_modify_source_scene": true,
+      "disable_original_foot_collision": true,
+      "foot_length_status": "resolved_from_sedon_foot_collision_box_size",
+      "prototype_metadata": {
+        "source": "assumption/prototype",
+        "confidence": "low",
+        "valid_for": "simulation_prototype_only"
+      },
+      "added_patches": [
+        {
+          "side": "right",
+          "region": "heel",
+          "geom_name": "R_foot_contact_duck_like_multi_patch_heel",
+          "body_name": "R_link_ankle_pitch",
+          "pos": "-0.0002 0.025 -0.071",
+          "size": "0.0154 0.0288 0.008",
+          "source": "assumption/prototype",
+          "confidence": "low",
+          "valid_for": "simulation_prototype_only"
+        },
+        {
+          "side": "right",
+          "region": "center",
+          "geom_name": "R_foot_contact_duck_like_multi_patch_center",
+          "body_name": "R_link_ankle_pitch",
+          "pos": "0.025 0.025 -0.0705",
+          "size": "0.0182 0.0296 0.0085",
+          "source": "assumption/prototype",
+          "confidence": "low",
+          "valid_for": "simulation_prototype_only"
+        },
+        {
+          "side": "right",
+          "region": "toe",
+          "geom_name": "R_foot_contact_duck_like_multi_patch_toe",
+          "body_name": "R_link_ankle_pitch",
+          "pos": "0.0516 0.025 -0.071",
+          "size": "0.0154 0.0288 0.008",
+          "source": "assumption/prototype",
+          "confidence": "low",
+          "valid_for": "simulation_prototype_only"
+        },
+        {
+          "side": "right",
+          "region": "inner",
+          "geom_name": "R_foot_contact_duck_like_multi_patch_inner",
+          "body_name": "R_link_ankle_pitch",
+          "pos": "0.0264 0.0114 -0.0715",
+          "size": "0.0154 0.0096 0.0075",
+          "source": "assumption/prototype",
+          "confidence": "low",
+          "valid_for": "simulation_prototype_only"
+        },
+        {
+          "side": "right",
+          "region": "outer",
+          "geom_name": "R_foot_contact_duck_like_multi_patch_outer",
+          "body_name": "R_link_ankle_pitch",
+          "pos": "0.0264 0.0386 -0.0715",
+          "size": "0.0154 0.0096 0.0075",
+          "source": "assumption/prototype",
+          "confidence": "low",
+          "valid_for": "simulation_prototype_only"
+        },
+        {
+          "side": "left",
+          "region": "heel",
+          "geom_name": "L_foot_contact_duck_like_multi_patch_heel",
+          "body_name": "L_link_ankle_pitch",
+          "pos": "-0.0002 -0.025 -0.071",
+          "size": "0.0154 0.0288 0.008",
+          "source": "assumption/prototype",
+          "confidence": "low",
+          "valid_for": "simulation_prototype_only"
+        },
+        {
+          "side": "left",
+          "region": "center",
+          "geom_name": "L_foot_contact_duck_like_multi_patch_center",
+          "body_name": "L_link_ankle_pitch",
+          "pos": "0.025 -0.025 -0.0705",
+          "size": "0.0182 0.0296 0.0085",
+          "source": "assumption/prototype",
+          "confidence": "low",
+          "valid_for": "simulation_prototype_only"
+        },
+        {
+          "side": "left",
+          "region": "toe",
+          "geom_name": "L_foot_contact_duck_like_multi_patch_toe",
+          "body_name": "L_link_ankle_pitch",
+          "pos": "0.0516 -0.025 -0.071",
+          "size": "0.0154 0.0288 0.008",
+          "source": "assumption/prototype",
+          "confidence": "low",
+          "valid_for": "simulation_prototype_only"
+        },
+        {
+          "side": "left",
+          "region": "inner",
+          "geom_name": "L_foot_contact_duck_like_multi_patch_inner",
+          "body_name": "L_link_ankle_pitch",
+          "pos": "0.0264 -0.0386 -0.0715",
+          "size": "0.0154 0.0096 0.0075",
+          "source": "assumption/prototype",
+          "confidence": "low",
+          "valid_for": "simulation_prototype_only"
+        },
+        {
+          "side": "left",
+          "region": "outer",
+          "geom_name": "L_foot_contact_duck_like_multi_patch_outer",
+          "body_name": "L_link_ankle_pitch",
+          "pos": "0.0264 -0.0114 -0.0715",
+          "size": "0.0154 0.0096 0.0075",
+          "source": "assumption/prototype",
+          "confidence": "low",
+          "valid_for": "simulation_prototype_only"
+        }
+      ],
+      "compile_result": {
+        "compiled": true,
+        "nbody": 12,
+        "ngeom": 24,
+        "njnt": 11,
+        "nu": 10
+      },
+      "description": "Use the Open Duck Mini multi-patch contact concept as a low-confidence Sedon simulation prototype."
+    }
+  ]
+}
