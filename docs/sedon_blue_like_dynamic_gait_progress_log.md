@@ -867,3 +867,55 @@ This is not Blue-like dynamic gait success.
 ### Next Decision
 
 Tune posture stability and conservative amplitude before any PPO.
+
+## 2026-06-02 - Sedon v5_22 Toe Handoff Targeted Probe
+
+### Goal
+
+Run a bounded, controlled posture sweep on Sedon v5_22 foot prototype variants to check whether center-to-toe load transfer is physically observable before controller gait sequencing or PPO.
+
+### Files
+
+- `tools/sedon/diagnostics/v5_22/run_sedon_v5_22_toe_handoff_probe.py`
+- `configs/sedon/sedon_v5_22_toe_handoff_probe.yaml`
+- `docs/sedon_v5_22_toe_handoff_probe_report.md`
+- `artifacts/sedon_debug/v5_22_toe_handoff_probe/probe_results.csv`
+- `artifacts/sedon_debug/v5_22_toe_handoff_probe/metrics.json`
+- `artifacts/sedon_debug/v5_22_toe_handoff_probe/raw_contacts.csv`
+
+### Commands
+
+```text
+.venv\Scripts\python.exe -B -m py_compile tools\sedon\diagnostics\v5_22\run_sedon_v5_22_toe_handoff_probe.py
+.venv\Scripts\python.exe -B tools\sedon\diagnostics\v5_22\run_sedon_v5_22_toe_handoff_probe.py
+```
+
+### Key Metrics
+
+| Metric | Value |
+| --- | ---: |
+| probe_rows | 36 |
+| toe_handoff_candidate_found | false |
+| candidate_count | 0 |
+| best_foot_variant | duck_like_multi_patch |
+| best_posture_case | ankle_toe_down_bias |
+| best_actuator_profile | ankle_boost_hypothesis |
+| best_toe_force_ratio | 0.928829 |
+| best_center_force_ratio | 0.071171 |
+| best_heel_force_ratio | 0.000000 |
+| best_contact_none_rate | 0.850000 |
+| best_result_label | insufficient_contact_persistence |
+
+### Result
+
+NO_TOE_HANDOFF_CANDIDATE
+
+### Engineering Interpretation
+
+The targeted probe can create high toe force ratios under ankle toe-down bias and ankle boost, but those rows do not pass the prototype toe handoff rule because contact persistence is poor. The best row has `contact_none_rate=0.85`, so the observed toe loading is intermittent and should not be treated as a stable toe handoff.
+
+MuJoCo contact force is read from raw contact normal force via `mj_contactForce`; patch attribution depends on prototype geom names and is not a verified physical sensor. This remains bounded diagnostic only, not walking success and not sim2real evidence.
+
+### Next Decision
+
+Prioritize foot geometry tuning and contact persistence before controller gait sequencing. Do not PPO.
