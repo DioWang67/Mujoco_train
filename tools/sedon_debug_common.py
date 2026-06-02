@@ -11,7 +11,7 @@ import numpy as np
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SCENE_PATH = REPO_ROOT / "private_assets" / "sedon" / "training_scene.xml"
+DEFAULT_SCENE_PATH = REPO_ROOT / "private_assets" / "sedon_v5_22" / "training_scene.xml"
 DEBUG_OUT_DIR = REPO_ROOT / "artifacts" / "sedon_debug"
 FLOOR_GEOM = "floor"
 RIGHT_FOOT_GEOM = "R_foot_collision"

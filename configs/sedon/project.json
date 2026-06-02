@@ -1,9 +1,9 @@
 {
   "slug": "sedon",
-  "display_name": "Sedon standing baseline",
+  "display_name": "Sedon v5_22 standing baseline",
   "train_module": "sedon_baseline.train",
   "eval_module": "sedon_baseline.eval",
   "job_name": "sedon",
   "smoke_args": ["--smoke", "--n-envs", "1", "--reset-noise-scale", "0"],
-  "private_asset_dir": "private_assets/sedon"
+  "private_asset_dir": "private_assets/sedon_v5_22"
 }
