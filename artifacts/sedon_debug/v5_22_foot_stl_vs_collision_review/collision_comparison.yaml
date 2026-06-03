@@ -1,0 +1,252 @@
+{
+  "schema_version": 1,
+  "version": "v5_22",
+  "model_path": "private_assets/sedon_v5_22/training_scene.xml",
+  "collision_geoms": [
+    {
+      "side": "left",
+      "body_name": "L_link_ankle_pitch",
+      "name": "L_foot_collision",
+      "type": "box",
+      "pos": [
+        0.025,
+        -0.025,
+        -0.054
+      ],
+      "size": [
+        0.07,
+        0.04,
+        0.025
+      ],
+      "friction": "1.0 0.005 0.0001",
+      "bbox": {
+        "min": [
+          -0.045000000000000005,
+          -0.065,
+          -0.079
+        ],
+        "max": [
+          0.095,
+          0.015,
+          -0.028999999999999998
+        ],
+        "center": [
+          0.024999999999999998,
+          -0.025,
+          -0.054
+        ],
+        "dimensions": {
+          "x": 0.14,
+          "y": 0.08,
+          "z": 0.05
+        },
+        "length_x": 0.14,
+        "width_y": 0.08,
+        "height_z": 0.05
+      }
+    },
+    {
+      "side": "right",
+      "body_name": "R_link_ankle_pitch",
+      "name": "R_foot_collision",
+      "type": "box",
+      "pos": [
+        0.025,
+        0.025,
+        -0.054
+      ],
+      "size": [
+        0.07,
+        0.04,
+        0.025
+      ],
+      "friction": "1.0 0.005 0.0001",
+      "bbox": {
+        "min": [
+          -0.045000000000000005,
+          -0.015,
+          -0.079
+        ],
+        "max": [
+          0.095,
+          0.065,
+          -0.028999999999999998
+        ],
+        "center": [
+          0.024999999999999998,
+          0.025,
+          -0.054
+        ],
+        "dimensions": {
+          "x": 0.14,
+          "y": 0.08,
+          "z": 0.05
+        },
+        "length_x": 0.14,
+        "width_y": 0.08,
+        "height_z": 0.05
+      }
+    }
+  ],
+  "comparisons": [
+    {
+      "side": "left",
+      "stl_path": "private_assets/sedon_v5_22/mjcf_source/L_link_ankle_pitch.STL",
+      "stl_role": "ankle_pitch_visual_candidate",
+      "collision_geom": "L_foot_collision",
+      "collision_type": "box",
+      "visual_stl_bbox": {
+        "min": [
+          -0.07308342307806015,
+          -0.052949998527765274,
+          -0.0923616960644722
+        ],
+        "max": [
+          0.12618429958820343,
+          0.020999830216169357,
+          0.05249856784939766
+        ],
+        "center": [
+          0.02655043825507164,
+          -0.01597508415579796,
+          -0.01993156410753727
+        ],
+        "dimensions": {
+          "x": 0.19926772266626358,
+          "y": 0.07394982874393463,
+          "z": 0.14486026391386986
+        },
+        "length_x": 0.19926772266626358,
+        "width_y": 0.07394982874393463,
+        "height_z": 0.14486026391386986
+      },
+      "collision_bbox": {
+        "min": [
+          -0.045000000000000005,
+          -0.065,
+          -0.079
+        ],
+        "max": [
+          0.095,
+          0.015,
+          -0.028999999999999998
+        ],
+        "center": [
+          0.024999999999999998,
+          -0.025,
+          -0.054
+        ],
+        "dimensions": {
+          "x": 0.14,
+          "y": 0.08,
+          "z": 0.05
+        },
+        "length_x": 0.14,
+        "width_y": 0.08,
+        "height_z": 0.05
+      },
+      "dimension_relative_errors": {
+        "x": 0.29742761082047386,
+        "y": 0.07562714070081712,
+        "z": 0.6548397838780088
+      },
+      "center_offset_relative": {
+        "x": 0.007780679351007278,
+        "y": 0.11281144805252553,
+        "z": 0.23518137391161276
+      },
+      "mismatch_score": 0.2642173911566153,
+      "collision_over_simplified": true,
+      "status": "compared",
+      "source": "assumption",
+      "confidence": "low"
+    },
+    {
+      "side": "right",
+      "stl_path": "private_assets/sedon_v5_22/mjcf_source/R_link_ankle_pitch.STL",
+      "stl_role": "ankle_pitch_visual_candidate",
+      "collision_geom": "R_foot_collision",
+      "collision_type": "box",
+      "visual_stl_bbox": {
+        "min": [
+          -0.07308342307806015,
+          -0.020999830216169357,
+          -0.0923616960644722
+        ],
+        "max": [
+          0.12618429958820343,
+          0.052949998527765274,
+          0.05249858275055885
+        ],
+        "center": [
+          0.02655043825507164,
+          0.01597508415579796,
+          -0.019931556656956673
+        ],
+        "dimensions": {
+          "x": 0.19926772266626358,
+          "y": 0.07394982874393463,
+          "z": 0.14486027881503105
+        },
+        "length_x": 0.19926772266626358,
+        "width_y": 0.07394982874393463,
+        "height_z": 0.14486027881503105
+      },
+      "collision_bbox": {
+        "min": [
+          -0.045000000000000005,
+          -0.015,
+          -0.079
+        ],
+        "max": [
+          0.095,
+          0.065,
+          -0.028999999999999998
+        ],
+        "center": [
+          0.024999999999999998,
+          0.025,
+          -0.054
+        ],
+        "dimensions": {
+          "x": 0.14,
+          "y": 0.08,
+          "z": 0.05
+        },
+        "length_x": 0.14,
+        "width_y": 0.08,
+        "height_z": 0.05
+      },
+      "dimension_relative_errors": {
+        "x": 0.29742761082047386,
+        "y": 0.07562714070081712,
+        "z": 0.6548398193831733
+      },
+      "center_offset_relative": {
+        "x": 0.007780679351007278,
+        "y": 0.11281144805252553,
+        "z": 0.2351814011523793
+      },
+      "mismatch_score": 0.26421740202749033,
+      "collision_over_simplified": true,
+      "status": "compared",
+      "source": "assumption",
+      "confidence": "low"
+    }
+  ],
+  "engineering_conclusion": {
+    "collision_over_simplified": true,
+    "physical_foot_may_support_rollover": "unknown",
+    "MuJoCo_collision_needs_update": "unknown",
+    "mechanical_redesign_needed": "unknown",
+    "next_step": "request_cad_step_or_bottom_specific_mesh",
+    "bottom_specific_mesh_found": false,
+    "do_not_claim_walking_success": true,
+    "do_not_use_stl_as_final_collision": true
+  },
+  "recommendations": [
+    "Request CAD/STEP or a bottom-specific mesh because the discovered STL files are ankle-pitch visual candidates, not explicit sole/bottom geometry.",
+    "Do not directly use the STL mesh as final MuJoCo collision.",
+    "Use mechanical review to decide whether to update collision or redesign the foot bottom."
+  ]
+}

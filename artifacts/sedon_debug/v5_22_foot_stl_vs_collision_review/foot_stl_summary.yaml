@@ -1,0 +1,1360 @@
+{
+  "schema_version": 1,
+  "status": "FOOT_STL_VS_COLLISION_REVIEW_COMPLETE",
+  "version": "v5_22",
+  "model_path": "private_assets/sedon_v5_22/training_scene.xml",
+  "valid_for": "read_only_visual_geometry_collision_comparison",
+  "invalid_for": [
+    "final_collision_mesh_claim",
+    "walking_success_claim",
+    "ppo_readiness_claim",
+    "mechanical_redesign_final_claim"
+  ],
+  "search_roots": [
+    "private_assets",
+    "private_assets/sedon_v5_22",
+    "private_assets/SEEDON_URDF_5_22"
+  ],
+  "stl_summaries": [
+    {
+      "path": "private_assets/sedon/mjcf_source/L_link_ankle_pitch.STL",
+      "side": "left",
+      "role": "ankle_pitch_visual_candidate",
+      "vertex_count": 127164,
+      "triangle_count": 42388,
+      "bbox": {
+        "min": [
+          -0.07308340817689896,
+          -0.05444999784231186,
+          -0.09236171096563339
+        ],
+        "max": [
+          0.12618429958820343,
+          0.019499830901622772,
+          0.05249857157468796
+        ],
+        "center": [
+          0.026550445705652237,
+          -0.017475083470344543,
+          -0.019931569695472717
+        ],
+        "dimensions": {
+          "x": 0.1992677077651024,
+          "y": 0.07394982874393463,
+          "z": 0.14486028254032135
+        },
+        "length_x": 0.1992677077651024,
+        "width_y": 0.07394982874393463,
+        "height_z": 0.14486028254032135
+      },
+      "bottom": {
+        "lowest_z": -0.09236171096563339,
+        "bottom_vertex_tolerance": 0.002,
+        "bottom_vertex_count": 8475,
+        "bottom_vertex_ratio": 0.06664622062847976,
+        "bottom_bbox": {
+          "min": [
+            -0.05484175309538841,
+            -0.042045023292303085,
+            -0.09236171096563339
+          ],
+          "max": [
+            0.09487640112638474,
+            -0.0007551868329755962,
+            -0.09036489576101303
+          ],
+          "center": [
+            0.02001732401549816,
+            -0.02140010506263934,
+            -0.09136330336332321
+          ],
+          "dimensions": {
+            "x": 0.14971815422177315,
+            "y": 0.04128983645932749,
+            "z": 0.0019968152046203613
+          },
+          "length_x": 0.14971815422177315,
+          "width_y": 0.04128983645932749,
+          "height_z": 0.0019968152046203613
+        },
+        "x_bin_min_z": [
+          {
+            "bin": 0,
+            "x_start": -0.07308340817689896,
+            "x_end": -0.04461659278188433,
+            "min_z": -0.09161891788244247,
+            "sample_count": 25480
+          },
+          {
+            "bin": 1,
+            "x_start": -0.04461659278188433,
+            "x_end": -0.0161497773868697,
+            "min_z": -0.092361681163311,
+            "sample_count": 17050
+          },
+          {
+            "bin": 2,
+            "x_start": -0.0161497773868697,
+            "x_end": 0.012317038008144918,
+            "min_z": -0.092361681163311,
+            "sample_count": 17133
+          },
+          {
+            "bin": 3,
+            "x_start": 0.012317038008144918,
+            "x_end": 0.040783853403159556,
+            "min_z": -0.092361681163311,
+            "sample_count": 14713
+          },
+          {
+            "bin": 4,
+            "x_start": 0.040783853403159556,
+            "x_end": 0.06925066879817418,
+            "min_z": -0.09236171096563339,
+            "sample_count": 16966
+          },
+          {
+            "bin": 5,
+            "x_start": 0.06925066879817418,
+            "x_end": 0.09771748419318879,
+            "min_z": -0.09235509485006332,
+            "sample_count": 31939
+          },
+          {
+            "bin": 6,
+            "x_start": 0.09771748419318879,
+            "x_end": 0.12618429958820343,
+            "min_z": -0.08963536471128464,
+            "sample_count": 3883
+          }
+        ],
+        "x_min_z_range": 0.002726346254348755,
+        "front_min_z": -0.08963536471128464,
+        "center_min_z": -0.092361681163311,
+        "rear_min_z": -0.09161891788244247,
+        "front_extent": 0.12618429958820343,
+        "rear_extent": -0.07308340817689896,
+        "bottom_x_span_ratio": 0.7513417798646108,
+        "bottom_y_span": 0.04128983645932749,
+        "front_non_bottom_extent_ratio": 0.157114761909765,
+        "rear_non_bottom_extent_ratio": 0.09154345822562421
+      },
+      "interpretation": {
+        "flat_bottom_candidate": true,
+        "rocker_like_candidate": false,
+        "continuous_bottom_candidate": true,
+        "discrete_patch_candidate": false,
+        "toe_contact_area_candidate": true,
+        "heel_contact_area_candidate": true,
+        "bottom_shape": "flat",
+        "heuristic_source": "stl_vertex_lowest_z_distribution",
+        "source": "assumption",
+        "confidence": "low"
+      }
+    },
+    {
+      "path": "private_assets/sedon/mjcf_source/R_link_ankle_pitch.STL",
+      "side": "right",
+      "role": "ankle_pitch_visual_candidate",
+      "vertex_count": 127368,
+      "triangle_count": 42456,
+      "bbox": {
+        "min": [
+          -0.07308340817689896,
+          -0.019499830901622772,
+          -0.09236171096563339
+        ],
+        "max": [
+          0.12618429958820343,
+          0.05444999784231186,
+          0.05249857157468796
+        ],
+        "center": [
+          0.026550445705652237,
+          0.017475083470344543,
+          -0.019931569695472717
+        ],
+        "dimensions": {
+          "x": 0.1992677077651024,
+          "y": 0.07394982874393463,
+          "z": 0.14486028254032135
+        },
+        "length_x": 0.1992677077651024,
+        "width_y": 0.07394982874393463,
+        "height_z": 0.14486028254032135
+      },
+      "bottom": {
+        "lowest_z": -0.09236171096563339,
+        "bottom_vertex_tolerance": 0.002,
+        "bottom_vertex_count": 8488,
+        "bottom_vertex_ratio": 0.06664154261666981,
+        "bottom_bbox": {
+          "min": [
+            -0.05484175309538841,
+            0.0007551868329755962,
+            -0.09236171096563339
+          ],
+          "max": [
+            0.09487640112638474,
+            0.042045023292303085,
+            -0.09036489576101303
+          ],
+          "center": [
+            0.02001732401549816,
+            0.02140010506263934,
+            -0.09136330336332321
+          ],
+          "dimensions": {
+            "x": 0.14971815422177315,
+            "y": 0.04128983645932749,
+            "z": 0.0019968152046203613
+          },
+          "length_x": 0.14971815422177315,
+          "width_y": 0.04128983645932749,
+          "height_z": 0.0019968152046203613
+        },
+        "x_bin_min_z": [
+          {
+            "bin": 0,
+            "x_start": -0.07308340817689896,
+            "x_end": -0.04461659278188433,
+            "min_z": -0.09161891788244247,
+            "sample_count": 25540
+          },
+          {
+            "bin": 1,
+            "x_start": -0.04461659278188433,
+            "x_end": -0.0161497773868697,
+            "min_z": -0.092361681163311,
+            "sample_count": 17117
+          },
+          {
+            "bin": 2,
+            "x_start": -0.0161497773868697,
+            "x_end": 0.012317038008144918,
+            "min_z": -0.092361681163311,
+            "sample_count": 17158
+          },
+          {
+            "bin": 3,
+            "x_start": 0.012317038008144918,
+            "x_end": 0.040783853403159556,
+            "min_z": -0.092361681163311,
+            "sample_count": 14697
+          },
+          {
+            "bin": 4,
+            "x_start": 0.040783853403159556,
+            "x_end": 0.06925066879817418,
+            "min_z": -0.09236171096563339,
+            "sample_count": 17001
+          },
+          {
+            "bin": 5,
+            "x_start": 0.06925066879817418,
+            "x_end": 0.09771748419318879,
+            "min_z": -0.09235509485006332,
+            "sample_count": 31942
+          },
+          {
+            "bin": 6,
+            "x_start": 0.09771748419318879,
+            "x_end": 0.12618429958820343,
+            "min_z": -0.08963536471128464,
+            "sample_count": 3913
+          }
+        ],
+        "x_min_z_range": 0.002726346254348755,
+        "front_min_z": -0.08963536471128464,
+        "center_min_z": -0.092361681163311,
+        "rear_min_z": -0.09161891788244247,
+        "front_extent": 0.12618429958820343,
+        "rear_extent": -0.07308340817689896,
+        "bottom_x_span_ratio": 0.7513417798646108,
+        "bottom_y_span": 0.04128983645932749,
+        "front_non_bottom_extent_ratio": 0.157114761909765,
+        "rear_non_bottom_extent_ratio": 0.09154345822562421
+      },
+      "interpretation": {
+        "flat_bottom_candidate": true,
+        "rocker_like_candidate": false,
+        "continuous_bottom_candidate": true,
+        "discrete_patch_candidate": false,
+        "toe_contact_area_candidate": true,
+        "heel_contact_area_candidate": true,
+        "bottom_shape": "flat",
+        "heuristic_source": "stl_vertex_lowest_z_distribution",
+        "source": "assumption",
+        "confidence": "low"
+      }
+    },
+    {
+      "path": "private_assets/sedon/original_urdf_package/urdf/meshes/L_link_ankle_pitch.STL",
+      "side": "left",
+      "role": "ankle_pitch_visual_candidate",
+      "vertex_count": 127164,
+      "triangle_count": 42388,
+      "bbox": {
+        "min": [
+          -0.07308340817689896,
+          -0.05444999784231186,
+          -0.09236171096563339
+        ],
+        "max": [
+          0.12618429958820343,
+          0.019499830901622772,
+          0.05249857157468796
+        ],
+        "center": [
+          0.026550445705652237,
+          -0.017475083470344543,
+          -0.019931569695472717
+        ],
+        "dimensions": {
+          "x": 0.1992677077651024,
+          "y": 0.07394982874393463,
+          "z": 0.14486028254032135
+        },
+        "length_x": 0.1992677077651024,
+        "width_y": 0.07394982874393463,
+        "height_z": 0.14486028254032135
+      },
+      "bottom": {
+        "lowest_z": -0.09236171096563339,
+        "bottom_vertex_tolerance": 0.002,
+        "bottom_vertex_count": 8475,
+        "bottom_vertex_ratio": 0.06664622062847976,
+        "bottom_bbox": {
+          "min": [
+            -0.05484175309538841,
+            -0.042045023292303085,
+            -0.09236171096563339
+          ],
+          "max": [
+            0.09487640112638474,
+            -0.0007551868329755962,
+            -0.09036489576101303
+          ],
+          "center": [
+            0.02001732401549816,
+            -0.02140010506263934,
+            -0.09136330336332321
+          ],
+          "dimensions": {
+            "x": 0.14971815422177315,
+            "y": 0.04128983645932749,
+            "z": 0.0019968152046203613
+          },
+          "length_x": 0.14971815422177315,
+          "width_y": 0.04128983645932749,
+          "height_z": 0.0019968152046203613
+        },
+        "x_bin_min_z": [
+          {
+            "bin": 0,
+            "x_start": -0.07308340817689896,
+            "x_end": -0.04461659278188433,
+            "min_z": -0.09161891788244247,
+            "sample_count": 25480
+          },
+          {
+            "bin": 1,
+            "x_start": -0.04461659278188433,
+            "x_end": -0.0161497773868697,
+            "min_z": -0.092361681163311,
+            "sample_count": 17050
+          },
+          {
+            "bin": 2,
+            "x_start": -0.0161497773868697,
+            "x_end": 0.012317038008144918,
+            "min_z": -0.092361681163311,
+            "sample_count": 17133
+          },
+          {
+            "bin": 3,
+            "x_start": 0.012317038008144918,
+            "x_end": 0.040783853403159556,
+            "min_z": -0.092361681163311,
+            "sample_count": 14713
+          },
+          {
+            "bin": 4,
+            "x_start": 0.040783853403159556,
+            "x_end": 0.06925066879817418,
+            "min_z": -0.09236171096563339,
+            "sample_count": 16966
+          },
+          {
+            "bin": 5,
+            "x_start": 0.06925066879817418,
+            "x_end": 0.09771748419318879,
+            "min_z": -0.09235509485006332,
+            "sample_count": 31939
+          },
+          {
+            "bin": 6,
+            "x_start": 0.09771748419318879,
+            "x_end": 0.12618429958820343,
+            "min_z": -0.08963536471128464,
+            "sample_count": 3883
+          }
+        ],
+        "x_min_z_range": 0.002726346254348755,
+        "front_min_z": -0.08963536471128464,
+        "center_min_z": -0.092361681163311,
+        "rear_min_z": -0.09161891788244247,
+        "front_extent": 0.12618429958820343,
+        "rear_extent": -0.07308340817689896,
+        "bottom_x_span_ratio": 0.7513417798646108,
+        "bottom_y_span": 0.04128983645932749,
+        "front_non_bottom_extent_ratio": 0.157114761909765,
+        "rear_non_bottom_extent_ratio": 0.09154345822562421
+      },
+      "interpretation": {
+        "flat_bottom_candidate": true,
+        "rocker_like_candidate": false,
+        "continuous_bottom_candidate": true,
+        "discrete_patch_candidate": false,
+        "toe_contact_area_candidate": true,
+        "heel_contact_area_candidate": true,
+        "bottom_shape": "flat",
+        "heuristic_source": "stl_vertex_lowest_z_distribution",
+        "source": "assumption",
+        "confidence": "low"
+      }
+    },
+    {
+      "path": "private_assets/sedon/original_urdf_package/urdf/meshes/R_link_ankle_pitch.STL",
+      "side": "right",
+      "role": "ankle_pitch_visual_candidate",
+      "vertex_count": 127368,
+      "triangle_count": 42456,
+      "bbox": {
+        "min": [
+          -0.07308340817689896,
+          -0.019499830901622772,
+          -0.09236171096563339
+        ],
+        "max": [
+          0.12618429958820343,
+          0.05444999784231186,
+          0.05249857157468796
+        ],
+        "center": [
+          0.026550445705652237,
+          0.017475083470344543,
+          -0.019931569695472717
+        ],
+        "dimensions": {
+          "x": 0.1992677077651024,
+          "y": 0.07394982874393463,
+          "z": 0.14486028254032135
+        },
+        "length_x": 0.1992677077651024,
+        "width_y": 0.07394982874393463,
+        "height_z": 0.14486028254032135
+      },
+      "bottom": {
+        "lowest_z": -0.09236171096563339,
+        "bottom_vertex_tolerance": 0.002,
+        "bottom_vertex_count": 8488,
+        "bottom_vertex_ratio": 0.06664154261666981,
+        "bottom_bbox": {
+          "min": [
+            -0.05484175309538841,
+            0.0007551868329755962,
+            -0.09236171096563339
+          ],
+          "max": [
+            0.09487640112638474,
+            0.042045023292303085,
+            -0.09036489576101303
+          ],
+          "center": [
+            0.02001732401549816,
+            0.02140010506263934,
+            -0.09136330336332321
+          ],
+          "dimensions": {
+            "x": 0.14971815422177315,
+            "y": 0.04128983645932749,
+            "z": 0.0019968152046203613
+          },
+          "length_x": 0.14971815422177315,
+          "width_y": 0.04128983645932749,
+          "height_z": 0.0019968152046203613
+        },
+        "x_bin_min_z": [
+          {
+            "bin": 0,
+            "x_start": -0.07308340817689896,
+            "x_end": -0.04461659278188433,
+            "min_z": -0.09161891788244247,
+            "sample_count": 25540
+          },
+          {
+            "bin": 1,
+            "x_start": -0.04461659278188433,
+            "x_end": -0.0161497773868697,
+            "min_z": -0.092361681163311,
+            "sample_count": 17117
+          },
+          {
+            "bin": 2,
+            "x_start": -0.0161497773868697,
+            "x_end": 0.012317038008144918,
+            "min_z": -0.092361681163311,
+            "sample_count": 17158
+          },
+          {
+            "bin": 3,
+            "x_start": 0.012317038008144918,
+            "x_end": 0.040783853403159556,
+            "min_z": -0.092361681163311,
+            "sample_count": 14697
+          },
+          {
+            "bin": 4,
+            "x_start": 0.040783853403159556,
+            "x_end": 0.06925066879817418,
+            "min_z": -0.09236171096563339,
+            "sample_count": 17001
+          },
+          {
+            "bin": 5,
+            "x_start": 0.06925066879817418,
+            "x_end": 0.09771748419318879,
+            "min_z": -0.09235509485006332,
+            "sample_count": 31942
+          },
+          {
+            "bin": 6,
+            "x_start": 0.09771748419318879,
+            "x_end": 0.12618429958820343,
+            "min_z": -0.08963536471128464,
+            "sample_count": 3913
+          }
+        ],
+        "x_min_z_range": 0.002726346254348755,
+        "front_min_z": -0.08963536471128464,
+        "center_min_z": -0.092361681163311,
+        "rear_min_z": -0.09161891788244247,
+        "front_extent": 0.12618429958820343,
+        "rear_extent": -0.07308340817689896,
+        "bottom_x_span_ratio": 0.7513417798646108,
+        "bottom_y_span": 0.04128983645932749,
+        "front_non_bottom_extent_ratio": 0.157114761909765,
+        "rear_non_bottom_extent_ratio": 0.09154345822562421
+      },
+      "interpretation": {
+        "flat_bottom_candidate": true,
+        "rocker_like_candidate": false,
+        "continuous_bottom_candidate": true,
+        "discrete_patch_candidate": false,
+        "toe_contact_area_candidate": true,
+        "heel_contact_area_candidate": true,
+        "bottom_shape": "flat",
+        "heuristic_source": "stl_vertex_lowest_z_distribution",
+        "source": "assumption",
+        "confidence": "low"
+      }
+    },
+    {
+      "path": "private_assets/sedon_v5_22/mjcf_source/L_link_ankle_pitch.STL",
+      "side": "left",
+      "role": "ankle_pitch_visual_candidate",
+      "vertex_count": 126426,
+      "triangle_count": 42142,
+      "bbox": {
+        "min": [
+          -0.07308342307806015,
+          -0.052949998527765274,
+          -0.0923616960644722
+        ],
+        "max": [
+          0.12618429958820343,
+          0.020999830216169357,
+          0.05249856784939766
+        ],
+        "center": [
+          0.02655043825507164,
+          -0.01597508415579796,
+          -0.01993156410753727
+        ],
+        "dimensions": {
+          "x": 0.19926772266626358,
+          "y": 0.07394982874393463,
+          "z": 0.14486026391386986
+        },
+        "length_x": 0.19926772266626358,
+        "width_y": 0.07394982874393463,
+        "height_z": 0.14486026391386986
+      },
+      "bottom": {
+        "lowest_z": -0.0923616960644722,
+        "bottom_vertex_tolerance": 0.002,
+        "bottom_vertex_count": 8488,
+        "bottom_vertex_ratio": 0.06713808868428962,
+        "bottom_bbox": {
+          "min": [
+            -0.05484176427125931,
+            -0.04074481502175331,
+            -0.0923616960644722
+          ],
+          "max": [
+            0.09487639367580414,
+            0.0005450230091810226,
+            -0.09036488085985184
+          ],
+          "center": [
+            0.020017314702272415,
+            -0.020099896006286144,
+            -0.09136328846216202
+          ],
+          "dimensions": {
+            "x": 0.14971815794706345,
+            "y": 0.041289838030934334,
+            "z": 0.0019968152046203613
+          },
+          "length_x": 0.14971815794706345,
+          "width_y": 0.041289838030934334,
+          "height_z": 0.0019968152046203613
+        },
+        "x_bin_min_z": [
+          {
+            "bin": 0,
+            "x_start": -0.07308342307806015,
+            "x_end": -0.044616605554308214,
+            "min_z": -0.09161890298128128,
+            "sample_count": 25833
+          },
+          {
+            "bin": 1,
+            "x_start": -0.044616605554308214,
+            "x_end": -0.01614978803055627,
+            "min_z": -0.09236166626214981,
+            "sample_count": 17055
+          },
+          {
+            "bin": 2,
+            "x_start": -0.01614978803055627,
+            "x_end": 0.012317029493195672,
+            "min_z": -0.09236166626214981,
+            "sample_count": 16667
+          },
+          {
+            "bin": 3,
+            "x_start": 0.012317029493195672,
+            "x_end": 0.04078384701694761,
+            "min_z": -0.09236166626214981,
+            "sample_count": 14517
+          },
+          {
+            "bin": 4,
+            "x_start": 0.04078384701694761,
+            "x_end": 0.06925066454069956,
+            "min_z": -0.0923616960644722,
+            "sample_count": 16948
+          },
+          {
+            "bin": 5,
+            "x_start": 0.06925066454069956,
+            "x_end": 0.0977174820644515,
+            "min_z": -0.09235507994890213,
+            "sample_count": 31538
+          },
+          {
+            "bin": 6,
+            "x_start": 0.0977174820644515,
+            "x_end": 0.12618429958820343,
+            "min_z": -0.08963534981012344,
+            "sample_count": 3868
+          }
+        ],
+        "x_min_z_range": 0.002726346254348755,
+        "front_min_z": -0.08963534981012344,
+        "center_min_z": -0.09236166626214981,
+        "rear_min_z": -0.09161890298128128,
+        "front_extent": 0.12618429958820343,
+        "rear_extent": -0.07308342307806015,
+        "bottom_x_span_ratio": 0.7513417423744715,
+        "bottom_y_span": 0.041289838030934334,
+        "front_non_bottom_extent_ratio": 0.157114787550587,
+        "rear_non_bottom_extent_ratio": 0.0915434700749415
+      },
+      "interpretation": {
+        "flat_bottom_candidate": true,
+        "rocker_like_candidate": false,
+        "continuous_bottom_candidate": true,
+        "discrete_patch_candidate": false,
+        "toe_contact_area_candidate": true,
+        "heel_contact_area_candidate": true,
+        "bottom_shape": "flat",
+        "heuristic_source": "stl_vertex_lowest_z_distribution",
+        "source": "assumption",
+        "confidence": "low"
+      }
+    },
+    {
+      "path": "private_assets/sedon_v5_22/mjcf_source/R_link_ankle_pitch.STL",
+      "side": "right",
+      "role": "ankle_pitch_visual_candidate",
+      "vertex_count": 126978,
+      "triangle_count": 42326,
+      "bbox": {
+        "min": [
+          -0.07308342307806015,
+          -0.020999830216169357,
+          -0.0923616960644722
+        ],
+        "max": [
+          0.12618429958820343,
+          0.052949998527765274,
+          0.05249858275055885
+        ],
+        "center": [
+          0.02655043825507164,
+          0.01597508415579796,
+          -0.019931556656956673
+        ],
+        "dimensions": {
+          "x": 0.19926772266626358,
+          "y": 0.07394982874393463,
+          "z": 0.14486027881503105
+        },
+        "length_x": 0.19926772266626358,
+        "width_y": 0.07394982874393463,
+        "height_z": 0.14486027881503105
+      },
+      "bottom": {
+        "lowest_z": -0.0923616960644722,
+        "bottom_vertex_tolerance": 0.002,
+        "bottom_vertex_count": 8488,
+        "bottom_vertex_ratio": 0.0668462253303722,
+        "bottom_bbox": {
+          "min": [
+            -0.05484176427125931,
+            -0.0005448131705634296,
+            -0.0923616960644722
+          ],
+          "max": [
+            0.09487639367580414,
+            0.040745023638010025,
+            -0.09036488085985184
+          ],
+          "center": [
+            0.020017314702272415,
+            0.020100105233723298,
+            -0.09136328846216202
+          ],
+          "dimensions": {
+            "x": 0.14971815794706345,
+            "y": 0.041289836808573455,
+            "z": 0.0019968152046203613
+          },
+          "length_x": 0.14971815794706345,
+          "width_y": 0.041289836808573455,
+          "height_z": 0.0019968152046203613
+        },
+        "x_bin_min_z": [
+          {
+            "bin": 0,
+            "x_start": -0.07308342307806015,
+            "x_end": -0.044616605554308214,
+            "min_z": -0.09161890298128128,
+            "sample_count": 25318
+          },
+          {
+            "bin": 1,
+            "x_start": -0.044616605554308214,
+            "x_end": -0.01614978803055627,
+            "min_z": -0.09236166626214981,
+            "sample_count": 17150
+          },
+          {
+            "bin": 2,
+            "x_start": -0.01614978803055627,
+            "x_end": 0.012317029493195672,
+            "min_z": -0.09236166626214981,
+            "sample_count": 17200
+          },
+          {
+            "bin": 3,
+            "x_start": 0.012317029493195672,
+            "x_end": 0.04078384701694761,
+            "min_z": -0.09236166626214981,
+            "sample_count": 14587
+          },
+          {
+            "bin": 4,
+            "x_start": 0.04078384701694761,
+            "x_end": 0.06925066454069956,
+            "min_z": -0.0923616960644722,
+            "sample_count": 17219
+          },
+          {
+            "bin": 5,
+            "x_start": 0.06925066454069956,
+            "x_end": 0.0977174820644515,
+            "min_z": -0.09235507994890213,
+            "sample_count": 31623
+          },
+          {
+            "bin": 6,
+            "x_start": 0.0977174820644515,
+            "x_end": 0.12618429958820343,
+            "min_z": -0.08963534981012344,
+            "sample_count": 3881
+          }
+        ],
+        "x_min_z_range": 0.002726346254348755,
+        "front_min_z": -0.08963534981012344,
+        "center_min_z": -0.09236166626214981,
+        "rear_min_z": -0.09161890298128128,
+        "front_extent": 0.12618429958820343,
+        "rear_extent": -0.07308342307806015,
+        "bottom_x_span_ratio": 0.7513417423744715,
+        "bottom_y_span": 0.041289836808573455,
+        "front_non_bottom_extent_ratio": 0.157114787550587,
+        "rear_non_bottom_extent_ratio": 0.0915434700749415
+      },
+      "interpretation": {
+        "flat_bottom_candidate": true,
+        "rocker_like_candidate": false,
+        "continuous_bottom_candidate": true,
+        "discrete_patch_candidate": false,
+        "toe_contact_area_candidate": true,
+        "heel_contact_area_candidate": true,
+        "bottom_shape": "flat",
+        "heuristic_source": "stl_vertex_lowest_z_distribution",
+        "source": "assumption",
+        "confidence": "low"
+      }
+    },
+    {
+      "path": "private_assets/SEEDON_URDF_5_22/meshes/L_link_ankle_pitch.STL",
+      "side": "left",
+      "role": "ankle_pitch_visual_candidate",
+      "vertex_count": 126426,
+      "triangle_count": 42142,
+      "bbox": {
+        "min": [
+          -0.07308342307806015,
+          -0.052949998527765274,
+          -0.0923616960644722
+        ],
+        "max": [
+          0.12618429958820343,
+          0.020999830216169357,
+          0.05249856784939766
+        ],
+        "center": [
+          0.02655043825507164,
+          -0.01597508415579796,
+          -0.01993156410753727
+        ],
+        "dimensions": {
+          "x": 0.19926772266626358,
+          "y": 0.07394982874393463,
+          "z": 0.14486026391386986
+        },
+        "length_x": 0.19926772266626358,
+        "width_y": 0.07394982874393463,
+        "height_z": 0.14486026391386986
+      },
+      "bottom": {
+        "lowest_z": -0.0923616960644722,
+        "bottom_vertex_tolerance": 0.002,
+        "bottom_vertex_count": 8488,
+        "bottom_vertex_ratio": 0.06713808868428962,
+        "bottom_bbox": {
+          "min": [
+            -0.05484176427125931,
+            -0.04074481502175331,
+            -0.0923616960644722
+          ],
+          "max": [
+            0.09487639367580414,
+            0.0005450230091810226,
+            -0.09036488085985184
+          ],
+          "center": [
+            0.020017314702272415,
+            -0.020099896006286144,
+            -0.09136328846216202
+          ],
+          "dimensions": {
+            "x": 0.14971815794706345,
+            "y": 0.041289838030934334,
+            "z": 0.0019968152046203613
+          },
+          "length_x": 0.14971815794706345,
+          "width_y": 0.041289838030934334,
+          "height_z": 0.0019968152046203613
+        },
+        "x_bin_min_z": [
+          {
+            "bin": 0,
+            "x_start": -0.07308342307806015,
+            "x_end": -0.044616605554308214,
+            "min_z": -0.09161890298128128,
+            "sample_count": 25833
+          },
+          {
+            "bin": 1,
+            "x_start": -0.044616605554308214,
+            "x_end": -0.01614978803055627,
+            "min_z": -0.09236166626214981,
+            "sample_count": 17055
+          },
+          {
+            "bin": 2,
+            "x_start": -0.01614978803055627,
+            "x_end": 0.012317029493195672,
+            "min_z": -0.09236166626214981,
+            "sample_count": 16667
+          },
+          {
+            "bin": 3,
+            "x_start": 0.012317029493195672,
+            "x_end": 0.04078384701694761,
+            "min_z": -0.09236166626214981,
+            "sample_count": 14517
+          },
+          {
+            "bin": 4,
+            "x_start": 0.04078384701694761,
+            "x_end": 0.06925066454069956,
+            "min_z": -0.0923616960644722,
+            "sample_count": 16948
+          },
+          {
+            "bin": 5,
+            "x_start": 0.06925066454069956,
+            "x_end": 0.0977174820644515,
+            "min_z": -0.09235507994890213,
+            "sample_count": 31538
+          },
+          {
+            "bin": 6,
+            "x_start": 0.0977174820644515,
+            "x_end": 0.12618429958820343,
+            "min_z": -0.08963534981012344,
+            "sample_count": 3868
+          }
+        ],
+        "x_min_z_range": 0.002726346254348755,
+        "front_min_z": -0.08963534981012344,
+        "center_min_z": -0.09236166626214981,
+        "rear_min_z": -0.09161890298128128,
+        "front_extent": 0.12618429958820343,
+        "rear_extent": -0.07308342307806015,
+        "bottom_x_span_ratio": 0.7513417423744715,
+        "bottom_y_span": 0.041289838030934334,
+        "front_non_bottom_extent_ratio": 0.157114787550587,
+        "rear_non_bottom_extent_ratio": 0.0915434700749415
+      },
+      "interpretation": {
+        "flat_bottom_candidate": true,
+        "rocker_like_candidate": false,
+        "continuous_bottom_candidate": true,
+        "discrete_patch_candidate": false,
+        "toe_contact_area_candidate": true,
+        "heel_contact_area_candidate": true,
+        "bottom_shape": "flat",
+        "heuristic_source": "stl_vertex_lowest_z_distribution",
+        "source": "assumption",
+        "confidence": "low"
+      }
+    },
+    {
+      "path": "private_assets/SEEDON_URDF_5_22/meshes/R_link_ankle_pitch.STL",
+      "side": "right",
+      "role": "ankle_pitch_visual_candidate",
+      "vertex_count": 126978,
+      "triangle_count": 42326,
+      "bbox": {
+        "min": [
+          -0.07308342307806015,
+          -0.020999830216169357,
+          -0.0923616960644722
+        ],
+        "max": [
+          0.12618429958820343,
+          0.052949998527765274,
+          0.05249858275055885
+        ],
+        "center": [
+          0.02655043825507164,
+          0.01597508415579796,
+          -0.019931556656956673
+        ],
+        "dimensions": {
+          "x": 0.19926772266626358,
+          "y": 0.07394982874393463,
+          "z": 0.14486027881503105
+        },
+        "length_x": 0.19926772266626358,
+        "width_y": 0.07394982874393463,
+        "height_z": 0.14486027881503105
+      },
+      "bottom": {
+        "lowest_z": -0.0923616960644722,
+        "bottom_vertex_tolerance": 0.002,
+        "bottom_vertex_count": 8488,
+        "bottom_vertex_ratio": 0.0668462253303722,
+        "bottom_bbox": {
+          "min": [
+            -0.05484176427125931,
+            -0.0005448131705634296,
+            -0.0923616960644722
+          ],
+          "max": [
+            0.09487639367580414,
+            0.040745023638010025,
+            -0.09036488085985184
+          ],
+          "center": [
+            0.020017314702272415,
+            0.020100105233723298,
+            -0.09136328846216202
+          ],
+          "dimensions": {
+            "x": 0.14971815794706345,
+            "y": 0.041289836808573455,
+            "z": 0.0019968152046203613
+          },
+          "length_x": 0.14971815794706345,
+          "width_y": 0.041289836808573455,
+          "height_z": 0.0019968152046203613
+        },
+        "x_bin_min_z": [
+          {
+            "bin": 0,
+            "x_start": -0.07308342307806015,
+            "x_end": -0.044616605554308214,
+            "min_z": -0.09161890298128128,
+            "sample_count": 25318
+          },
+          {
+            "bin": 1,
+            "x_start": -0.044616605554308214,
+            "x_end": -0.01614978803055627,
+            "min_z": -0.09236166626214981,
+            "sample_count": 17150
+          },
+          {
+            "bin": 2,
+            "x_start": -0.01614978803055627,
+            "x_end": 0.012317029493195672,
+            "min_z": -0.09236166626214981,
+            "sample_count": 17200
+          },
+          {
+            "bin": 3,
+            "x_start": 0.012317029493195672,
+            "x_end": 0.04078384701694761,
+            "min_z": -0.09236166626214981,
+            "sample_count": 14587
+          },
+          {
+            "bin": 4,
+            "x_start": 0.04078384701694761,
+            "x_end": 0.06925066454069956,
+            "min_z": -0.0923616960644722,
+            "sample_count": 17219
+          },
+          {
+            "bin": 5,
+            "x_start": 0.06925066454069956,
+            "x_end": 0.0977174820644515,
+            "min_z": -0.09235507994890213,
+            "sample_count": 31623
+          },
+          {
+            "bin": 6,
+            "x_start": 0.0977174820644515,
+            "x_end": 0.12618429958820343,
+            "min_z": -0.08963534981012344,
+            "sample_count": 3881
+          }
+        ],
+        "x_min_z_range": 0.002726346254348755,
+        "front_min_z": -0.08963534981012344,
+        "center_min_z": -0.09236166626214981,
+        "rear_min_z": -0.09161890298128128,
+        "front_extent": 0.12618429958820343,
+        "rear_extent": -0.07308342307806015,
+        "bottom_x_span_ratio": 0.7513417423744715,
+        "bottom_y_span": 0.041289836808573455,
+        "front_non_bottom_extent_ratio": 0.157114787550587,
+        "rear_non_bottom_extent_ratio": 0.0915434700749415
+      },
+      "interpretation": {
+        "flat_bottom_candidate": true,
+        "rocker_like_candidate": false,
+        "continuous_bottom_candidate": true,
+        "discrete_patch_candidate": false,
+        "toe_contact_area_candidate": true,
+        "heel_contact_area_candidate": true,
+        "bottom_shape": "flat",
+        "heuristic_source": "stl_vertex_lowest_z_distribution",
+        "source": "assumption",
+        "confidence": "low"
+      }
+    }
+  ],
+  "collision_geoms": [
+    {
+      "side": "left",
+      "body_name": "L_link_ankle_pitch",
+      "name": "L_foot_collision",
+      "type": "box",
+      "pos": [
+        0.025,
+        -0.025,
+        -0.054
+      ],
+      "size": [
+        0.07,
+        0.04,
+        0.025
+      ],
+      "friction": "1.0 0.005 0.0001",
+      "bbox": {
+        "min": [
+          -0.045000000000000005,
+          -0.065,
+          -0.079
+        ],
+        "max": [
+          0.095,
+          0.015,
+          -0.028999999999999998
+        ],
+        "center": [
+          0.024999999999999998,
+          -0.025,
+          -0.054
+        ],
+        "dimensions": {
+          "x": 0.14,
+          "y": 0.08,
+          "z": 0.05
+        },
+        "length_x": 0.14,
+        "width_y": 0.08,
+        "height_z": 0.05
+      }
+    },
+    {
+      "side": "right",
+      "body_name": "R_link_ankle_pitch",
+      "name": "R_foot_collision",
+      "type": "box",
+      "pos": [
+        0.025,
+        0.025,
+        -0.054
+      ],
+      "size": [
+        0.07,
+        0.04,
+        0.025
+      ],
+      "friction": "1.0 0.005 0.0001",
+      "bbox": {
+        "min": [
+          -0.045000000000000005,
+          -0.015,
+          -0.079
+        ],
+        "max": [
+          0.095,
+          0.065,
+          -0.028999999999999998
+        ],
+        "center": [
+          0.024999999999999998,
+          0.025,
+          -0.054
+        ],
+        "dimensions": {
+          "x": 0.14,
+          "y": 0.08,
+          "z": 0.05
+        },
+        "length_x": 0.14,
+        "width_y": 0.08,
+        "height_z": 0.05
+      }
+    }
+  ],
+  "comparisons": [
+    {
+      "side": "left",
+      "stl_path": "private_assets/sedon_v5_22/mjcf_source/L_link_ankle_pitch.STL",
+      "stl_role": "ankle_pitch_visual_candidate",
+      "collision_geom": "L_foot_collision",
+      "collision_type": "box",
+      "visual_stl_bbox": {
+        "min": [
+          -0.07308342307806015,
+          -0.052949998527765274,
+          -0.0923616960644722
+        ],
+        "max": [
+          0.12618429958820343,
+          0.020999830216169357,
+          0.05249856784939766
+        ],
+        "center": [
+          0.02655043825507164,
+          -0.01597508415579796,
+          -0.01993156410753727
+        ],
+        "dimensions": {
+          "x": 0.19926772266626358,
+          "y": 0.07394982874393463,
+          "z": 0.14486026391386986
+        },
+        "length_x": 0.19926772266626358,
+        "width_y": 0.07394982874393463,
+        "height_z": 0.14486026391386986
+      },
+      "collision_bbox": {
+        "min": [
+          -0.045000000000000005,
+          -0.065,
+          -0.079
+        ],
+        "max": [
+          0.095,
+          0.015,
+          -0.028999999999999998
+        ],
+        "center": [
+          0.024999999999999998,
+          -0.025,
+          -0.054
+        ],
+        "dimensions": {
+          "x": 0.14,
+          "y": 0.08,
+          "z": 0.05
+        },
+        "length_x": 0.14,
+        "width_y": 0.08,
+        "height_z": 0.05
+      },
+      "dimension_relative_errors": {
+        "x": 0.29742761082047386,
+        "y": 0.07562714070081712,
+        "z": 0.6548397838780088
+      },
+      "center_offset_relative": {
+        "x": 0.007780679351007278,
+        "y": 0.11281144805252553,
+        "z": 0.23518137391161276
+      },
+      "mismatch_score": 0.2642173911566153,
+      "collision_over_simplified": true,
+      "status": "compared",
+      "source": "assumption",
+      "confidence": "low"
+    },
+    {
+      "side": "right",
+      "stl_path": "private_assets/sedon_v5_22/mjcf_source/R_link_ankle_pitch.STL",
+      "stl_role": "ankle_pitch_visual_candidate",
+      "collision_geom": "R_foot_collision",
+      "collision_type": "box",
+      "visual_stl_bbox": {
+        "min": [
+          -0.07308342307806015,
+          -0.020999830216169357,
+          -0.0923616960644722
+        ],
+        "max": [
+          0.12618429958820343,
+          0.052949998527765274,
+          0.05249858275055885
+        ],
+        "center": [
+          0.02655043825507164,
+          0.01597508415579796,
+          -0.019931556656956673
+        ],
+        "dimensions": {
+          "x": 0.19926772266626358,
+          "y": 0.07394982874393463,
+          "z": 0.14486027881503105
+        },
+        "length_x": 0.19926772266626358,
+        "width_y": 0.07394982874393463,
+        "height_z": 0.14486027881503105
+      },
+      "collision_bbox": {
+        "min": [
+          -0.045000000000000005,
+          -0.015,
+          -0.079
+        ],
+        "max": [
+          0.095,
+          0.065,
+          -0.028999999999999998
+        ],
+        "center": [
+          0.024999999999999998,
+          0.025,
+          -0.054
+        ],
+        "dimensions": {
+          "x": 0.14,
+          "y": 0.08,
+          "z": 0.05
+        },
+        "length_x": 0.14,
+        "width_y": 0.08,
+        "height_z": 0.05
+      },
+      "dimension_relative_errors": {
+        "x": 0.29742761082047386,
+        "y": 0.07562714070081712,
+        "z": 0.6548398193831733
+      },
+      "center_offset_relative": {
+        "x": 0.007780679351007278,
+        "y": 0.11281144805252553,
+        "z": 0.2351814011523793
+      },
+      "mismatch_score": 0.26421740202749033,
+      "collision_over_simplified": true,
+      "status": "compared",
+      "source": "assumption",
+      "confidence": "low"
+    }
+  ],
+  "engineering_conclusion": {
+    "collision_over_simplified": true,
+    "physical_foot_may_support_rollover": "unknown",
+    "MuJoCo_collision_needs_update": "unknown",
+    "mechanical_redesign_needed": "unknown",
+    "next_step": "request_cad_step_or_bottom_specific_mesh",
+    "bottom_specific_mesh_found": false,
+    "do_not_claim_walking_success": true,
+    "do_not_use_stl_as_final_collision": true
+  },
+  "recommendations": [
+    "Request CAD/STEP or a bottom-specific mesh because the discovered STL files are ankle-pitch visual candidates, not explicit sole/bottom geometry.",
+    "Do not directly use the STL mesh as final MuJoCo collision.",
+    "Use mechanical review to decide whether to update collision or redesign the foot bottom."
+  ],
+  "artifact_paths": {
+    "foot_stl_summary": "artifacts/sedon_debug/v5_22_foot_stl_vs_collision_review/foot_stl_summary.yaml",
+    "foot_stl_bbox": "artifacts/sedon_debug/v5_22_foot_stl_vs_collision_review/foot_stl_bbox.csv",
+    "collision_comparison": "artifacts/sedon_debug/v5_22_foot_stl_vs_collision_review/collision_comparison.yaml"
+  }
+}

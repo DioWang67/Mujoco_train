@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "version": "v5_22",
+  "model_path": "private_assets/sedon_v5_22/training_scene.xml",
+  "artifacts_dir": "artifacts/sedon_debug/v5_22_foot_stl_vs_collision_review",
+  "report_path": "docs/sedon_v5_22_foot_stl_vs_collision_review.md",
+  "valid_for": "read_only_visual_geometry_collision_comparison",
+  "invalid_for": [
+    "final_collision_mesh_claim",
+    "walking_success_claim",
+    "ppo_readiness_claim",
+    "mechanical_redesign_final_claim"
+  ],
+  "candidate_search_roots": [
+    "private_assets",
+    "private_assets/sedon_v5_22",
+    "private_assets/SEEDON_URDF_5_22",
+    "private_assets/SEEDON_URDF_5_22_*",
+    "original_urdf_package/meshes",
+    "mjcf_source"
+  ],
+  "explicit_stl_paths": [],
+  "foot_related_name_tokens": [
+    "foot",
+    "sole",
+    "toe",
+    "heel",
+    "tpu",
+    "ankle_pitch"
+  ],
+  "side_name_tokens": {
+    "left": ["left", "l_", "l-"],
+    "right": ["right", "r_", "r-"]
+  },
+  "collision_geom_names": {
+    "left": "L_foot_collision",
+    "right": "R_foot_collision"
+  },
+  "stl_bottom_analysis": {
+    "bottom_vertex_tolerance": 0.002,
+    "x_bins": 7,
+    "flat_z_range_threshold": 0.004,
+    "curved_z_range_threshold": 0.008,
+    "protrusion_ratio_threshold": 0.18,
+    "source": "assumption",
+    "confidence": "low"
+  },
+  "mismatch_thresholds": {
+    "bbox_dimension_ratio_warn": 0.35,
+    "center_offset_ratio_warn": 0.25,
+    "score_over_simplified": 0.45,
+    "source": "assumption",
+    "confidence": "low"
+  }
+}
