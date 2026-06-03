@@ -1,0 +1,462 @@
+"""Build a minimal MuJoCo training scene from the converted Seedon MJCF."""
+
+from __future__ import annotations
+
+import argparse
+import os
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+import mujoco
+
+BASE_LINK_NAME = "base_link"
+DEFAULT_BASE_HEIGHT = 0.46
+DEFAULT_MOTOR_CTRL_RANGE = "-100 100"
+DEFAULT_BASE_INERTIAL_Z_OFFSET = 0.0
+DEFAULT_FOOT_SIZE = (0.07, 0.04, 0.025)
+DEFAULT_FOOT_FRICTION = "1.0 0.005 0.0001"
+DEFAULT_STANCE_WIDTH_SCALE = 1.0
+VISUAL_ONLY_ATTRS = {
+    "contype": "0",
+    "conaffinity": "0",
+    "group": "1",
+}
+
+
+def _set_compiler_defaults(root: ET.Element, mesh_dir: Path | None = None) -> None:
+    """Ensure compiler settings are suitable for generated limits."""
+    compiler = root.find("compiler")
+    if compiler is None:
+        compiler = ET.Element("compiler")
+        root.insert(0, compiler)
+    compiler.set("angle", "radian")
+    compiler.set("autolimits", "true")
+    if mesh_dir is not None:
+        compiler.set("meshdir", str(mesh_dir))
+
+
+def _add_option(root: ET.Element) -> None:
+    """Add conservative simulation defaults if missing."""
+    if root.find("option") is not None:
+        return
+    option = ET.Element(
+        "option",
+        {
+            "timestep": "0.002",
+            "integrator": "RK4",
+            "gravity": "0 0 -9.81",
+        },
+    )
+    insert_index = 1 if root.find("compiler") is not None else 0
+    root.insert(insert_index, option)
+
+
+def _extract_base_inertial(urdf_path: Path) -> ET.Element:
+    """Return a MJCF inertial element for ``base_link`` from the source URDF.
+
+    Args:
+        urdf_path: Prepared URDF used for the MuJoCo conversion.
+
+    Returns:
+        MJCF ``inertial`` element.
+
+    Raises:
+        ValueError: If the URDF has no usable ``base_link`` inertial data.
+    """
+    root = ET.parse(urdf_path).getroot()
+    link = root.find(f"link[@name='{BASE_LINK_NAME}']")
+    inertial = link.find("inertial") if link is not None else None
+    if inertial is None:
+        raise ValueError(f"URDF link '{BASE_LINK_NAME}' has no inertial element.")
+
+    origin = inertial.find("origin")
+    mass = inertial.find("mass")
+    inertia = inertial.find("inertia")
+    if mass is None or inertia is None:
+        raise ValueError(f"URDF link '{BASE_LINK_NAME}' has incomplete inertial data.")
+
+    ixx = inertia.attrib["ixx"]
+    iyy = inertia.attrib["iyy"]
+    izz = inertia.attrib["izz"]
+    ixy = inertia.attrib["ixy"]
+    ixz = inertia.attrib["ixz"]
+    iyz = inertia.attrib["iyz"]
+    return ET.Element(
+        "inertial",
+        {
+            "pos": origin.attrib.get("xyz", "0 0 0") if origin is not None else "0 0 0",
+            "mass": mass.attrib["value"],
+            "fullinertia": f"{ixx} {iyy} {izz} {ixy} {ixz} {iyz}",
+        },
+    )
+
+
+def _apply_inertial_z_offset(inertial: ET.Element, z_offset: float) -> ET.Element:
+    """Return a copy of an inertial element with a z-position offset."""
+    adjusted = ET.Element(inertial.tag, dict(inertial.attrib))
+    pos_values = [
+        float(part)
+        for part in adjusted.attrib.get("pos", "0 0 0").split()
+    ]
+    if len(pos_values) != 3:
+        raise ValueError("Base inertial pos must contain exactly three values.")
+    pos_values[2] += z_offset
+    adjusted.set("pos", " ".join(f"{value:g}" for value in pos_values))
+    return adjusted
+
+
+def _find_worldbody(root: ET.Element) -> ET.Element:
+    """Return the MJCF worldbody element."""
+    worldbody = root.find("worldbody")
+    if worldbody is None:
+        raise ValueError("MJCF has no worldbody.")
+    return worldbody
+
+
+def _take_world_children(worldbody: ET.Element) -> list[ET.Element]:
+    """Remove and return all current worldbody children."""
+    children = list(worldbody)
+    for child in children:
+        worldbody.remove(child)
+    return children
+
+
+def _build_base_body(
+    world_children: list[ET.Element],
+    base_inertial: ET.Element,
+    base_height: float,
+) -> ET.Element:
+    """Wrap converted fixed-base bodies/geoms in a floating base body."""
+    base_body = ET.Element(
+        "body",
+        {
+            "name": BASE_LINK_NAME,
+            "pos": f"0 0 {base_height:g}",
+        },
+    )
+    base_body.append(base_inertial)
+    base_body.append(ET.Element("freejoint", {"name": "floating_base"}))
+
+    for child in world_children:
+        base_body.append(child)
+    return base_body
+
+
+def _add_floor_and_lighting(worldbody: ET.Element) -> None:
+    """Add a simple floor and light for smoke testing and visualization."""
+    worldbody.append(
+        ET.Element(
+            "geom",
+            {
+                "name": "floor",
+                "type": "plane",
+                "size": "2 2 0.05",
+                "rgba": "0.55 0.55 0.55 1",
+                "friction": "1.0 0.005 0.0001",
+            },
+        )
+    )
+    worldbody.append(
+        ET.Element(
+            "light",
+            {
+                "name": "key_light",
+                "pos": "0 -1.5 2.5",
+                "dir": "0 1 -1",
+                "diffuse": "0.8 0.8 0.8",
+            },
+        )
+    )
+
+
+def _joint_names(root: ET.Element) -> list[str]:
+    """Return controllable hinge joint names from the model."""
+    names: list[str] = []
+    for joint in root.findall(".//joint"):
+        name = joint.attrib.get("name")
+        if not name:
+            continue
+        if joint.attrib.get("type", "hinge") != "hinge":
+            continue
+        names.append(name)
+    return names
+
+
+def _replace_actuators(root: ET.Element, ctrl_range: str) -> list[str]:
+    """Create one position-like motor per hinge joint.
+
+    Args:
+        root: MJCF root.
+        ctrl_range: Motor control range as ``"low high"``.
+
+    Returns:
+        Names of joints that received motors.
+    """
+    for actuator in root.findall("actuator"):
+        root.remove(actuator)
+
+    joint_names = _joint_names(root)
+    actuator = ET.Element("actuator")
+    for joint_name in joint_names:
+        actuator.append(
+            ET.Element(
+                "motor",
+                {
+                    "name": f"{joint_name}_motor",
+                    "joint": joint_name,
+                    "ctrlrange": ctrl_range,
+                    "ctrllimited": "true",
+                },
+            )
+        )
+    root.append(actuator)
+    return joint_names
+
+
+def _set_mesh_geoms_visual_only(root: ET.Element) -> None:
+    """Keep imported STL meshes visible but remove them from contact physics."""
+    for geom in root.findall(".//geom"):
+        if geom.attrib.get("type") == "mesh" or "mesh" in geom.attrib:
+            geom.attrib.update(VISUAL_ONLY_ATTRS)
+
+
+def _remove_base_mesh_visual(base_body: ET.Element) -> None:
+    """Hide the noisy SolidWorks base STL in favor of a clean proxy body."""
+    for geom in list(base_body.findall("geom")):
+        if geom.attrib.get("mesh") == BASE_LINK_NAME:
+            base_body.remove(geom)
+
+
+def _scale_stance_width(root: ET.Element, stance_width_scale: float) -> None:
+    """Scale the lateral offsets of left/right hip-yaw roots."""
+    if stance_width_scale <= 0.0:
+        raise ValueError("stance_width_scale must be positive.")
+    for body_name, direction in (
+        ("R_link_hip_yaw", -1.0),
+        ("L_link_hip_yaw", 1.0),
+    ):
+        body = root.find(f".//body[@name='{body_name}']")
+        if body is None:
+            raise ValueError(f"MJCF has no body named '{body_name}'.")
+        pos_values = [float(part) for part in body.attrib.get("pos", "0 0 0").split()]
+        if len(pos_values) != 3:
+            raise ValueError(f"Body '{body_name}' pos must contain three values.")
+        pos_values[1] = direction * abs(pos_values[1]) * stance_width_scale
+        body.set("pos", " ".join(f"{value:g}" for value in pos_values))
+
+
+def _format_vec3(values: tuple[float, float, float]) -> str:
+    """Return an MJCF vec3 string."""
+    return " ".join(f"{value:g}" for value in values)
+
+
+def _add_training_proxy_geoms(
+    root: ET.Element,
+    foot_size: tuple[float, float, float] = DEFAULT_FOOT_SIZE,
+    foot_friction: str = DEFAULT_FOOT_FRICTION,
+) -> None:
+    """Add simple, stable visual/contact geometry for training and debugging."""
+    if len(foot_size) != 3:
+        raise ValueError("foot_size must contain exactly three values.")
+    if min(foot_size) <= 0.0:
+        raise ValueError("foot_size values must be positive.")
+    base_body = root.find(f".//body[@name='{BASE_LINK_NAME}']")
+    if base_body is None:
+        raise ValueError(f"MJCF has no body named '{BASE_LINK_NAME}'.")
+    _remove_base_mesh_visual(base_body)
+
+    ET.SubElement(
+        base_body,
+        "geom",
+        {
+            "name": "base_proxy",
+            "type": "ellipsoid",
+            "pos": "-0.02 0 -0.08",
+            "size": "0.17 0.11 0.10",
+            "rgba": "0.36 0.45 0.55 1",
+            "friction": "0.8 0.005 0.0001",
+        },
+    )
+
+    foot_specs = {
+        "R_link_ankle_pitch": ("R_foot_collision", "0.025 0.025 -0.054"),
+        "L_link_ankle_pitch": ("L_foot_collision", "0.025 -0.025 -0.054"),
+    }
+    for body_name, (geom_name, pos) in foot_specs.items():
+        body = root.find(f".//body[@name='{body_name}']")
+        if body is None:
+            raise ValueError(f"MJCF has no body named '{body_name}'.")
+        ET.SubElement(
+            body,
+            "geom",
+            {
+                "name": geom_name,
+                "type": "box",
+                "pos": pos,
+                "size": _format_vec3(foot_size),
+                "rgba": "0.12 0.12 0.12 0",
+                "friction": foot_friction,
+            },
+        )
+
+
+def build_training_scene(
+    source_scene: Path,
+    source_urdf: Path,
+    output_scene: Path,
+    base_height: float,
+    motor_ctrl_range: str,
+    base_inertial_z_offset: float = DEFAULT_BASE_INERTIAL_Z_OFFSET,
+    foot_size: tuple[float, float, float] = DEFAULT_FOOT_SIZE,
+    foot_friction: str = DEFAULT_FOOT_FRICTION,
+    stance_width_scale: float = DEFAULT_STANCE_WIDTH_SCALE,
+) -> tuple[Path, mujoco.MjModel, list[str]]:
+    """Build and compile a minimal Seedon training scene.
+
+    Args:
+        source_scene: Converted MJCF scene from ``convert_urdf_to_mjcf``.
+        source_urdf: Prepared URDF containing base inertial data.
+        output_scene: Destination MJCF scene.
+        base_height: Initial floating-base height above the floor.
+        motor_ctrl_range: Control range for all motors.
+        base_inertial_z_offset: Offset applied to the base inertial COM z position.
+        foot_size: Foot collision box half-size.
+        foot_friction: Foot friction triplet.
+        stance_width_scale: Scale applied to hip-yaw lateral offsets.
+
+    Returns:
+        Output scene path, compiled MuJoCo model, and actuated joint names.
+    """
+    tree = ET.parse(source_scene)
+    root = tree.getroot()
+    root.set("model", "seedon_training")
+    relative_mesh_dir = Path(
+        os.path.relpath(source_scene.parent.resolve(), output_scene.parent.resolve())
+    )
+    _set_compiler_defaults(root, relative_mesh_dir)
+    _add_option(root)
+
+    worldbody = _find_worldbody(root)
+    children = _take_world_children(worldbody)
+    _add_floor_and_lighting(worldbody)
+    worldbody.append(
+        _build_base_body(
+            world_children=children,
+            base_inertial=_apply_inertial_z_offset(
+                _extract_base_inertial(source_urdf),
+                base_inertial_z_offset,
+            ),
+            base_height=base_height,
+        )
+    )
+    _set_mesh_geoms_visual_only(root)
+    _scale_stance_width(root, stance_width_scale)
+    _add_training_proxy_geoms(root, foot_size, foot_friction)
+
+    actuated_joints = _replace_actuators(root, motor_ctrl_range)
+    ET.indent(tree, space="  ")
+    output_scene.parent.mkdir(parents=True, exist_ok=True)
+    tree.write(output_scene, encoding="utf-8", xml_declaration=True)
+
+    model = mujoco.MjModel.from_xml_path(str(output_scene))
+    return output_scene, model, actuated_joints
+
+
+def build_parser() -> argparse.ArgumentParser:
+    """Build the command line parser."""
+    parser = argparse.ArgumentParser(
+        description="Build a minimal floating-base Seedon MuJoCo training scene."
+    )
+    parser.add_argument(
+        "--source-scene",
+        type=Path,
+        default=Path("private_assets/seedon/mjcf_source/scene.xml"),
+        help="Converted source MJCF scene.",
+    )
+    parser.add_argument(
+        "--source-urdf",
+        type=Path,
+        default=Path("private_assets/seedon/mjcf_source/seedon.urdf"),
+        help="Prepared URDF with base inertial data.",
+    )
+    parser.add_argument(
+        "--output-scene",
+        type=Path,
+        default=Path("private_assets/seedon/training_scene.xml"),
+        help="Output training MJCF scene.",
+    )
+    parser.add_argument(
+        "--base-height",
+        type=float,
+        default=DEFAULT_BASE_HEIGHT,
+        help="Initial base height above the floor.",
+    )
+    parser.add_argument(
+        "--motor-ctrl-range",
+        default=DEFAULT_MOTOR_CTRL_RANGE,
+        help="Control range used for generated motors.",
+    )
+    parser.add_argument(
+        "--base-inertial-z-offset",
+        type=float,
+        default=DEFAULT_BASE_INERTIAL_Z_OFFSET,
+        help="Offset applied to base inertial COM z position.",
+    )
+    parser.add_argument(
+        "--foot-size",
+        default=_format_vec3(DEFAULT_FOOT_SIZE),
+        help="Foot collision half-size as 'x y z'.",
+    )
+    parser.add_argument(
+        "--foot-friction",
+        default=DEFAULT_FOOT_FRICTION,
+        help="Foot collision friction triplet as 'slide spin roll'.",
+    )
+    parser.add_argument(
+        "--stance-width-scale",
+        type=float,
+        default=DEFAULT_STANCE_WIDTH_SCALE,
+        help="Scale applied to left/right hip-yaw lateral offsets.",
+    )
+    return parser
+
+
+def _parse_vec3(raw_value: str, option_name: str) -> tuple[float, float, float]:
+    """Parse an MJCF vec3 CLI value."""
+    parts = raw_value.replace(",", " ").split()
+    if len(parts) != 3:
+        raise ValueError(f"{option_name} must contain exactly three numbers.")
+    values = tuple(float(part) for part in parts)
+    if min(values) <= 0.0:
+        raise ValueError(f"{option_name} values must be positive.")
+    return values  # type: ignore[return-value]
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Run the training scene build command."""
+    args = build_parser().parse_args(argv)
+    output_scene, model, joint_names = build_training_scene(
+        source_scene=args.source_scene,
+        source_urdf=args.source_urdf,
+        output_scene=args.output_scene,
+        base_height=args.base_height,
+        motor_ctrl_range=args.motor_ctrl_range,
+        base_inertial_z_offset=args.base_inertial_z_offset,
+        foot_size=_parse_vec3(args.foot_size, "--foot-size"),
+        foot_friction=args.foot_friction,
+        stance_width_scale=args.stance_width_scale,
+    )
+    print(f"Saved training scene: {output_scene}")
+    print(
+        "Model: "
+        f"nbody={model.nbody} njnt={model.njnt} ngeom={model.ngeom} "
+        f"nq={model.nq} nv={model.nv} nu={model.nu}"
+    )
+    print("Actuated joints:")
+    for joint_name in joint_names:
+        print(f"- {joint_name}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

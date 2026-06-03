@@ -1,5 +1,5 @@
 {
-    // NEED TO WRAP all in a body named "base" and add site 
+    // NEED TO WRAP all in a body named "base" and add site
     // <site name="imu" pos="-0.08 -0.0 0.05"/>
     // and comment the default kp frictionloss etc
     "documentId": "64074dfcfa379b37d8a47762",

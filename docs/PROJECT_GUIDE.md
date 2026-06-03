@@ -11,20 +11,20 @@ Use these first. Avoid running deep modules directly unless a runbook says so.
 ```bash
 python train.py --project h1 [args...]
 python train.py --project grasp [args...]
-python train.py --project sedon [args...]
+python train.py --project seedon [args...]
 
 python eval.py --project h1 [args...]
 python eval.py --project grasp [args...]
-python eval.py --project sedon [args...]
+python eval.py --project seedon [args...]
 
 python -m tools
 ```
 
-For Sedon on the remote release layout, direct module execution is acceptable
+For Seedon on the remote release layout, direct module execution is acceptable
 when debugging dispatcher or path issues:
 
 ```bash
-python -m sedon_baseline.train [args...]
+python -m seedon_baseline.train [args...]
 ```
 
 ## Repository Map
@@ -36,7 +36,7 @@ python -m sedon_baseline.train [args...]
 | `robot_learning/` | Shared project discovery, path resolution, config loading, and runtime helpers. | Keep small. |
 | `h1_baseline/` | H1 environment, train, eval, and tests. | Active. |
 | `grasp_baseline/` | Fixed-base grasp environment, train, eval, and tests. | Active. |
-| `sedon_baseline/` | Sedon environment, train, eval, and tests. | Active. |
+| `seedon_baseline/` | Seedon environment, train, eval, and tests. | Active. |
 | `tools/` | Python CLIs for debug, eval, packaging, and experiments. | Active, but mixed maturity. |
 | `scripts/` | Operator wrappers for local and remote work. | Active. Prefer thin wrappers. |
 | `tests/` | Lightweight tests that should run without private assets where possible. | Active. |
@@ -66,9 +66,9 @@ python train.py --project grasp --phase full --n-envs 32
 python eval.py --project grasp --episodes 10
 ```
 
-### Sedon
+### Seedon
 
-Sedon is the current locomotion focus. The canonical runbook is:
+Seedon is the current locomotion focus. The canonical runbook is:
 
 ```text
 scene build -> smoke -> train -> gait viewer/audit -> reward/config iteration
@@ -77,16 +77,16 @@ scene build -> smoke -> train -> gait viewer/audit -> reward/config iteration
 Start with:
 
 ```bash
-python -m tools.build_sedon_training_scene
-python -m tools.smoke_sedon_env --steps 20
-python train.py --project sedon --smoke --n-envs 1
+python -m tools.build_seedon_training_scene
+python -m tools.smoke_seedon_env --steps 20
+python train.py --project seedon --smoke --n-envs 1
 ```
 
 For the current reverse-knee/no-tiptoe experiment, see:
 
 ```text
-docs/SEDON_WORKFLOW.md
-configs/sedon/README.md
+docs/SEEDON_WORKFLOW.md
+configs/seedon/README.md
 ```
 
 ## Tool Maturity
@@ -96,9 +96,9 @@ standard workflow.
 
 | Tier | Meaning | Examples |
 |---|---|---|
-| Standard | Safe first-choice operator commands. | `smoke_sedon_env`, `sedon_eval`, `debug_sedon_gait_viewer`, `debug_sedon_gait_audit` |
-| Diagnostic | Useful for answering one specific mechanical or reward question. | `debug_sedon_*`, `preview_sedon_*`, `trace_*` |
-| Sweep / Experimental | Generates comparison data; may be slow or create output dirs. | `sweep_sedon_*`, `sedon_gait_sweep` |
+| Standard | Safe first-choice operator commands. | `smoke_seedon_env`, `seedon_eval`, `debug_seedon_gait_viewer`, `debug_seedon_gait_audit` |
+| Diagnostic | Useful for answering one specific mechanical or reward question. | `debug_seedon_*`, `preview_seedon_*`, `trace_*` |
+| Sweep / Experimental | Generates comparison data; may be slow or create output dirs. | `sweep_seedon_*`, `seedon_gait_sweep` |
 | Packaging | Release and deployment helpers. | `deploy_release`, `prepare_package` |
 
 Before adding a new tool, prefer extending an existing one if the question is
@@ -122,7 +122,7 @@ Check source content directly, or inspect the release directory name.
 Deploy from local Windows:
 
 ```powershell
-scripts\sedon_remote_deploy_and_check.bat
+scripts\seedon_remote_deploy_and_check.bat
 ```
 
 For one-off payloads, place files in `deploy_content/` using repo-relative
@@ -152,5 +152,5 @@ Current known local leftovers:
 - `.gitignore` has uncommitted local changes.
 - `sweep_train.py` is untracked.
 
-Those were not touched by the Sedon gait commit and should be reviewed
+Those were not touched by the Seedon gait commit and should be reviewed
 separately.

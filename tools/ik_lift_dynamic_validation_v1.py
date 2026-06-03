@@ -12,8 +12,8 @@ from typing import Any
 import mujoco
 import numpy as np
 
-from sedon_baseline.env import SedonStandingEnv
-from tools.audit_sedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
+from seedon_baseline.env import SeedonStandingEnv
+from tools.audit_seedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
 from tools.blue_unload_mechanism_search import (
     DEFAULT_BASE_CONFIG,
     JOINT_NAMES,
@@ -32,18 +32,18 @@ from tools.blue_unload_mechanism_search import (
 )
 from tools.kinematic_foot_jacobian_diagnostic_v1 import _set_joint_positions, _state
 from tools.lift_after_unload_v1 import UnloadWindow, _best_window, _load_timeline
-from tools.render_sedon_policy_comparison import _make_side_camera, _save_mp4
+from tools.render_seedon_policy_comparison import _make_side_camera, _save_mp4
 
 
 SOURCE_CANDIDATE_ID = "dur180_sr0p08_wrm0p02_skm0p03_sa0p04_lean0p035_latm0p01_tl0"
 DEFAULT_SOURCE_TOP = (
     REPO_ROOT
     / "artifacts"
-    / "sedon_debug"
+    / "seedon_debug"
     / "blue_unload_refine_v2"
     / "blue_unload_refine_v2_top20.csv"
 )
-DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "sedon_debug" / "ik_lift_dynamic_validation_v1"
+DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "seedon_debug" / "ik_lift_dynamic_validation_v1"
 
 
 @dataclass(frozen=True)
@@ -168,7 +168,7 @@ def _segments(prefix: str, support: str, start: np.ndarray, target: np.ndarray, 
 
 
 def _expected_clearance(unload: UnloadCandidate, gain: int, *, side: str, base_config: Path, seed: int) -> float:
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(base_config))
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(base_config))
     try:
         env.reset(seed=seed)
         base = _right_unload_target(unload) if side == "right" else _left_unload_target(unload)
@@ -200,7 +200,7 @@ def build_seed(c: IkLiftCandidate, neutral_duration: int) -> dict[str, Any]:
     keyframes.extend(_segments("left_lift_mj", "right", left_unload, left_lift, c.lift_duration))
     keyframes.extend(_segments("left_land_mj", "double", left_lift, left_unload * 0.45, c.landing_duration))
     return {
-        "schema": "sedon_gait_seed.v1",
+        "schema": "seedon_gait_seed.v1",
         "target_type": "absolute",
         "description": "Generated IK lift dynamic validation v1 reference.",
         "joint_names": JOINT_NAMES,
@@ -283,7 +283,7 @@ def _classify(clearance: float, upright: float, impact: float, drop: float, none
 
 
 def audit_candidate(c: IkLiftCandidate, *, config_path: Path, seed_path: Path, baseline_impact: float, out_dir: Path, steps: int, seed: int, warmup_steps: int) -> IkLiftAudit:
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(config_path))
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(config_path))
     total_weight = float(np.sum(env.model.body_mass) * 9.81)
     infos: list[dict[str, Any]] = []
     timeline: list[dict[str, Any]] = []
@@ -369,7 +369,7 @@ def write_results(path: Path, rows: list[IkLiftAudit]) -> None:
 
 
 def render_candidate(row: IkLiftAudit, *, steps: int, seed: int, fps: int, width: int, height: int, out_dir: Path) -> Path:
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(Path(row.config_path)))
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(Path(row.config_path)))
     renderer = mujoco.Renderer(env.model, height=height, width=width)
     camera = _make_side_camera()
     frames: list[np.ndarray] = []

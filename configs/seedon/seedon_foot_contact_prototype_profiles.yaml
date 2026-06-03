@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "purpose": "Seedon foot contact prototype profiles for center-first rollover and toe handoff diagnostics.",
+  "safety": {
+    "modifies_source_scene": false,
+    "enters_ppo": false,
+    "claims_walking_success": false,
+    "duck_geometry_usage": "concept_reference_only"
+  },
+  "prototype_metadata": {
+    "source": "assumption/prototype",
+    "confidence": "low",
+    "valid_for": "simulation_prototype_only"
+  },
+  "profiles": [
+    {
+      "name": "current_box_baseline",
+      "description": "Copy the current Seedon training scene without adding contact patches.",
+      "disable_original_foot_collision": false,
+      "patches": []
+    },
+    {
+      "name": "simple_toe_center_heel",
+      "description": "Replace each original foot collision with heel, center, and toe box patches estimated from Seedon foot length.",
+      "disable_original_foot_collision": true,
+      "manual_required_if_foot_length_unknown": true,
+      "patches": [
+        {
+          "region": "heel",
+          "normalized_x": -0.34,
+          "normalized_y": 0.0,
+          "size_scale": [0.24, 0.82, 0.34]
+        },
+        {
+          "region": "center",
+          "normalized_x": 0.0,
+          "normalized_y": 0.0,
+          "size_scale": [0.30, 0.88, 0.36]
+        },
+        {
+          "region": "toe",
+          "normalized_x": 0.36,
+          "normalized_y": 0.0,
+          "size_scale": [0.24, 0.82, 0.34]
+        }
+      ]
+    },
+    {
+      "name": "duck_like_multi_patch",
+      "description": "Use the Open Duck Mini multi-patch contact concept as a low-confidence Seedon simulation prototype.",
+      "disable_original_foot_collision": true,
+      "manual_required_if_foot_length_unknown": true,
+      "duck_reference_policy": "concept_only_not_verified_geometry",
+      "patches": [
+        {
+          "region": "heel",
+          "normalized_x": -0.36,
+          "normalized_y": 0.0,
+          "size_scale": [0.22, 0.72, 0.32]
+        },
+        {
+          "region": "center",
+          "normalized_x": 0.0,
+          "normalized_y": 0.0,
+          "size_scale": [0.26, 0.74, 0.34]
+        },
+        {
+          "region": "toe",
+          "normalized_x": 0.38,
+          "normalized_y": 0.0,
+          "size_scale": [0.22, 0.72, 0.32]
+        },
+        {
+          "region": "inner",
+          "normalized_x": 0.02,
+          "normalized_y": -0.34,
+          "size_scale": [0.22, 0.24, 0.30]
+        },
+        {
+          "region": "outer",
+          "normalized_x": 0.02,
+          "normalized_y": 0.34,
+          "size_scale": [0.22, 0.24, 0.30]
+        }
+      ]
+    }
+  ]
+}

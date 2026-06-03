@@ -63,8 +63,8 @@ class GraspTrainConfig:
 
 
 @dataclass(frozen=True)
-class SedonTrainConfig:
-    """Static training configuration for the Sedon standing baseline."""
+class SeedonTrainConfig:
+    """Static training configuration for the Seedon standing baseline."""
 
     n_envs_default: int
     total_timesteps: int
@@ -218,9 +218,9 @@ def load_grasp_train_config(repo_root: Path) -> GraspTrainConfig:
     )
 
 
-def load_sedon_train_config(repo_root: Path) -> SedonTrainConfig:
-    """Load the Sedon standing config from ``configs/sedon/train.json``."""
-    path = repo_root / "configs" / "sedon" / "train.json"
+def load_seedon_train_config(repo_root: Path) -> SeedonTrainConfig:
+    """Load the Seedon standing config from ``configs/seedon/train.json``."""
+    path = repo_root / "configs" / "seedon" / "train.json"
     data = _load_json(path)
     _require_keys(
         path,
@@ -245,7 +245,7 @@ def load_sedon_train_config(repo_root: Path) -> SedonTrainConfig:
             "eval_episodes",
         },
     )
-    return SedonTrainConfig(
+    return SeedonTrainConfig(
         n_envs_default=int(data["n_envs_default"]),
         total_timesteps=int(data["total_timesteps"]),
         smoke_timesteps=int(data["smoke_timesteps"]),

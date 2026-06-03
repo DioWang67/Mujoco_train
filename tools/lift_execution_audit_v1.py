@@ -11,14 +11,14 @@ from typing import Any
 import mujoco
 import numpy as np
 
-from sedon_baseline.env import SedonStandingEnv
-from tools.audit_sedon_shuffle_v0 import _load_config
+from seedon_baseline.env import SeedonStandingEnv
+from tools.audit_seedon_shuffle_v0 import _load_config
 from tools.blue_unload_mechanism_search import JOINT_NAMES, REPO_ROOT, _contact_state
 from tools.ik_lift_dynamic_validation_v1 import DEFAULT_OUT_DIR as IK_VALIDATION_OUT_DIR
 
 
 DEFAULT_TOP_CSV = IK_VALIDATION_OUT_DIR / "ik_lift_dynamic_validation_v1_top10.csv"
-DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "sedon_debug" / "lift_execution_audit_v1"
+DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "seedon_debug" / "lift_execution_audit_v1"
 MAPPED_JOINTS = (
     "R_joint_hip_pitch",
     "R_joint_knee_pitch",
@@ -98,7 +98,7 @@ def _read_top_candidate(path: Path, rank: int) -> CandidateSource:
     )
 
 
-def _joint_positions_from_data(env: SedonStandingEnv, data: mujoco.MjData) -> np.ndarray:
+def _joint_positions_from_data(env: SeedonStandingEnv, data: mujoco.MjData) -> np.ndarray:
     """Return actuated joint qpos values from arbitrary MuJoCo data."""
 
     return np.array(
@@ -107,7 +107,7 @@ def _joint_positions_from_data(env: SedonStandingEnv, data: mujoco.MjData) -> np
     )
 
 
-def _foot_bottom_heights_from_data(env: SedonStandingEnv, data: mujoco.MjData) -> np.ndarray:
+def _foot_bottom_heights_from_data(env: SeedonStandingEnv, data: mujoco.MjData) -> np.ndarray:
     """Return foot bottom heights for arbitrary MuJoCo data."""
 
     heights = []
@@ -119,7 +119,7 @@ def _foot_bottom_heights_from_data(env: SedonStandingEnv, data: mujoco.MjData) -
 
 
 def _side_index(side: str) -> int:
-    """Return foot index for a side label used by SedonStandingEnv."""
+    """Return foot index for a side label used by SeedonStandingEnv."""
 
     if side == "right":
         return 0
@@ -128,7 +128,7 @@ def _side_index(side: str) -> int:
     return -1
 
 
-def _expected_foot_z(env: SedonStandingEnv, target_positions: np.ndarray, swing_side: str) -> float:
+def _expected_foot_z(env: SeedonStandingEnv, target_positions: np.ndarray, swing_side: str) -> float:
     """Estimate kinematic swing-foot z if commanded joint targets were reached.
 
     The copy keeps the current floating-base pose and replaces only actuated
@@ -148,7 +148,7 @@ def _expected_foot_z(env: SedonStandingEnv, target_positions: np.ndarray, swing_
     return float(_foot_bottom_heights_from_data(env, temp_data)[swing_index])
 
 
-def _actuator_force_saturation(env: SedonStandingEnv) -> np.ndarray:
+def _actuator_force_saturation(env: SeedonStandingEnv) -> np.ndarray:
     """Return per-actuator force saturation flags when force ranges are finite."""
 
     if not hasattr(env.model, "actuator_forcerange") or not hasattr(env.data, "actuator_force"):
@@ -164,7 +164,7 @@ def _actuator_force_saturation(env: SedonStandingEnv) -> np.ndarray:
     return finite & (np.minimum(lower, upper) <= 0.02 * span)
 
 
-def _ctrl_saturation(env: SedonStandingEnv) -> np.ndarray:
+def _ctrl_saturation(env: SeedonStandingEnv) -> np.ndarray:
     """Return per-actuator ctrl saturation flags."""
 
     span = np.maximum(env._ctrl_range[:, 1] - env._ctrl_range[:, 0], 1e-9)
@@ -173,7 +173,7 @@ def _ctrl_saturation(env: SedonStandingEnv) -> np.ndarray:
     return np.minimum(lower, upper) <= 0.02 * span
 
 
-def _contact_counts(env: SedonStandingEnv, swing_side: str) -> tuple[int, int]:
+def _contact_counts(env: SeedonStandingEnv, swing_side: str) -> tuple[int, int]:
     """Return total floor-foot contacts and swing-foot floor contacts."""
 
     swing_index = _side_index(swing_side)
@@ -204,7 +204,7 @@ def _swing_contact_force(info: dict[str, Any], swing_side: str) -> float:
     return 0.0
 
 
-def _row_base(step: int, phase: dict[str, object], info: dict[str, Any], env: SedonStandingEnv, target: np.ndarray, expected_z: float) -> dict[str, Any]:
+def _row_base(step: int, phase: dict[str, object], info: dict[str, Any], env: SeedonStandingEnv, target: np.ndarray, expected_z: float) -> dict[str, Any]:
     """Build one audit row from the post-step dynamic state."""
 
     swing_side = str(phase["swing_side"])
@@ -253,7 +253,7 @@ def _row_base(step: int, phase: dict[str, object], info: dict[str, Any], env: Se
 def audit_lift_execution(source: CandidateSource, *, steps: int, seed: int) -> list[dict[str, Any]]:
     """Replay one IK lift candidate and collect per-step lift-window diagnostics."""
 
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(source.config_path))
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(source.config_path))
     rows: list[dict[str, Any]] = []
     try:
         env.reset(seed=seed)

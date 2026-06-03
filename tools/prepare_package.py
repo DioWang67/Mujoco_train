@@ -132,7 +132,7 @@ def main() -> None:
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(src, dst)
 
-    for package_name in ["tools", "robot_learning", "h1_baseline", "grasp_baseline", "sedon_baseline"]:
+    for package_name in ["tools", "robot_learning", "h1_baseline", "grasp_baseline", "seedon_baseline"]:
         src_dir = HERE / package_name
         dst_dir = CODE / package_name
         if src_dir.exists():

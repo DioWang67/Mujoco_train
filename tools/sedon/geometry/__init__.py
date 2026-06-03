@@ -1,2 +1,0 @@
-"""Sedon prototype geometry helpers."""
-

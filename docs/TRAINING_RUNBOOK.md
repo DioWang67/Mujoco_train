@@ -1,8 +1,8 @@
 # Training Runbook
 
 Use this as the short operator guide. For project structure, see
-`docs/PROJECT_GUIDE.md`. For Sedon-specific gait work, see
-`docs/SEDON_WORKFLOW.md`.
+`docs/PROJECT_GUIDE.md`. For Seedon-specific gait work, see
+`docs/SEEDON_WORKFLOW.md`.
 
 ## Before Training
 
@@ -62,41 +62,41 @@ Evaluate:
 python eval.py --project grasp --episodes 10
 ```
 
-## Sedon
+## Seedon
 
 Build/check scene:
 
 ```bash
-python -m tools.build_sedon_training_scene
-python -m tools.smoke_sedon_env --steps 20
+python -m tools.build_seedon_training_scene
+python -m tools.smoke_seedon_env --steps 20
 ```
 
 Smoke:
 
 ```bash
-python train.py --project sedon --smoke --n-envs 1 --reset-noise-scale 0
+python train.py --project seedon --smoke --n-envs 1 --reset-noise-scale 0
 ```
 
 Current Blue-style support gait local run:
 
 ```powershell
-$env:SEDON_CONFIG_OVERRIDES='configs\sedon\blue_dynamic_support_gait.json'
-python train.py --project sedon --total-timesteps 2000000 --n-envs 4 --reset-noise-scale 0.005
+$env:SEEDON_CONFIG_OVERRIDES='configs\seedon\blue_dynamic_support_gait.json'
+python train.py --project seedon --total-timesteps 2000000 --n-envs 4 --reset-noise-scale 0.005
 ```
 
 Remote deploy, resume, and status:
 
 ```powershell
-scripts\sedon_remote_deploy_and_check.bat
-scripts\sedon_remote_resume_training.bat
-scripts\sedon_remote_training_status.bat
+scripts\seedon_remote_deploy_and_check.bat
+scripts\seedon_remote_resume_training.bat
+scripts\seedon_remote_training_status.bat
 ```
 
 Remote direct command from `code/current`:
 
 ```bash
-export SEDON_CONFIG_OVERRIDES=configs/sedon/blue_dynamic_support_gait.json
-python -m sedon_baseline.train --total-timesteps 2000000 --n-envs 128 --reset-noise-scale 0.005
+export SEEDON_CONFIG_OVERRIDES=configs/seedon/blue_dynamic_support_gait.json
+python -m seedon_baseline.train --total-timesteps 2000000 --n-envs 128 --reset-noise-scale 0.005
 ```
 
 ## Evaluation And Audit
@@ -108,16 +108,16 @@ python -m tools.compare_eval --episodes 8 --vel 1.0 --out-json reports/compare_r
 python -m tools.gate_check --report reports/compare_report.json --gates configs/gate_profiles.json --profile preprod
 ```
 
-Sedon viewer:
+Seedon viewer:
 
 ```bash
-python -m tools.debug_sedon_gait_viewer --mode policy --steps 600 --speed 0.5 --out-csv artifacts/sedon_debug/policy_gait_view.csv
+python -m tools.debug_seedon_gait_viewer --mode policy --steps 600 --speed 0.5 --out-csv artifacts/seedon_debug/policy_gait_view.csv
 ```
 
-Sedon audit:
+Seedon audit:
 
 ```bash
-python -m tools.debug_sedon_gait_audit --mode policy --steps 600 --out-csv artifacts/sedon_debug/policy_gait_audit.csv
+python -m tools.debug_seedon_gait_audit --mode policy --steps 600 --out-csv artifacts/seedon_debug/policy_gait_audit.csv
 ```
 
 ## Artifacts
@@ -137,9 +137,9 @@ same run. Mismatched VecNormalize stats can make a valid checkpoint look broken.
 ## Decision Rules
 
 - If smoke fails, do not start a long run.
-- If Sedon reward improves but gait viewer shows tiptoe, dragging, hopping, or
+- If Seedon reward improves but gait viewer shows tiptoe, dragging, hopping, or
   base-proxy contact, treat the run as failed for gait quality.
-- If Sedon still cannot unload or micro-lift after a long run, move to
+- If Seedon still cannot unload or micro-lift after a long run, move to
   reference tracking or stronger phase terms instead of only adding timesteps.
 - If remote `code/current` is not a Git repo, that is normal for release
   deployments. Inspect source files or release directory names instead.

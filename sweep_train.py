@@ -1,4 +1,4 @@
-"""Randomized Sedon curriculum sweep runner.
+"""Randomized Seedon curriculum sweep runner.
 
 This script samples a small number of reward/control configurations, runs a
 short PPO sanity training for each one, evaluates saved checkpoints, and writes
@@ -22,15 +22,15 @@ from typing import Any
 
 import numpy as np
 
-from sedon_baseline.env import (
+from seedon_baseline.env import (
     CONFIG_OVERRIDES_ENV,
-    SedonStandingConfig,
-    SedonStandingEnv,
+    SeedonStandingConfig,
+    SeedonStandingEnv,
 )
 
 
 REPO_ROOT = Path(__file__).resolve().parent
-DEFAULT_OUT_ROOT = REPO_ROOT / "artifacts" / "sedon_sweeps"
+DEFAULT_OUT_ROOT = REPO_ROOT / "artifacts" / "seedon_sweeps"
 MAX_EPISODE_STEPS = 400
 
 SEARCH_SPACE: dict[str, list[float]] = {
@@ -131,7 +131,7 @@ def _build_trial_env(
     env = dict(base_env)
     env[CONFIG_OVERRIDES_ENV] = json.dumps(config, sort_keys=True)
     env["MUJOCO_TRAIN_LAYOUT_ROOT"] = str(run_root)
-    env["MUJOCO_TRAIN_PROJECT_SLUG"] = "sedon"
+    env["MUJOCO_TRAIN_PROJECT_SLUG"] = "seedon"
     return env
 
 
@@ -190,11 +190,11 @@ def _run_command(
 
 def _zero_action_rollout(config_overrides: dict[str, float]) -> GaitMetrics:
     """Run fixed-gait zero-action rollout for prefiltering."""
-    base_config = SedonStandingConfig()
-    reward_config = SedonStandingConfig(
+    base_config = SeedonStandingConfig()
+    reward_config = SeedonStandingConfig(
         **{**base_config.__dict__, **config_overrides}
     )
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=reward_config)
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=reward_config)
     try:
         env.reset(seed=42)
         action = np.zeros(env.action_space.shape, dtype=np.float64)
@@ -243,7 +243,7 @@ def _candidate_checkpoints(models_root: Path) -> list[tuple[str, Path, Path]]:
 
 
 def _parse_eval_csv(csv_path: Path, model_name: str) -> EvalMetrics:
-    """Parse Sedon eval CSV and compute sweep score."""
+    """Parse Seedon eval CSV and compute sweep score."""
     with csv_path.open("r", encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
     if not rows:
@@ -321,7 +321,7 @@ def _evaluate_trial(
             sys.executable,
             "eval.py",
             "--project",
-            "sedon",
+            "seedon",
             "--episodes",
             str(episodes),
             "--model-path",
@@ -439,7 +439,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Run randomized Sedon training sweep."""
+    """Run randomized Seedon training sweep."""
     args = build_parser().parse_args(argv)
     if args.trials <= 0:
         raise ValueError("--trials must be positive.")
@@ -548,7 +548,7 @@ def main(argv: list[str] | None = None) -> int:
             sys.executable,
             "train.py",
             "--project",
-            "sedon",
+            "seedon",
             "--n-envs",
             str(args.n_envs),
             "--total-timesteps",
@@ -580,7 +580,7 @@ def main(argv: list[str] | None = None) -> int:
             )
             continue
 
-        models_root = run_dir / "runs" / "sedon" / "models" / "sedon"
+        models_root = run_dir / "runs" / "seedon" / "models" / "seedon"
         best_metrics = _evaluate_trial(
             env=eval_env,
             run_dir=run_dir,

@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "version": "v5_22",
+  "model_path": "private_assets/seedon_v5_22/training_scene.xml",
+  "source_urdf": "private_assets/SEEDON_URDF_5_22/urdf/SEEDON_URDF_5_21.urdf",
+  "controller_source": "seedon_baseline/env.py",
+  "artifacts_dir": "artifacts/seedon_debug/v5_22_actuator_envelope",
+  "report_path": "docs/seedon_v5_22_actuator_envelope_report.md",
+  "torque_data": {
+    "source": "provided_by_team_message",
+    "confidence": "medium",
+    "torque_side": "unknown_motor_side_or_joint_output",
+    "groups": {
+      "hip_pitch": {
+        "rated_nm": 20.0,
+        "peak_nm": 60.0
+      },
+      "ankle_pitch": {
+        "rated_nm": 5.0,
+        "peak_nm": 14.0
+      },
+      "other_leg_joints": {
+        "rated_nm": 6.0,
+        "peak_nm": 17.0
+      }
+    }
+  },
+  "profiles": {
+    "rated_safe": {
+      "uses": "rated torque",
+      "valid_for": "bounded_diagnostic_only",
+      "invalid_for": [
+        "sim2real_claim",
+        "walking_success_claim"
+      ]
+    },
+    "peak_upper_bound": {
+      "uses": "peak torque",
+      "valid_for": "short_burst_diagnostic_only",
+      "invalid_for": [
+        "continuous_gait_claim",
+        "sim2real_claim"
+      ]
+    },
+    "ankle_risk_sweep": {
+      "ankle_pitch_values_nm": [
+        5.0,
+        10.0,
+        14.0,
+        20.0
+      ],
+      "purpose": "test toe handoff / rollover sensitivity to ankle authority"
+    }
+  }
+}

@@ -24,16 +24,16 @@ def test_eval_dispatcher_runs_configured_project_module(monkeypatch) -> None:
     monkeypatch.setattr(
         eval,
         "split_mode_args",
-        lambda argv: ("sedon", ["--episodes", "1", "--render"]),
+        lambda argv: ("seedon", ["--episodes", "1", "--render"]),
     )
     monkeypatch.setattr(
         eval,
         "get_robot_project",
-        lambda slug: _Project("sedon_baseline.eval"),
+        lambda slug: _Project("seedon_baseline.eval"),
     )
     monkeypatch.setattr(eval.importlib, "import_module", lambda name: fake_module)
 
-    assert eval.main(["--project", "sedon", "--episodes", "1", "--render"]) == 0
+    assert eval.main(["--project", "seedon", "--episodes", "1", "--render"]) == 0
     assert captured_argv == ["--episodes", "1", "--render"]
 
 
@@ -54,7 +54,7 @@ def test_eval_dispatcher_lists_projects_without_importing_eval_modules(
         "load_robot_projects",
         lambda: {
             "h1": _Project("h1_baseline.eval", display_name="H1 walking"),
-            "sedon": _Project("sedon_baseline.eval", display_name="Sedon"),
+            "seedon": _Project("seedon_baseline.eval", display_name="Seedon"),
         },
     )
     monkeypatch.setattr(

@@ -13,13 +13,13 @@ from typing import Any
 import mujoco
 import numpy as np
 
-from sedon_baseline.env import SedonStandingConfig, SedonStandingEnv
-from tools.audit_sedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
+from seedon_baseline.env import SeedonStandingConfig, SeedonStandingEnv
+from tools.audit_seedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
 from tools.blue_forward_shuffle_v1 import DEFAULT_CONFIG, DEFAULT_MODEL, DEFAULT_VECNORM
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "sedon_debug" / "blue_forward_shuffle_authority_sweep_v1"
+DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "seedon_debug" / "blue_forward_shuffle_authority_sweep_v1"
 DEFAULT_FORCES = "0.5,1,2,3"
 DEFAULT_LOCATIONS = "base_link,base_com,stance_foot_phase_only"
 DEFAULT_PHASE_GATES = "always,right_support,left_support,alternating_support"
@@ -103,7 +103,7 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
-def _scaled_seed_path(base_config: SedonStandingConfig, cadence_scale: float, out_dir: Path) -> Path | None:
+def _scaled_seed_path(base_config: SeedonStandingConfig, cadence_scale: float, out_dir: Path) -> Path | None:
     """Create a timing-only reference seed copy for one cadence scale."""
 
     if base_config.reference_gait_seed_path is None:
@@ -124,7 +124,7 @@ def _scaled_seed_path(base_config: SedonStandingConfig, cadence_scale: float, ou
     return path
 
 
-def _config_for_cadence(base_config: SedonStandingConfig, cadence_scale: float, out_dir: Path) -> tuple[SedonStandingConfig, Path]:
+def _config_for_cadence(base_config: SeedonStandingConfig, cadence_scale: float, out_dir: Path) -> tuple[SeedonStandingConfig, Path]:
     """Return a config variant with unchanged poses and scaled seed timing."""
 
     payload = dict(base_config.__dict__)
@@ -136,7 +136,7 @@ def _config_for_cadence(base_config: SedonStandingConfig, cadence_scale: float, 
     payload["march_forward_progress_weight"] = 0.0
     payload["march_forward_velocity_weight"] = 0.0
     payload["march_swing_forward_weight"] = 0.0
-    config = SedonStandingConfig(**payload)
+    config = SeedonStandingConfig(**payload)
     config_path = out_dir / "configs" / f"cadence_{_fmt(cadence_scale)}.json"
     _write_json(config_path, payload)
     return config, config_path
@@ -155,7 +155,7 @@ class PolicyProvider:
         self._model = PPO.load(str(model_path))
         self._vecnorm_path = vecnorm_path
 
-    def bind(self, env: SedonStandingEnv):
+    def bind(self, env: SeedonStandingEnv):
         """Return a deterministic action function bound to one raw env."""
 
         from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
@@ -197,7 +197,7 @@ def _phase_gate_active(phase_gate: str, support_side: str) -> bool:
     raise ValueError(f"Unsupported phase gate: {phase_gate}")
 
 
-def _force_body_id(env: SedonStandingEnv, apply_location: str, support_side: str) -> int | None:
+def _force_body_id(env: SeedonStandingEnv, apply_location: str, support_side: str) -> int | None:
     if apply_location in {"base_link", "base_com"}:
         return int(env._base_body_id)
     if apply_location == "stance_foot_phase_only":
@@ -209,7 +209,7 @@ def _force_body_id(env: SedonStandingEnv, apply_location: str, support_side: str
     raise ValueError(f"Unsupported apply location: {apply_location}")
 
 
-def _apply_forward_force(env: SedonStandingEnv, candidate: AuthorityCandidate, support_side: str) -> float:
+def _apply_forward_force(env: SeedonStandingEnv, candidate: AuthorityCandidate, support_side: str) -> float:
     env.data.xfrc_applied[:] = 0.0
     if not _phase_gate_active(candidate.phase_gate, support_side):
         return 0.0
@@ -220,7 +220,7 @@ def _apply_forward_force(env: SedonStandingEnv, candidate: AuthorityCandidate, s
     return candidate.force_n
 
 
-def _row(step: int, env: SedonStandingEnv, info: dict[str, Any], force: float, right_slide_delta: float, left_slide_delta: float) -> dict[str, Any]:
+def _row(step: int, env: SeedonStandingEnv, info: dict[str, Any], force: float, right_slide_delta: float, left_slide_delta: float) -> dict[str, Any]:
     return {
         "step": step,
         "phase_name": str(info["phase_name"]),
@@ -263,7 +263,7 @@ def _write_timeline(path: Path, rows: list[dict[str, Any]]) -> None:
 def audit_candidate(
     candidate: AuthorityCandidate,
     *,
-    config: SedonStandingConfig,
+    config: SeedonStandingConfig,
     policy_provider: PolicyProvider,
     out_dir: Path,
     steps: int,
@@ -274,7 +274,7 @@ def audit_candidate(
 ) -> AuthorityAudit:
     """Run one deterministic authority sweep candidate."""
 
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=config)
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=config)
     dt = float(env.dt)
     robot_weight = float(np.sum(env.model.body_mass) * 9.81)
     rows: list[dict[str, Any]] = []
@@ -409,8 +409,8 @@ def audit_candidate(
     )
 
 
-def build_candidates(args: argparse.Namespace, base_config: SedonStandingConfig) -> tuple[list[AuthorityCandidate], dict[float, SedonStandingConfig]]:
-    configs: dict[float, SedonStandingConfig] = {}
+def build_candidates(args: argparse.Namespace, base_config: SeedonStandingConfig) -> tuple[list[AuthorityCandidate], dict[float, SeedonStandingConfig]]:
+    configs: dict[float, SeedonStandingConfig] = {}
     config_paths: dict[float, Path] = {}
     for cadence in args.cadence_scales:
         config, config_path = _config_for_cadence(base_config, cadence, args.out_dir)

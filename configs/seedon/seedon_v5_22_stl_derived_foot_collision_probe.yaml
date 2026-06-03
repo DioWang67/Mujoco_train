@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "version": "v5_22",
+  "model_path": "private_assets/seedon_v5_22/training_scene.xml",
+  "stl_paths": {
+    "left": "private_assets/seedon_v5_22/mjcf_source/L_link_ankle_pitch.STL",
+    "right": "private_assets/seedon_v5_22/mjcf_source/R_link_ankle_pitch.STL"
+  },
+  "artifacts_dir": "artifacts/seedon_debug/v5_22_stl_derived_foot_collision_probe",
+  "report_path": "docs/seedon_v5_22_stl_derived_foot_collision_probe_report.md",
+  "valid_for": "contact_diagnostic_only",
+  "invalid_for": [
+    "final_collision_design",
+    "walking_success_claim",
+    "sim2real_claim",
+    "ppo_training_claim",
+    "continuous_gait_claim"
+  ],
+  "method_limitations": [
+    "Ankle-pitch STL is treated as a visual foot-bottom candidate, not as final collision.",
+    "STL local z is assumed to be vertical; source=assumption, confidence=low.",
+    "Lowest-z percentile can capture bevel or visual-only mesh triangles.",
+    "Generated collision variants are simplified primitives, not raw STL mesh collision.",
+    "MuJoCo contact force is raw normal force from mj_contactForce, not a calibrated foot sensor."
+  ],
+  "stl_bottom_extraction": {
+    "lowest_z_percentile": 2.0,
+    "x_bins": 12,
+    "flat_z_range_threshold": 0.004,
+    "curved_z_range_threshold": 0.012,
+    "source": "assumption",
+    "confidence": "low"
+  },
+  "collision_fit": {
+    "half_height": 0.010,
+    "min_length": 0.050,
+    "min_width": 0.020,
+    "source": "assumption",
+    "confidence": "low"
+  },
+  "lowered_toe_box": {
+    "toe_length_scale": 0.38,
+    "toe_height_scale": 0.70,
+    "toe_z_lowering": -0.004,
+    "source": "assumption",
+    "confidence": "low"
+  },
+  "rocker_capsules": {
+    "radius_scale": 0.75,
+    "width_scale": 0.88,
+    "x_offset_scale": 0.58,
+    "heel_z_offset": 0.004,
+    "center_z_offset": -0.003,
+    "toe_z_offset": 0.001,
+    "source": "assumption",
+    "confidence": "low"
+  },
+  "continuous_bottom": {
+    "x_scale": 1.0,
+    "y_scale": 0.95,
+    "z_scale": 0.80,
+    "z_offset": -0.004,
+    "source": "assumption",
+    "confidence": "low"
+  },
+  "foot_variants": [
+    "stl_fitted_box",
+    "stl_fitted_lowered_toe_box",
+    "stl_fitted_rocker_capsules",
+    "stl_fitted_continuous_bottom"
+  ],
+  "actuator_profiles": {
+    "peak_upper_bound": {
+      "hip_pitch": 60.0,
+      "ankle_pitch": 14.0,
+      "other_leg_joints": 17.0,
+      "valid_for": "upper_bound_diagnostic_only",
+      "invalid_for": [
+        "continuous_gait_claim"
+      ],
+      "source": "provided_by_team_message",
+      "confidence": "medium",
+      "torque_side": "unknown_motor_side_or_joint_output"
+    },
+    "ankle_boost_hypothesis": {
+      "hip_pitch": 40.0,
+      "ankle_pitch": 20.0,
+      "other_leg_joints": 12.0,
+      "valid_for": "bounded_diagnostic_only",
+      "source": "assumption",
+      "confidence": "low",
+      "torque_side": "unknown_motor_side_or_joint_output"
+    }
+  },
+  "prototype_thresholds": {
+    "source": "prototype_threshold",
+    "confidence": "low",
+    "prototype_success_contact_none_rate_max": 0.25,
+    "useful_signal_contact_none_rate_max": 0.5,
+    "contact_x_progression_min": 0.0,
+    "large_tilt_degrees": 35.0
+  },
+  "simulation": {
+    "hold_steps": 100,
+    "aggregation_last_steps": 25,
+    "pd_stiffness": 35.0,
+    "pd_damping": 2.0,
+    "max_qpos_abs": 20.0
+  },
+  "posture_cases": [
+    {
+      "name": "neutral_stance",
+      "base_pitch_degrees": 0.0,
+      "base_x_shift": 0.0,
+      "joint_biases": {}
+    },
+    {
+      "name": "ankle_toe_down_bias",
+      "base_pitch_degrees": 8.0,
+      "base_x_shift": 0.0,
+      "joint_biases": {
+        "L_joint_ankle_pitch": 0.25,
+        "R_joint_ankle_pitch": 0.25
+      }
+    },
+    {
+      "name": "mild_forward_lean",
+      "base_pitch_degrees": 8.0,
+      "base_x_shift": 0.015,
+      "joint_biases": {
+        "L_joint_hip_pitch": 0.10,
+        "R_joint_hip_pitch": 0.10,
+        "L_joint_knee_pitch": -0.16,
+        "R_joint_knee_pitch": -0.16,
+        "L_joint_ankle_pitch": 0.14,
+        "R_joint_ankle_pitch": 0.14
+      }
+    },
+    {
+      "name": "medium_forward_base_pitch",
+      "base_pitch_degrees": 10.0,
+      "base_x_shift": 0.0,
+      "joint_biases": {}
+    }
+  ]
+}

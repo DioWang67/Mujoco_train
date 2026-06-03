@@ -1,4 +1,4 @@
-"""Final minimal check for Sedon unload controller v2b authority.
+"""Final minimal check for Seedon unload controller v2b authority.
 
 This tool tests only the three channels supported by attribution:
 swing hip-roll, support hip-roll, and lean proxy. It does not train,
@@ -15,10 +15,10 @@ from typing import Any
 
 import numpy as np
 
-from sedon_baseline.env import SedonStandingEnv
-from tools.audit_sedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
+from seedon_baseline.env import SeedonStandingEnv
+from tools.audit_seedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
 from tools.blue_forward_shuffle_v1 import DEFAULT_CONFIG, DEFAULT_MODEL, DEFAULT_VECNORM
-from tools.sedon_explicit_locomotion_controller_v2 import (
+from tools.seedon_explicit_locomotion_controller_v2 import (
     L_HIP_ROLL,
     R_HIP_ROLL,
     _contact_state,
@@ -27,7 +27,7 @@ from tools.sedon_explicit_locomotion_controller_v2 import (
     _support_force,
     _swing_force,
 )
-from tools.sedon_unload_controller_v2a import (
+from tools.seedon_unload_controller_v2a import (
     UnloadConfig,
     UnloadPhase,
     UnloadRuntime,
@@ -39,7 +39,7 @@ from tools.sedon_unload_controller_v2a import (
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "sedon_debug" / "unload_controller_v2b_final_check"
+DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "seedon_debug" / "unload_controller_v2b_final_check"
 
 
 @dataclass(frozen=True)
@@ -185,7 +185,7 @@ def _apply_terms(
 
 
 def _v2b_target(
-    env: SedonStandingEnv,
+    env: SeedonStandingEnv,
     runtime: V2BRuntime,
     config: UnloadConfig,
     channel_set: ChannelSet,
@@ -234,7 +234,7 @@ def _sync_hold_state(previous_phase: UnloadPhase, runtime: V2BRuntime) -> None:
         runtime.hold_lean_correction = 0.0
 
 
-def _row(step: int, env: SedonStandingEnv, runtime: V2BRuntime, event: str, robot_weight: float) -> dict[str, Any]:
+def _row(step: int, env: SeedonStandingEnv, runtime: V2BRuntime, event: str, robot_weight: float) -> dict[str, Any]:
     fsm = runtime.fsm
     swing = _swing_force(env, fsm.swing_side)
     support = _support_force(env, fsm.swing_side)
@@ -276,7 +276,7 @@ def run_v2b(
     channel_set: ChannelSet,
     gain: GainProfile,
 ) -> V2BResult:
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(config_path))
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(config_path))
     runtime = V2BRuntime(fsm=UnloadRuntime())
     rows: list[dict[str, Any]] = []
     try:
@@ -362,7 +362,7 @@ def write_results(path: Path, rows: list[V2BResult]) -> None:
 def write_summary(path: Path, rows: list[V2BResult], v2a_min: float, v2a_mean: float) -> None:
     best = min(rows, key=lambda row: row.min_swing_force)
     lines = [
-        "# Sedon Unload Controller V2B Final Check",
+        "# Seedon Unload Controller V2B Final Check",
         "",
         f"v2a_min_swing_force: {v2a_min:.3f} N",
         f"v2a_mean_swing_force: {v2a_mean:.3f} N",
@@ -381,7 +381,7 @@ def write_summary(path: Path, rows: list[V2BResult], v2a_min: float, v2a_mean: f
     if all(row.min_swing_force >= 38.0 or not row.stable for row in rows):
         lines.append(
             "All six v2b checks failed to move stable min_swing_force clearly below 38N. "
-            "Current control-channel authority is insufficient; keep Sedon on grounded/forward shuffle."
+            "Current control-channel authority is insufficient; keep Seedon on grounded/forward shuffle."
         )
     elif any(row.stable and row.min_swing_force <= 35.0 for row in rows):
         lines.append(

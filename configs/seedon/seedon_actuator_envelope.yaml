@@ -1,0 +1,359 @@
+{
+  "schema_version": 1,
+  "tool_version": "seedon-actuator-envelope-inspector-v1",
+  "generated_at": "2026-06-01T07:23:48+00:00",
+  "purpose": "Read-only Seedon actuator envelope inspection for Duck-like gait readiness.",
+  "sources": {
+    "seedon_parameters": "D:\\Git\\robotlearning\\seedon_mujoco\\configs\\seedon\\seedon_robot_parameters.yaml",
+    "source_xml": "D:\\Git\\robotlearning\\seedon_mujoco\\private_assets\\seedon\\training_scene.xml"
+  },
+  "summary": {
+    "status": "NOT_READY",
+    "actuator_count": 10,
+    "actuator_kind_counts": {
+      "motor": 10
+    },
+    "explicit_ctrlrange_count": 10,
+    "missing_kp_count": 10,
+    "missing_forcerange_count": 10,
+    "missing_gear_count": 10,
+    "direct_duck_actuator_transfer_allowed": false,
+    "reason": "Seedon actuator ctrlrange is explicit, but kp/forcerange/gear and control semantics require clarification."
+  },
+  "actuators": [
+    {
+      "name": "R_joint_hip_yaw_motor",
+      "joint": "R_joint_hip_yaw",
+      "side": "right",
+      "kind": "motor",
+      "ctrlrange": [
+        -100.0,
+        100.0
+      ],
+      "kp": null,
+      "forcerange": null,
+      "gear": null,
+      "field_status": {
+        "kind": "explicit",
+        "joint": "explicit",
+        "ctrlrange": "explicit",
+        "kp": "unknown",
+        "forcerange": "unknown",
+        "gear": "unknown"
+      },
+      "confidence": {
+        "kind": "high",
+        "ctrlrange": "high",
+        "kp": "manual_required",
+        "forcerange": "manual_required",
+        "gear": "manual_required"
+      },
+      "source": "Explicit actuator fields extracted from Seedon MJCF XML.",
+      "notes": "Envelope is not a torque limit unless Seedon control semantics confirm it."
+    },
+    {
+      "name": "R_joint_hip_roll_motor",
+      "joint": "R_joint_hip_roll",
+      "side": "right",
+      "kind": "motor",
+      "ctrlrange": [
+        -100.0,
+        100.0
+      ],
+      "kp": null,
+      "forcerange": null,
+      "gear": null,
+      "field_status": {
+        "kind": "explicit",
+        "joint": "explicit",
+        "ctrlrange": "explicit",
+        "kp": "unknown",
+        "forcerange": "unknown",
+        "gear": "unknown"
+      },
+      "confidence": {
+        "kind": "high",
+        "ctrlrange": "high",
+        "kp": "manual_required",
+        "forcerange": "manual_required",
+        "gear": "manual_required"
+      },
+      "source": "Explicit actuator fields extracted from Seedon MJCF XML.",
+      "notes": "Envelope is not a torque limit unless Seedon control semantics confirm it."
+    },
+    {
+      "name": "R_joint_hip_pitch_motor",
+      "joint": "R_joint_hip_pitch",
+      "side": "right",
+      "kind": "motor",
+      "ctrlrange": [
+        -100.0,
+        100.0
+      ],
+      "kp": null,
+      "forcerange": null,
+      "gear": null,
+      "field_status": {
+        "kind": "explicit",
+        "joint": "explicit",
+        "ctrlrange": "explicit",
+        "kp": "unknown",
+        "forcerange": "unknown",
+        "gear": "unknown"
+      },
+      "confidence": {
+        "kind": "high",
+        "ctrlrange": "high",
+        "kp": "manual_required",
+        "forcerange": "manual_required",
+        "gear": "manual_required"
+      },
+      "source": "Explicit actuator fields extracted from Seedon MJCF XML.",
+      "notes": "Envelope is not a torque limit unless Seedon control semantics confirm it."
+    },
+    {
+      "name": "R_joint_knee_pitch_motor",
+      "joint": "R_joint_knee_pitch",
+      "side": "right",
+      "kind": "motor",
+      "ctrlrange": [
+        -100.0,
+        100.0
+      ],
+      "kp": null,
+      "forcerange": null,
+      "gear": null,
+      "field_status": {
+        "kind": "explicit",
+        "joint": "explicit",
+        "ctrlrange": "explicit",
+        "kp": "unknown",
+        "forcerange": "unknown",
+        "gear": "unknown"
+      },
+      "confidence": {
+        "kind": "high",
+        "ctrlrange": "high",
+        "kp": "manual_required",
+        "forcerange": "manual_required",
+        "gear": "manual_required"
+      },
+      "source": "Explicit actuator fields extracted from Seedon MJCF XML.",
+      "notes": "Envelope is not a torque limit unless Seedon control semantics confirm it."
+    },
+    {
+      "name": "R_joint_ankle_pitch_motor",
+      "joint": "R_joint_ankle_pitch",
+      "side": "right",
+      "kind": "motor",
+      "ctrlrange": [
+        -100.0,
+        100.0
+      ],
+      "kp": null,
+      "forcerange": null,
+      "gear": null,
+      "field_status": {
+        "kind": "explicit",
+        "joint": "explicit",
+        "ctrlrange": "explicit",
+        "kp": "unknown",
+        "forcerange": "unknown",
+        "gear": "unknown"
+      },
+      "confidence": {
+        "kind": "high",
+        "ctrlrange": "high",
+        "kp": "manual_required",
+        "forcerange": "manual_required",
+        "gear": "manual_required"
+      },
+      "source": "Explicit actuator fields extracted from Seedon MJCF XML.",
+      "notes": "Envelope is not a torque limit unless Seedon control semantics confirm it."
+    },
+    {
+      "name": "L_joint_hip_yaw_motor",
+      "joint": "L_joint_hip_yaw",
+      "side": "left",
+      "kind": "motor",
+      "ctrlrange": [
+        -100.0,
+        100.0
+      ],
+      "kp": null,
+      "forcerange": null,
+      "gear": null,
+      "field_status": {
+        "kind": "explicit",
+        "joint": "explicit",
+        "ctrlrange": "explicit",
+        "kp": "unknown",
+        "forcerange": "unknown",
+        "gear": "unknown"
+      },
+      "confidence": {
+        "kind": "high",
+        "ctrlrange": "high",
+        "kp": "manual_required",
+        "forcerange": "manual_required",
+        "gear": "manual_required"
+      },
+      "source": "Explicit actuator fields extracted from Seedon MJCF XML.",
+      "notes": "Envelope is not a torque limit unless Seedon control semantics confirm it."
+    },
+    {
+      "name": "L_joint_hip_roll_motor",
+      "joint": "L_joint_hip_roll",
+      "side": "left",
+      "kind": "motor",
+      "ctrlrange": [
+        -100.0,
+        100.0
+      ],
+      "kp": null,
+      "forcerange": null,
+      "gear": null,
+      "field_status": {
+        "kind": "explicit",
+        "joint": "explicit",
+        "ctrlrange": "explicit",
+        "kp": "unknown",
+        "forcerange": "unknown",
+        "gear": "unknown"
+      },
+      "confidence": {
+        "kind": "high",
+        "ctrlrange": "high",
+        "kp": "manual_required",
+        "forcerange": "manual_required",
+        "gear": "manual_required"
+      },
+      "source": "Explicit actuator fields extracted from Seedon MJCF XML.",
+      "notes": "Envelope is not a torque limit unless Seedon control semantics confirm it."
+    },
+    {
+      "name": "L_joint_hip_pitch_motor",
+      "joint": "L_joint_hip_pitch",
+      "side": "left",
+      "kind": "motor",
+      "ctrlrange": [
+        -100.0,
+        100.0
+      ],
+      "kp": null,
+      "forcerange": null,
+      "gear": null,
+      "field_status": {
+        "kind": "explicit",
+        "joint": "explicit",
+        "ctrlrange": "explicit",
+        "kp": "unknown",
+        "forcerange": "unknown",
+        "gear": "unknown"
+      },
+      "confidence": {
+        "kind": "high",
+        "ctrlrange": "high",
+        "kp": "manual_required",
+        "forcerange": "manual_required",
+        "gear": "manual_required"
+      },
+      "source": "Explicit actuator fields extracted from Seedon MJCF XML.",
+      "notes": "Envelope is not a torque limit unless Seedon control semantics confirm it."
+    },
+    {
+      "name": "L_joint_knee_pitch_motor",
+      "joint": "L_joint_knee_pitch",
+      "side": "left",
+      "kind": "motor",
+      "ctrlrange": [
+        -100.0,
+        100.0
+      ],
+      "kp": null,
+      "forcerange": null,
+      "gear": null,
+      "field_status": {
+        "kind": "explicit",
+        "joint": "explicit",
+        "ctrlrange": "explicit",
+        "kp": "unknown",
+        "forcerange": "unknown",
+        "gear": "unknown"
+      },
+      "confidence": {
+        "kind": "high",
+        "ctrlrange": "high",
+        "kp": "manual_required",
+        "forcerange": "manual_required",
+        "gear": "manual_required"
+      },
+      "source": "Explicit actuator fields extracted from Seedon MJCF XML.",
+      "notes": "Envelope is not a torque limit unless Seedon control semantics confirm it."
+    },
+    {
+      "name": "L_joint_ankle_pitch_motor",
+      "joint": "L_joint_ankle_pitch",
+      "side": "left",
+      "kind": "motor",
+      "ctrlrange": [
+        -100.0,
+        100.0
+      ],
+      "kp": null,
+      "forcerange": null,
+      "gear": null,
+      "field_status": {
+        "kind": "explicit",
+        "joint": "explicit",
+        "ctrlrange": "explicit",
+        "kp": "unknown",
+        "forcerange": "unknown",
+        "gear": "unknown"
+      },
+      "confidence": {
+        "kind": "high",
+        "ctrlrange": "high",
+        "kp": "manual_required",
+        "forcerange": "manual_required",
+        "gear": "manual_required"
+      },
+      "source": "Explicit actuator fields extracted from Seedon MJCF XML.",
+      "notes": "Envelope is not a torque limit unless Seedon control semantics confirm it."
+    }
+  ],
+  "manual_required": [
+    {
+      "field": "seedon_actuator_kp",
+      "count": 10,
+      "reason": "Seedon XML exposes motor actuators without explicit kp."
+    },
+    {
+      "field": "seedon_actuator_forcerange",
+      "count": 10,
+      "reason": "Seedon XML exposes no explicit actuator force range."
+    },
+    {
+      "field": "seedon_actuator_gear",
+      "count": 10,
+      "reason": "Seedon XML exposes no explicit actuator gear in extracted fields."
+    },
+    {
+      "field": "control_semantics",
+      "count": 10,
+      "reason": "Need environment/control-path inspection before interpreting ctrlrange as torque, position, or normalized action semantics."
+    }
+  ],
+  "safe_reference_fields": [
+    "actuator name",
+    "actuator kind",
+    "joint binding",
+    "explicit ctrlrange as source metadata"
+  ],
+  "not_safe_to_transfer": [
+    "Duck kp",
+    "Duck forcerange",
+    "Duck position-actuator semantics",
+    "Duck joint trajectory"
+  ]
+}

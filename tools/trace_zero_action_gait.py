@@ -1,4 +1,4 @@
-"""Trace Sedon zero-action gait and contact pairs over one rollout."""
+"""Trace Seedon zero-action gait and contact pairs over one rollout."""
 
 from __future__ import annotations
 
@@ -9,8 +9,8 @@ from pathlib import Path
 
 import numpy as np
 
-from sedon_baseline.env import SedonStandingConfig, SedonStandingEnv, load_sedon_config_from_env
-from tools.sedon_debug_common import (
+from seedon_baseline.env import SeedonStandingConfig, SeedonStandingEnv, load_seedon_config_from_env
+from tools.seedon_debug_common import (
     BASE_PROXY_GEOM,
     DEFAULT_SCENE_PATH,
     DEBUG_OUT_DIR,
@@ -54,7 +54,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--relaxed-foot",
         action="store_true",
-        help=f"Temporarily use relaxed Sedon foot collision half-size {RELAXED_FOOT_SIZE}.",
+        help=f"Temporarily use relaxed Seedon foot collision half-size {RELAXED_FOOT_SIZE}.",
     )
     parser.add_argument(
         "--right-knee-safe-range",
@@ -135,14 +135,14 @@ def _write_rows(path: Path, rows: list[dict[str, object]]) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Run zero-action Sedon rollout and write contact/pose diagnostics."""
+    """Run zero-action Seedon rollout and write contact/pose diagnostics."""
     args = build_parser().parse_args(argv)
     if args.steps <= 0:
         raise ValueError("--steps must be positive.")
     if args.print_every <= 0:
         raise ValueError("--print-every must be positive.")
 
-    base_config = load_sedon_config_from_env()
+    base_config = load_seedon_config_from_env()
     overrides: dict[str, float] = {}
     if args.right_knee_safe_range is not None:
         overrides["right_knee_safe_lower"] = args.right_knee_safe_range[0]
@@ -150,8 +150,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.left_knee_safe_range is not None:
         overrides["left_knee_safe_lower"] = args.left_knee_safe_range[0]
         overrides["left_knee_safe_upper"] = args.left_knee_safe_range[1]
-    reward_config = SedonStandingConfig(**{**base_config.__dict__, **overrides})
-    env = SedonStandingEnv(
+    reward_config = SeedonStandingConfig(**{**base_config.__dict__, **overrides})
+    env = SeedonStandingEnv(
         scene_path=require_scene(args.scene_path),
         reset_noise_scale=0.0,
         reward_config=reward_config,

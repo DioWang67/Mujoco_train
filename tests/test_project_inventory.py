@@ -12,7 +12,7 @@ def test_cleanup_reason_marks_known_runtime_outputs() -> None:
     assert cleanup_reason("models") == "cache or runtime output"
     assert cleanup_reason("_verify_reverse_knee") == "temporary verification output"
     assert cleanup_reason("artifacts") == "generated artifacts"
-    assert cleanup_reason("sedon_baseline") is None
+    assert cleanup_reason("seedon_baseline") is None
 
 
 def test_summarize_directories_reports_missing_and_existing_paths(tmp_path: Path) -> None:
@@ -31,7 +31,7 @@ def test_find_cleanup_candidates_only_returns_top_level_disposable_dirs(tmp_path
     (tmp_path / "_verify_probe").mkdir()
     (tmp_path / "_verify_probe" / "result.txt").write_text("ok", encoding="utf-8")
     (tmp_path / "logs").mkdir()
-    (tmp_path / "sedon_baseline").mkdir()
+    (tmp_path / "seedon_baseline").mkdir()
 
     candidates = find_cleanup_candidates(tmp_path)
     candidate_paths = {candidate.path.as_posix() for candidate in candidates}

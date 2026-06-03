@@ -1,4 +1,4 @@
-﻿{
+{
   "description": "Default benchmark matrix (flat-scene stress buckets)",
   "scenarios": [
     {"name": "flat_base_v1.0", "dr": false, "target_vel": 1.0, "episodes": 5, "seed": 100},

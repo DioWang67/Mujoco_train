@@ -43,11 +43,11 @@ def test_parse_env_file_rejects_invalid_line(tmp_path: Path) -> None:
         parse_env_file(env_file)
 
 
-def test_build_config_defaults_to_worktree_sedon() -> None:
+def test_build_config_defaults_to_worktree_seedon() -> None:
     config = build_config(parse_args([]), {})
 
-    assert config.project_slug == "sedon"
-    assert config.verify_project == "sedon"
+    assert config.project_slug == "seedon"
+    assert config.verify_project == "seedon"
     assert config.source_mode == "working-tree"
 
 

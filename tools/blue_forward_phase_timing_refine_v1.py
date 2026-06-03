@@ -12,8 +12,8 @@ from typing import Any
 import mujoco
 import numpy as np
 
-from sedon_baseline.env import SedonStandingConfig, SedonStandingEnv
-from tools.audit_sedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
+from seedon_baseline.env import SeedonStandingConfig, SeedonStandingEnv
+from tools.audit_seedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
 from tools.blue_forward_shuffle_authority_sweep_v1 import (
     DEFAULT_TARGET_VELOCITY,
     PolicyProvider,
@@ -22,11 +22,11 @@ from tools.blue_forward_shuffle_authority_sweep_v1 import (
     _fmt,
 )
 from tools.blue_forward_shuffle_v1 import DEFAULT_CONFIG, DEFAULT_MODEL, DEFAULT_VECNORM
-from tools.render_sedon_policy_comparison import _make_side_camera, _save_mp4
+from tools.render_seedon_policy_comparison import _make_side_camera, _save_mp4
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "sedon_debug" / "blue_forward_phase_timing_refine_v1"
+DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "seedon_debug" / "blue_forward_phase_timing_refine_v1"
 
 
 @dataclass(frozen=True)
@@ -106,7 +106,7 @@ def _yaw_from_qpos(qpos: np.ndarray) -> float:
     return float(np.arctan2(siny_cosp, cosy_cosp))
 
 
-def _support_local_step(env: SedonStandingEnv, phase: dict[str, object]) -> tuple[int, int]:
+def _support_local_step(env: SeedonStandingEnv, phase: dict[str, object]) -> tuple[int, int]:
     """Return approximate local support step and duration from reference phase alpha."""
 
     alpha = float(phase.get("phase_alpha", 0.0))
@@ -121,7 +121,7 @@ def _support_local_step(env: SedonStandingEnv, phase: dict[str, object]) -> tupl
     return local_step, duration
 
 
-def _timing_gate_active(candidate: TimingCandidate, env: SedonStandingEnv, phase: dict[str, object]) -> bool:
+def _timing_gate_active(candidate: TimingCandidate, env: SeedonStandingEnv, phase: dict[str, object]) -> bool:
     support = str(phase["support_side"])
     if support not in {"right", "left"}:
         return False
@@ -147,13 +147,13 @@ def _force_for_support(candidate: TimingCandidate, support_side: str) -> float:
     return 0.0
 
 
-def _body_id(env: SedonStandingEnv, candidate: TimingCandidate) -> int:
+def _body_id(env: SeedonStandingEnv, candidate: TimingCandidate) -> int:
     if candidate.apply_location in {"base_link", "base_com"}:
         return int(env._base_body_id)
     raise ValueError(f"Unsupported apply location: {candidate.apply_location}")
 
 
-def _apply_force(env: SedonStandingEnv, candidate: TimingCandidate, phase: dict[str, object]) -> float:
+def _apply_force(env: SeedonStandingEnv, candidate: TimingCandidate, phase: dict[str, object]) -> float:
     env.data.xfrc_applied[:] = 0.0
     if not _timing_gate_active(candidate, env, phase):
         return 0.0
@@ -162,7 +162,7 @@ def _apply_force(env: SedonStandingEnv, candidate: TimingCandidate, phase: dict[
     return force
 
 
-def _row(step: int, env: SedonStandingEnv, info: dict[str, Any], applied_force: float, right_slide: float, left_slide: float) -> dict[str, Any]:
+def _row(step: int, env: SeedonStandingEnv, info: dict[str, Any], applied_force: float, right_slide: float, left_slide: float) -> dict[str, Any]:
     return {
         "step": step,
         "phase_name": str(info["phase_name"]),
@@ -195,10 +195,10 @@ def _write_timeline(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writerows(rows)
 
 
-def _render_candidate(path: Path, candidate: TimingCandidate, config: SedonStandingConfig, policy_provider: PolicyProvider, *, steps: int, seed: int, fps: int, width: int, height: int) -> None:
+def _render_candidate(path: Path, candidate: TimingCandidate, config: SeedonStandingConfig, policy_provider: PolicyProvider, *, steps: int, seed: int, fps: int, width: int, height: int) -> None:
     """Render one timing candidate from a fixed side camera."""
 
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=config)
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=config)
     renderer = mujoco.Renderer(env.model, height=height, width=width)
     camera = _make_side_camera()
     frames: list[np.ndarray] = []
@@ -224,7 +224,7 @@ def _render_candidate(path: Path, candidate: TimingCandidate, config: SedonStand
 def audit_candidate(
     candidate: TimingCandidate,
     *,
-    config: SedonStandingConfig,
+    config: SeedonStandingConfig,
     policy_provider: PolicyProvider,
     out_dir: Path,
     steps: int,
@@ -237,7 +237,7 @@ def audit_candidate(
 ) -> TimingAudit:
     """Run one local timing-refine candidate."""
 
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=config)
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=config)
     dt = float(env.dt)
     robot_weight = float(np.sum(env.model.body_mass) * 9.81)
     rows: list[dict[str, Any]] = []
@@ -354,8 +354,8 @@ def audit_candidate(
     )
 
 
-def build_candidates(args: argparse.Namespace, base_config: SedonStandingConfig) -> tuple[list[TimingCandidate], dict[float, SedonStandingConfig]]:
-    configs: dict[float, SedonStandingConfig] = {}
+def build_candidates(args: argparse.Namespace, base_config: SeedonStandingConfig) -> tuple[list[TimingCandidate], dict[float, SeedonStandingConfig]]:
+    configs: dict[float, SeedonStandingConfig] = {}
     config_paths: dict[float, Path] = {}
     for cadence in args.cadence_scales:
         config, path = _config_for_cadence(base_config, cadence, args.out_dir)

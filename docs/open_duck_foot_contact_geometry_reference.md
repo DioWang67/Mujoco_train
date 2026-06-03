@@ -1,6 +1,6 @@
 # Open Duck Foot Contact Geometry Reference
 
-Task class: Class C local XML reference extraction. No network was used and Duck geometry is not directly applied to Sedon.
+Task class: Class C local XML reference extraction. No network was used and Duck geometry is not directly applied to Seedon.
 
 ## Summary
 
@@ -58,4 +58,4 @@ Task class: Class C local XML reference extraction. No network was used and Duck
 - Foot-related geoms use name and ancestor-body heuristics.
 - Mesh geoms are listed but their dimensions are not inferred from mesh files.
 - Visible active contact candidates are based on explicit XML class/contype/conaffinity only.
-- Duck reference is for Sedon prototype guidance only, not final mechanical design.
+- Duck reference is for Seedon prototype guidance only, not final mechanical design.

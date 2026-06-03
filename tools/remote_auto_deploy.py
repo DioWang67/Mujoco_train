@@ -180,7 +180,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def build_config(args: argparse.Namespace, env_values: dict[str, str]) -> DeployConfig:
     """Resolve CLI and environment values into one deployment config."""
     project_slug = validate_project_slug(
-        args.project_slug or env_value(env_values, "REMOTE_PROJECT_SLUG", "sedon")
+        args.project_slug or env_value(env_values, "REMOTE_PROJECT_SLUG", "seedon")
     )
     verify_project = args.verify_project or env_value(env_values, "REMOTE_VERIFY_PROJECT", project_slug)
     if args.skip_smoke:
@@ -607,7 +607,7 @@ def run_remote_health_check(config: DeployConfig, *, dry_run: bool) -> None:
             f"test -L {quote_remote(current_link)}",
             f"readlink -f {quote_remote(current_link)}",
             f"test -f {quote_remote(current_link + '/train.py')}",
-            f"test -f {quote_remote(current_link + '/sedon_baseline/env.py')}",
+            f"test -f {quote_remote(current_link + '/seedon_baseline/env.py')}",
             f"{quote_remote(config.remote_python)} --version",
         ]
     )

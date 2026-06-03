@@ -11,16 +11,16 @@ from typing import Callable
 
 import numpy as np
 
-from sedon_baseline.env import SedonStandingConfig, SedonStandingEnv
-from tools.audit_sedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
-from tools.render_sedon_policy_comparison import _make_side_camera, _save_mp4
+from seedon_baseline.env import SeedonStandingConfig, SeedonStandingEnv
+from tools.audit_seedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
+from tools.render_seedon_policy_comparison import _make_side_camera, _save_mp4
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CONFIG = REPO_ROOT / "configs" / "sedon" / "reference_teacher_pose_1_4_imitation.json"
-DEFAULT_MODEL = REPO_ROOT / "models" / "sedon" / "teacher_safe_baseline" / "model.zip"
-DEFAULT_VECNORM = REPO_ROOT / "models" / "sedon" / "teacher_safe_baseline" / "vecnorm.pkl"
-DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "sedon_debug" / "blue_forward_shuffle_v1"
+DEFAULT_CONFIG = REPO_ROOT / "configs" / "seedon" / "reference_teacher_pose_1_4_imitation.json"
+DEFAULT_MODEL = REPO_ROOT / "models" / "seedon" / "teacher_safe_baseline" / "model.zip"
+DEFAULT_VECNORM = REPO_ROOT / "models" / "seedon" / "teacher_safe_baseline" / "vecnorm.pkl"
+DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "seedon_debug" / "blue_forward_shuffle_v1"
 
 
 @dataclass(frozen=True)
@@ -66,7 +66,7 @@ def _parse_float_list(raw: str) -> list[float]:
     return values
 
 
-def _load_policy_provider(model_path: Path, vecnorm_path: Path, env: SedonStandingEnv) -> Callable[[np.ndarray], np.ndarray]:
+def _load_policy_provider(model_path: Path, vecnorm_path: Path, env: SeedonStandingEnv) -> Callable[[np.ndarray], np.ndarray]:
     """Load a deterministic policy callable with frozen VecNormalize stats."""
 
     if not model_path.is_file():
@@ -90,7 +90,7 @@ def _load_policy_provider(model_path: Path, vecnorm_path: Path, env: SedonStandi
     return predict
 
 
-def _config_for_velocity(base: SedonStandingConfig, velocity: float) -> SedonStandingConfig:
+def _config_for_velocity(base: SeedonStandingConfig, velocity: float) -> SeedonStandingConfig:
     """Return config variant that records the requested forward curriculum target."""
 
     payload = dict(base.__dict__)
@@ -99,10 +99,10 @@ def _config_for_velocity(base: SedonStandingConfig, velocity: float) -> SedonSta
     payload["march_forward_progress_weight"] = 0.0
     payload["march_forward_velocity_weight"] = 0.0
     payload["march_swing_forward_weight"] = 0.0
-    return SedonStandingConfig(**payload)
+    return SeedonStandingConfig(**payload)
 
 
-def _write_config(path: Path, config: SedonStandingConfig) -> None:
+def _write_config(path: Path, config: SeedonStandingConfig) -> None:
     """Write a compact JSON config variant."""
 
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -131,7 +131,7 @@ def _timeline_row(
     *,
     step: int,
     info: dict[str, object],
-    env: SedonStandingEnv,
+    env: SeedonStandingEnv,
     assist_force: float,
     right_slide_delta: float,
     left_slide_delta: float,
@@ -165,14 +165,14 @@ def _timeline_row(
     }
 
 
-def _render_frame(renderer: object, env: SedonStandingEnv, camera: object) -> np.ndarray:
+def _render_frame(renderer: object, env: SeedonStandingEnv, camera: object) -> np.ndarray:
     renderer.update_scene(env.data, camera=camera)
     return np.asarray(renderer.render(), dtype=np.uint8)
 
 
 def rollout_velocity(
     *,
-    config: SedonStandingConfig,
+    config: SeedonStandingConfig,
     target_velocity: float,
     model_path: Path,
     vecnorm_path: Path,
@@ -193,7 +193,7 @@ def rollout_velocity(
 
     import mujoco
 
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=config)
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=config)
     action_provider = _load_policy_provider(model_path, vecnorm_path, env)
     dt = float(env.dt)
     robot_weight = float(np.sum(env.model.body_mass) * 9.81)

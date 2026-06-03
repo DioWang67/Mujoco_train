@@ -67,7 +67,7 @@ def remote_start_script(
         else ""
     )
     config_export = (
-        f"SEDON_CONFIG_OVERRIDES={quote_remote(config_overrides)} "
+        f"SEEDON_CONFIG_OVERRIDES={quote_remote(config_overrides)} "
         if config_overrides
         else ""
     )

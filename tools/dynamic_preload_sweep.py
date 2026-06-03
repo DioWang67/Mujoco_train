@@ -10,8 +10,8 @@ from pathlib import Path
 import mujoco
 import numpy as np
 
-from sedon_baseline.env import JOINT_NAMES, SedonStandingEnv, load_sedon_config_from_env
-from tools.sedon_debug_common import (
+from seedon_baseline.env import JOINT_NAMES, SeedonStandingEnv, load_seedon_config_from_env
+from tools.seedon_debug_common import (
     BASE_PROXY_GEOM,
     DEBUG_OUT_DIR,
     DEFAULT_SCENE_PATH,
@@ -101,7 +101,7 @@ def _motion_alpha(profile: str, phase: float) -> float:
     raise ValueError(f"Unsupported profile: {profile}")
 
 
-def _build_target(env: SedonStandingEnv, candidate: DynamicPreloadCandidate, alpha: float) -> np.ndarray:
+def _build_target(env: SeedonStandingEnv, candidate: DynamicPreloadCandidate, alpha: float) -> np.ndarray:
     """Build an in-place preload target for one motion frame."""
     target = env._nominal_joint_qpos.copy()
     stance = candidate.side
@@ -115,7 +115,7 @@ def _build_target(env: SedonStandingEnv, candidate: DynamicPreloadCandidate, alp
     return target
 
 
-def _contact_metrics(env: SedonStandingEnv) -> tuple[float, float, float, bool, bool, bool, bool]:
+def _contact_metrics(env: SeedonStandingEnv) -> tuple[float, float, float, bool, bool, bool, bool]:
     """Return left/right vertical load and contact state flags."""
     left_world_z = 0.0
     right_world_z = 0.0
@@ -160,7 +160,7 @@ def _contact_metrics(env: SedonStandingEnv) -> tuple[float, float, float, bool, 
     )
 
 
-def _collect_frame_metrics(env: SedonStandingEnv, side: str, initial_base_height: float) -> FrameMetrics:
+def _collect_frame_metrics(env: SeedonStandingEnv, side: str, initial_base_height: float) -> FrameMetrics:
     """Collect one frame of dynamic preload metrics."""
     left_world_z, right_world_z, max_penetration, foot_collision, base_proxy_contact, both_contact, contact_none = _contact_metrics(env)
     total_world_z = left_world_z + right_world_z
@@ -190,7 +190,7 @@ def _mean_bool(values: list[bool]) -> float:
     return float(np.mean(np.asarray(values, dtype=np.float64))) if values else 0.0
 
 
-def _evaluate_candidate(env: SedonStandingEnv, candidate: DynamicPreloadCandidate) -> DynamicPreloadRow:
+def _evaluate_candidate(env: SeedonStandingEnv, candidate: DynamicPreloadCandidate) -> DynamicPreloadRow:
     """Run one dynamic preload candidate and summarize the full motion."""
     env.reset(seed=0)
     initial_base_height = float(env.data.xpos[env._base_body_id][2])
@@ -322,10 +322,10 @@ def _top_rows(rows: list[DynamicPreloadRow], top_k: int) -> list[DynamicPreloadR
 
 def run_sweep(scene_path: Path, out_csv: Path, top_k: int) -> list[DynamicPreloadRow]:
     """Run dynamic preload sweep and write CSV."""
-    env = SedonStandingEnv(
+    env = SeedonStandingEnv(
         scene_path=require_scene(scene_path),
         reset_noise_scale=0.0,
-        reward_config=load_sedon_config_from_env(),
+        reward_config=load_seedon_config_from_env(),
     )
     rows = [_evaluate_candidate(env, candidate) for candidate in _candidates()]
     _write_csv(out_csv, rows)

@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "version": "v5_22",
+  "model_path": "private_assets/seedon_v5_22/training_scene.xml",
+  "artifacts_dir": "artifacts/seedon_debug/v5_22_continuous_foot_bottom_probe",
+  "report_path": "docs/seedon_v5_22_continuous_foot_bottom_probe_report.md",
+  "valid_for": "contact_persistence_diagnostic_only",
+  "invalid_for": [
+    "final_mechanical_design_claim",
+    "walking_success_claim",
+    "sim2real_claim",
+    "continuous_gait_claim"
+  ],
+  "prototype_metadata": {
+    "source": "prototype",
+    "confidence": "low",
+    "valid_for": "contact_persistence_diagnostic_only",
+    "invalid_for": "final_mechanical_design_claim"
+  },
+  "method_limitations": [
+    "Continuous bottom uses simplified MuJoCo primitive approximation, not final foot geometry.",
+    "Region classification uses contact point local x projected into the foot body frame.",
+    "Local projection may be unreliable if body frames or foot collision frames are wrong.",
+    "MuJoCo contact force is raw normal force from mj_contactForce, not a physical sensor."
+  ],
+  "foot_variants": [
+    "current_box_baseline",
+    "discrete_toe_center_heel",
+    "continuous_rocker_bottom",
+    "hybrid_continuous_with_region_classifier"
+  ],
+  "continuous_bottom": {
+    "type": "ellipsoid",
+    "x_scale": 1.0,
+    "y_scale": 0.92,
+    "z_scale": 0.55,
+    "z_offset": -0.006,
+    "friction": "1.0 0.005 0.0001"
+  },
+  "discrete_patch": {
+    "heel": {
+      "normalized_x": -0.34,
+      "size_scale": [0.24, 0.82, 0.34]
+    },
+    "center": {
+      "normalized_x": 0.0,
+      "size_scale": [0.30, 0.88, 0.36]
+    },
+    "toe": {
+      "normalized_x": 0.36,
+      "size_scale": [0.24, 0.82, 0.34]
+    }
+  },
+  "actuator_profiles": {
+    "rated_safe": {
+      "hip_pitch": 20.0,
+      "ankle_pitch": 5.0,
+      "other_leg_joints": 6.0,
+      "valid_for": "bounded_diagnostic_only",
+      "source": "provided_by_team_message",
+      "confidence": "medium",
+      "torque_side": "unknown_motor_side_or_joint_output"
+    },
+    "peak_upper_bound": {
+      "hip_pitch": 60.0,
+      "ankle_pitch": 14.0,
+      "other_leg_joints": 17.0,
+      "valid_for": "upper_bound_diagnostic_only",
+      "invalid_for": [
+        "continuous_gait_claim"
+      ],
+      "source": "provided_by_team_message",
+      "confidence": "medium",
+      "torque_side": "unknown_motor_side_or_joint_output"
+    },
+    "ankle_boost_hypothesis": {
+      "hip_pitch": 40.0,
+      "ankle_pitch": 20.0,
+      "other_leg_joints": 12.0,
+      "valid_for": "bounded_diagnostic_only",
+      "source": "assumption",
+      "confidence": "low",
+      "torque_side": "unknown_motor_side_or_joint_output"
+    }
+  },
+  "prototype_thresholds": {
+    "source": "prototype_threshold",
+    "confidence": "low",
+    "contact_none_rate_max": 0.25,
+    "contact_x_progression_min": 0.0,
+    "large_tilt_degrees": 35.0,
+    "max_base_height_drift": 0.25
+  },
+  "simulation": {
+    "hold_steps": 100,
+    "aggregation_last_steps": 25,
+    "pd_stiffness": 35.0,
+    "pd_damping": 2.0,
+    "max_qpos_abs": 20.0
+  },
+  "posture_cases": [
+    {
+      "name": "neutral_stance",
+      "base_pitch_degrees": 0.0,
+      "base_x_shift": 0.0,
+      "joint_biases": {}
+    },
+    {
+      "name": "small_forward_base_pitch",
+      "base_pitch_degrees": 5.0,
+      "base_x_shift": 0.0,
+      "joint_biases": {}
+    },
+    {
+      "name": "medium_forward_base_pitch",
+      "base_pitch_degrees": 10.0,
+      "base_x_shift": 0.0,
+      "joint_biases": {}
+    },
+    {
+      "name": "ankle_toe_down_bias",
+      "base_pitch_degrees": 8.0,
+      "base_x_shift": 0.0,
+      "joint_biases": {
+        "L_joint_ankle_pitch": 0.25,
+        "R_joint_ankle_pitch": 0.25
+      }
+    },
+    {
+      "name": "mild_knee_hip_flexion_forward_lean",
+      "base_pitch_degrees": 10.0,
+      "base_x_shift": 0.015,
+      "joint_biases": {
+        "L_joint_hip_pitch": 0.12,
+        "R_joint_hip_pitch": 0.12,
+        "L_joint_knee_pitch": -0.20,
+        "R_joint_knee_pitch": -0.20,
+        "L_joint_ankle_pitch": 0.18,
+        "R_joint_ankle_pitch": 0.18
+      }
+    }
+  ]
+}

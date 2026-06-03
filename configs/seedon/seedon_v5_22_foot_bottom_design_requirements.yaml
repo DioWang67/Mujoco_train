@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "version": "v5_22",
+  "purpose": "Mechanical foot bottom design requirements derived from Seedon v5_22 contact diagnostics.",
+  "status": "MECHANICAL_REVIEW_REQUIRED",
+  "valid_for": "mechanical_review_and_mujoco_collision_update_planning",
+  "invalid_for": [
+    "walking_success_claim",
+    "sim2real_claim",
+    "final_mechanical_design_claim",
+    "ppo_training_go_ahead"
+  ],
+  "source_evidence": {
+    "sanity_gate": {
+      "status": "PARTIAL_PASS",
+      "note": "v5_22 model loads and PD hold is stable, but zero-action falls and motor/controller fields remain incomplete."
+    },
+    "actuator_envelope": {
+      "status": "PARTIAL_ACTUATOR_ENVELOPE",
+      "note": "Provided torque is bounded diagnostic only; torque side is unknown."
+    },
+    "duck_reference": {
+      "foot_related_geoms": 24,
+      "active_contact_candidates": [
+        "left_foot_bottom_tpu",
+        "right_foot_bottom_tpu"
+      ],
+      "interpretation": "Duck source uses visible foot bottom TPU mesh collision candidates, not explicit toe/center/heel primitive patches."
+    },
+    "toe_handoff_probe": {
+      "best_toe_force_ratio": 0.928829,
+      "best_center_force_ratio": 0.071171,
+      "best_heel_force_ratio": 0.0,
+      "best_contact_none_rate": 0.85,
+      "result": "insufficient_contact_persistence"
+    },
+    "continuous_bottom_probe": {
+      "best_overall_contact_none_rate": 0.82,
+      "best_continuous_contact_none_rate": 0.83,
+      "continuous_better_than_discrete": true,
+      "continuous_rollover_candidate_found": false,
+      "result": "insufficient_contact_persistence"
+    },
+    "ankle_authority": {
+      "ankle_boost_reduces_saturation": true,
+      "solves_contact_persistence": false
+    }
+  },
+  "required_foot_bottom_behavior": {
+    "stable_center_contact": {
+      "requirement": "Neutral stance should produce persistent center/bottom support without intermittent no-contact phases.",
+      "diagnostic_target": "contact_none_rate < 0.25",
+      "confidence": "prototype_threshold"
+    },
+    "continuous_rollover": {
+      "requirement": "Contact point should progress continuously from center/rear toward toe under forward lean or ankle toe-down posture.",
+      "diagnostic_target": "positive local-x progression without loss of support",
+      "confidence": "prototype_threshold"
+    },
+    "persistent_toe_contact": {
+      "requirement": "Toe region must carry load for enough consecutive simulation steps to support handoff diagnostics.",
+      "diagnostic_target": "toe loading with contact_none_rate < 0.25",
+      "confidence": "prototype_threshold"
+    },
+    "no_toe_heel_bridge": {
+      "requirement": "Toe and heel should not both act as separated load-bearing points in a way that bypasses center rollover.",
+      "diagnostic_target": "no bridge-like pattern during rollover posture cases",
+      "confidence": "prototype_threshold"
+    },
+    "low_contact_none_rate": {
+      "requirement": "Foot bottom should remain observable through neutral, forward lean, and toe-down probe postures.",
+      "diagnostic_target": "best current result 0.82 is insufficient; target < 0.25 before controller sequencing",
+      "confidence": "prototype_threshold"
+    }
+  },
+  "mechanical_questions_for_review": [
+    "What is the actual CAD/STEP foot bottom shape?",
+    "Is there a toe rocker radius or curved forefoot surface?",
+    "Is the contact surface TPU/rubber-like, and where is it located?",
+    "Where is the ankle pitch axis projection relative to the foot bottom, toe, and heel?",
+    "What are the measured foot length, toe length, heel length, and bottom width?",
+    "What material friction should be represented in MuJoCo?",
+    "Can CAD/STEP/mesh provide a simplified collision bottom surface for MuJoCo?",
+    "Should MuJoCo use a continuous bottom mesh/convex hull rather than separated primitive patches?"
+  ],
+  "recommended_design_directions": [
+    {
+      "direction": "continuous_rocker_like_bottom",
+      "reason": "Duck reference suggests continuous foot bottom contact, and Seedon continuous prototypes slightly improved persistence over discrete patches."
+    },
+    {
+      "direction": "tpu_like_bottom_surface",
+      "reason": "Duck visible active candidates are foot_bottom_tpu mesh collisions."
+    },
+    {
+      "direction": "enough_toe_contact_area",
+      "reason": "Seedon can generate toe loading, but toe contact is intermittent."
+    },
+    {
+      "direction": "avoid_separated_tiny_toe_patch",
+      "reason": "Discrete patches are classifiable but did not produce stable handoff candidates."
+    },
+    {
+      "direction": "continuous_collision_with_diagnostic_regions",
+      "reason": "Use a continuous collision surface while classifying heel/center/toe from contact point local x."
+    }
+  ],
+  "simulation_claim_limits": {
+    "can_claim": [
+      "current simulated contact persistence is insufficient",
+      "continuous bottom prototype is directionally better than discrete patches but still insufficient",
+      "ankle authority alone does not solve contact persistence"
+    ],
+    "cannot_claim": [
+      "walking success",
+      "final mechanical design validity",
+      "sim2real readiness",
+      "PPO readiness",
+      "verified foot material friction"
+    ]
+  },
+  "next_decision": {
+    "wait_for_mechanical_foot_review": true,
+    "then_update_mujoco_foot_collision": true,
+    "then_rerun_contact_persistence_probe": true,
+    "do_not_ppo_until_contact_persistence_passes": true
+  }
+}

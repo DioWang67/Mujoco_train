@@ -1,4 +1,4 @@
-"""Sweep residual action patterns against the Sedon teacher reference."""
+"""Sweep residual action patterns against the Seedon teacher reference."""
 
 from __future__ import annotations
 
@@ -9,13 +9,13 @@ from pathlib import Path
 
 import numpy as np
 
-from sedon_baseline.env import SedonStandingConfig, SedonStandingEnv
-from tools.audit_sedon_shuffle_v0 import _count_contact_none_bursts, _load_config
+from seedon_baseline.env import SeedonStandingConfig, SeedonStandingEnv
+from tools.audit_seedon_shuffle_v0 import _count_contact_none_bursts, _load_config
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_CONFIG = REPO_ROOT / "configs" / "sedon" / "reference_teacher_pose_1_4_imitation.json"
-DEFAULT_OUT_CSV = REPO_ROOT / "artifacts" / "sedon_debug" / "residual_safety_sweep.csv"
+DEFAULT_CONFIG = REPO_ROOT / "configs" / "seedon" / "reference_teacher_pose_1_4_imitation.json"
+DEFAULT_OUT_CSV = REPO_ROOT / "artifacts" / "seedon_debug" / "residual_safety_sweep.csv"
 DEFAULT_SCALES = (0.001, 0.002, 0.003, 0.005, 0.008)
 DEFAULT_LOW_FREQUENCY_INTERVALS = (10, 20, 40)
 DEFAULT_GAUSSIAN_SIGMAS = (0.05, 0.1, 0.2)
@@ -67,7 +67,7 @@ class ResidualActionGenerator:
 
     Args:
         case: Residual sweep case to generate.
-        action_shape: Gym action shape expected by the Sedon environment.
+        action_shape: Gym action shape expected by the Seedon environment.
         seed: Random seed for reproducible residual sequences.
 
     Raises:
@@ -155,7 +155,7 @@ def build_sweep_cases(
 
 
 def _audit_rollout(
-    config: SedonStandingConfig,
+    config: SeedonStandingConfig,
     case: ResidualSweepCase,
     *,
     steps: int,
@@ -163,7 +163,7 @@ def _audit_rollout(
     landing_impact_limit: float,
 ) -> ResidualSweepRow:
     """Run one residual rollout and aggregate teacher safety metrics."""
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=config)
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=config)
     obs, _ = env.reset(seed=seed)
     generator = ResidualActionGenerator(case, env.action_space.shape, seed)
     infos: list[dict[str, object]] = []
@@ -192,7 +192,7 @@ def _audit_rollout(
 
 
 def _summarize_infos(
-    env: SedonStandingEnv,
+    env: SeedonStandingEnv,
     case: ResidualSweepCase,
     infos: list[dict[str, object]],
     *,

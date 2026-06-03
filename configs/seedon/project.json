@@ -1,0 +1,9 @@
+{
+  "slug": "seedon",
+  "display_name": "Seedon v5_22 standing baseline",
+  "train_module": "seedon_baseline.train",
+  "eval_module": "seedon_baseline.eval",
+  "job_name": "seedon",
+  "smoke_args": ["--smoke", "--n-envs", "1", "--reset-noise-scale", "0"],
+  "private_asset_dir": "private_assets/seedon_v5_22"
+}

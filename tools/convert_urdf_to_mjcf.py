@@ -157,7 +157,7 @@ def prepare_urdf_package(
         raise ValueError(f"No STL meshes found under: {mesh_dir}")
 
     work_dir.mkdir(parents=True, exist_ok=True)
-    prepared_urdf = work_dir / "sedon.urdf"
+    prepared_urdf = work_dir / "seedon.urdf"
     shutil.copy2(urdf_path, prepared_urdf)
 
     results = [
@@ -204,19 +204,19 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--urdf",
         type=Path,
-        default=Path("private_assets/sedon/original_urdf_package/urdf/urdf/urdf.urdf"),
+        default=Path("private_assets/seedon/original_urdf_package/urdf/urdf/urdf.urdf"),
         help="Source URDF file.",
     )
     parser.add_argument(
         "--mesh-dir",
         type=Path,
-        default=Path("private_assets/sedon/original_urdf_package/urdf/meshes"),
+        default=Path("private_assets/seedon/original_urdf_package/urdf/meshes"),
         help="Directory containing STL meshes.",
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("private_assets/sedon/mjcf_source"),
+        default=Path("private_assets/seedon/mjcf_source"),
         help="Private output directory for prepared assets and scene.xml.",
     )
     parser.add_argument(

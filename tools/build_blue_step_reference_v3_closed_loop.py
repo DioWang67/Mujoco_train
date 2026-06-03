@@ -12,14 +12,14 @@ from typing import Any
 
 import numpy as np
 
-from sedon_baseline.env import SedonStandingEnv
-from tools.audit_sedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
-from tools.render_sedon_policy_comparison import _make_side_camera, _save_mp4
+from seedon_baseline.env import SeedonStandingEnv
+from tools.audit_seedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
+from tools.render_seedon_policy_comparison import _make_side_camera, _save_mp4
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_BASE_CONFIG = REPO_ROOT / "configs" / "sedon" / "reference_teacher_pose_1_4_imitation.json"
-DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "sedon_debug" / "blue_step_reference_v3_closed_loop"
+DEFAULT_BASE_CONFIG = REPO_ROOT / "configs" / "seedon" / "reference_teacher_pose_1_4_imitation.json"
+DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "seedon_debug" / "blue_step_reference_v3_closed_loop"
 JOINT_NAMES = [
     "R_joint_hip_yaw",
     "R_joint_hip_roll",
@@ -187,7 +187,7 @@ def _contact_state(info: dict[str, Any]) -> str:
 def build_probe_seed(c: V3Candidate, *, neutral_duration: int, max_preload_steps: int) -> dict[str, Any]:
     """Build a preload-only seed used to discover dynamic unload trigger steps."""
     return {
-        "schema": "sedon_gait_seed.v1",
+        "schema": "seedon_gait_seed.v1",
         "target_type": "absolute",
         "description": "Generated Blue-step v3 preload trigger probe.",
         "joint_names": JOINT_NAMES,
@@ -211,7 +211,7 @@ def build_final_seed(
     right_land = _right_preload(c) * 0.35
     left_land = _left_preload(c) * 0.35
     return {
-        "schema": "sedon_gait_seed.v1",
+        "schema": "seedon_gait_seed.v1",
         "target_type": "absolute",
         "description": "Generated Blue-step v3 closed-loop unload-before-lift reference.",
         "joint_names": JOINT_NAMES,
@@ -286,7 +286,7 @@ def find_unload_triggers(
     support_ratio_threshold: float,
 ) -> tuple[TriggerResult, TriggerResult]:
     """Run preload-only dynamic PD and return right/left unload trigger steps."""
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(config_path))
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(config_path))
     right = TriggerResult(False, max_preload_steps, float("inf"), 0.0)
     left = TriggerResult(False, max_preload_steps, float("inf"), 0.0)
     right_local_step = 0
@@ -361,7 +361,7 @@ def audit_final_candidate(
     warmup_steps: int,
 ) -> V3Audit:
     """Run final dynamic PD audit and write a contact-state timeline CSV."""
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(config_path))
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(config_path))
     total_weight = float(np.sum(env.model.body_mass) * 9.81)
     infos: list[dict[str, Any]] = []
     timeline: list[dict[str, Any]] = []
@@ -562,7 +562,7 @@ def render_candidate(
     """Render one reference candidate to MP4."""
     import mujoco
 
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(Path(row.config_path)))
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(Path(row.config_path)))
     renderer = mujoco.Renderer(env.model, height=height, width=width)
     camera = _make_side_camera()
     frames: list[np.ndarray] = []

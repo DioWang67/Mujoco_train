@@ -1,4 +1,4 @@
-"""Audit actuator authority needed to replace Sedon lateral assist."""
+"""Audit actuator authority needed to replace Seedon lateral assist."""
 
 from __future__ import annotations
 
@@ -10,8 +10,8 @@ from pathlib import Path
 import mujoco
 import numpy as np
 
-from sedon_baseline.env import JOINT_NAMES, SedonStandingEnv, load_sedon_config_from_env
-from tools.sedon_debug_common import (
+from seedon_baseline.env import JOINT_NAMES, SeedonStandingEnv, load_seedon_config_from_env
+from tools.seedon_debug_common import (
     DEBUG_OUT_DIR,
     DEFAULT_SCENE_PATH,
     FLOOR_GEOM,
@@ -81,7 +81,7 @@ def _smoothstep(phase: float) -> float:
     return phase * phase * (3.0 - 2.0 * phase)
 
 
-def _apply_stance_width_scale(env: SedonStandingEnv, scale: float) -> None:
+def _apply_stance_width_scale(env: SeedonStandingEnv, scale: float) -> None:
     """Apply temporary stance-width scale in memory."""
     for side, body_name in HIP_YAW_BODY.items():
         body_id = env._body_id(body_name)
@@ -89,7 +89,7 @@ def _apply_stance_width_scale(env: SedonStandingEnv, scale: float) -> None:
         env.model.body_pos[body_id][1] = direction * abs(float(env.model.body_pos[body_id][1])) * scale
 
 
-def _build_target(env: SedonStandingEnv, alpha: float, case: AuthorityCase) -> np.ndarray:
+def _build_target(env: SeedonStandingEnv, alpha: float, case: AuthorityCase) -> np.ndarray:
     """Build the audited right-support preload target."""
     target = env._nominal_joint_qpos.copy()
     target[HIP_ROLL_INDEX["right"]] += 0.005 * alpha
@@ -101,7 +101,7 @@ def _build_target(env: SedonStandingEnv, alpha: float, case: AuthorityCase) -> n
     return target
 
 
-def _contact_metrics(env: SedonStandingEnv) -> tuple[float, float, float]:
+def _contact_metrics(env: SeedonStandingEnv) -> tuple[float, float, float]:
     """Return left/right world-z forces and max penetration."""
     left = 0.0
     right = 0.0
@@ -126,7 +126,7 @@ def _contact_metrics(env: SedonStandingEnv) -> tuple[float, float, float]:
     return left, right, max_penetration
 
 
-def _ctrl_with_case(env: SedonStandingEnv, target: np.ndarray, case: AuthorityCase, alpha: float) -> np.ndarray:
+def _ctrl_with_case(env: SeedonStandingEnv, target: np.ndarray, case: AuthorityCase, alpha: float) -> np.ndarray:
     """Return PD ctrl with case-specific actuator authority injection."""
     ctrl = env._pd_control(target).copy()
     if case.hip_roll_ctrl_delta:
@@ -138,7 +138,7 @@ def _ctrl_with_case(env: SedonStandingEnv, target: np.ndarray, case: AuthorityCa
     return np.clip(ctrl, env._ctrl_range[:, 0], env._ctrl_range[:, 1])
 
 
-def _step_case(env: SedonStandingEnv, target: np.ndarray, case: AuthorityCase, alpha: float) -> None:
+def _step_case(env: SeedonStandingEnv, target: np.ndarray, case: AuthorityCase, alpha: float) -> None:
     """Advance one RL control step with optional lateral force and actuator injection."""
     base_id = env._base_body_id
     for _ in range(env.frame_skip):
@@ -149,7 +149,7 @@ def _step_case(env: SedonStandingEnv, target: np.ndarray, case: AuthorityCase, a
         env.data.xfrc_applied[base_id, :] = 0.0
 
 
-def _torque_saturation(env: SedonStandingEnv) -> float:
+def _torque_saturation(env: SeedonStandingEnv) -> float:
     """Return fraction of actuators near control limits."""
     lower_margin = np.abs(env.data.ctrl - env._ctrl_range[:, 0])
     upper_margin = np.abs(env.data.ctrl - env._ctrl_range[:, 1])
@@ -159,10 +159,10 @@ def _torque_saturation(env: SedonStandingEnv) -> float:
 
 def _evaluate_case(scene_path: Path, case: AuthorityCase) -> AuthorityAuditRow:
     """Evaluate one authority replacement case."""
-    env = SedonStandingEnv(
+    env = SeedonStandingEnv(
         scene_path=require_scene(scene_path),
         reset_noise_scale=0.0,
-        reward_config=load_sedon_config_from_env(),
+        reward_config=load_seedon_config_from_env(),
     )
     _apply_stance_width_scale(env, 0.9)
     env.reset(seed=0)

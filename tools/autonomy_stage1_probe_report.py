@@ -1,4 +1,4 @@
-"""Compare Sedon teacher baseline against a 25k autonomy-stage1 probe."""
+"""Compare Seedon teacher baseline against a 25k autonomy-stage1 probe."""
 
 from __future__ import annotations
 
@@ -7,15 +7,15 @@ import csv
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-from tools.audit_sedon_shuffle_v0 import ShuffleAudit, audit_shuffle, teacher_relative_gate
+from tools.audit_seedon_shuffle_v0 import ShuffleAudit, audit_shuffle, teacher_relative_gate
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_TEACHER_CONFIG = REPO_ROOT / "configs" / "sedon" / "reference_teacher_pose_1_4_imitation.json"
-DEFAULT_PROBE_CONFIG = REPO_ROOT / "configs" / "sedon" / "autonomy_stage1_teacher_curriculum.json"
-DEFAULT_CHECKPOINT = REPO_ROOT / "models" / "sedon" / "latest_model.zip"
-DEFAULT_VECNORM = REPO_ROOT / "models" / "sedon" / "vecnorm.pkl"
-DEFAULT_OUT_CSV = REPO_ROOT / "artifacts" / "sedon_debug" / "autonomy_stage1_probe_25k_report.csv"
+DEFAULT_TEACHER_CONFIG = REPO_ROOT / "configs" / "seedon" / "reference_teacher_pose_1_4_imitation.json"
+DEFAULT_PROBE_CONFIG = REPO_ROOT / "configs" / "seedon" / "autonomy_stage1_teacher_curriculum.json"
+DEFAULT_CHECKPOINT = REPO_ROOT / "models" / "seedon" / "latest_model.zip"
+DEFAULT_VECNORM = REPO_ROOT / "models" / "seedon" / "vecnorm.pkl"
+DEFAULT_OUT_CSV = REPO_ROOT / "artifacts" / "seedon_debug" / "autonomy_stage1_probe_25k_report.csv"
 
 
 @dataclass(frozen=True)

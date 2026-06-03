@@ -12,25 +12,25 @@ from tools.agent_workspace import (
 
 
 def test_should_include_path_blocks_private_assets_and_full_xml() -> None:
-    assert should_include_path(Path("private_assets/sedon/robot.stl")) is False
-    assert should_include_path(Path("sedon_baseline/assets/scene.xml")) is False
-    assert should_include_path(Path("configs/sedon/train.json")) is True
-    assert should_include_path(Path("sedon_baseline/env.py")) is True
+    assert should_include_path(Path("private_assets/seedon/robot.stl")) is False
+    assert should_include_path(Path("seedon_baseline/assets/scene.xml")) is False
+    assert should_include_path(Path("configs/seedon/train.json")) is True
+    assert should_include_path(Path("seedon_baseline/env.py")) is True
 
 
 def test_validate_relative_path_rejects_escape() -> None:
     with pytest.raises(ValueError):
-        validate_relative_path(Path("../private_assets/sedon/robot.xml"))
+        validate_relative_path(Path("../private_assets/seedon/robot.xml"))
 
 
 def test_build_sanitized_workspace_copies_only_safe_files(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     output_root = repo_root / "artifacts" / "agent_workspace"
-    (repo_root / "sedon_baseline").mkdir(parents=True)
-    (repo_root / "sedon_baseline" / "env.py").write_text("print('safe')\n", encoding="utf-8")
-    (repo_root / "sedon_baseline" / "scene.xml").write_text("<mujoco />\n", encoding="utf-8")
-    (repo_root / "private_assets" / "sedon").mkdir(parents=True)
-    (repo_root / "private_assets" / "sedon" / "robot.stl").write_text("mesh", encoding="utf-8")
+    (repo_root / "seedon_baseline").mkdir(parents=True)
+    (repo_root / "seedon_baseline" / "env.py").write_text("print('safe')\n", encoding="utf-8")
+    (repo_root / "seedon_baseline" / "scene.xml").write_text("<mujoco />\n", encoding="utf-8")
+    (repo_root / "private_assets" / "seedon").mkdir(parents=True)
+    (repo_root / "private_assets" / "seedon" / "robot.stl").write_text("mesh", encoding="utf-8")
     (repo_root / "README.md").write_text("# Repo\n", encoding="utf-8")
 
     result = build_sanitized_workspace(
@@ -39,9 +39,9 @@ def test_build_sanitized_workspace_copies_only_safe_files(tmp_path: Path) -> Non
         name="probe",
     )
 
-    assert (result.workspace_dir / "sedon_baseline" / "env.py").exists()
+    assert (result.workspace_dir / "seedon_baseline" / "env.py").exists()
     assert (result.workspace_dir / "README.md").exists()
-    assert not (result.workspace_dir / "sedon_baseline" / "scene.xml").exists()
+    assert not (result.workspace_dir / "seedon_baseline" / "scene.xml").exists()
     assert not (result.workspace_dir / "private_assets").exists()
     assert (result.workspace_dir / "SANITIZED_MANIFEST.json").exists()
 

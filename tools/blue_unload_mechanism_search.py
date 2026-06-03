@@ -12,14 +12,14 @@ from typing import Any
 
 import numpy as np
 
-from sedon_baseline.env import SedonStandingEnv
-from tools.audit_sedon_shuffle_v0 import _count_contact_none_bursts, _load_config
-from tools.render_sedon_policy_comparison import _make_side_camera, _save_mp4
+from seedon_baseline.env import SeedonStandingEnv
+from tools.audit_seedon_shuffle_v0 import _count_contact_none_bursts, _load_config
+from tools.render_seedon_policy_comparison import _make_side_camera, _save_mp4
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_BASE_CONFIG = REPO_ROOT / "configs" / "sedon" / "reference_teacher_pose_1_4_imitation.json"
-DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "sedon_debug" / "blue_unload_mechanism_search"
+DEFAULT_BASE_CONFIG = REPO_ROOT / "configs" / "seedon" / "reference_teacher_pose_1_4_imitation.json"
+DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "seedon_debug" / "blue_unload_mechanism_search"
 JOINT_NAMES = [
     "R_joint_hip_yaw",
     "R_joint_hip_roll",
@@ -142,7 +142,7 @@ def _kf(name: str, support_mode: str, target: np.ndarray, duration: int) -> dict
 def build_seed(c: UnloadCandidate, neutral_duration: int) -> dict[str, Any]:
     """Build an unload-only reference seed."""
     return {
-        "schema": "sedon_gait_seed.v1",
+        "schema": "seedon_gait_seed.v1",
         "target_type": "absolute",
         "description": "Generated Blue unload mechanism search reference.",
         "joint_names": JOINT_NAMES,
@@ -218,7 +218,7 @@ def audit_candidate(
     warmup_steps: int,
 ) -> UnloadAudit:
     """Run dynamic PD unload audit and write a timeline CSV."""
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(config_path))
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(config_path))
     total_weight = float(np.sum(env.model.body_mass) * 9.81)
     infos: list[dict[str, Any]] = []
     timeline: list[dict[str, Any]] = []
@@ -390,7 +390,7 @@ def render_candidate(
     """Render one unload candidate to MP4."""
     import mujoco
 
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(Path(row.config_path)))
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(Path(row.config_path)))
     renderer = mujoco.Renderer(env.model, height=height, width=width)
     camera = _make_side_camera()
     frames: list[np.ndarray] = []

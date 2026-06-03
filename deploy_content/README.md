@@ -6,33 +6,33 @@ customizing the deploy tool.
 Paths are relative to the repository root. For example:
 
 ```text
-deploy_content/configs/sedon/blue_dynamic_support_gait.json
+deploy_content/configs/seedon/blue_dynamic_support_gait.json
 ```
 
 will be deployed as:
 
 ```text
-configs/sedon/blue_dynamic_support_gait.json
+configs/seedon/blue_dynamic_support_gait.json
 ```
 
 Common examples:
 
 ```text
-deploy_content/configs/sedon/my_experiment.json
+deploy_content/configs/seedon/my_experiment.json
 deploy_content/tools/debug_my_case.py
-deploy_content/sedon_baseline/env.py
+deploy_content/seedon_baseline/env.py
 ```
 
 Then run:
 
 ```bat
-scripts\sedon_remote_deploy_and_check.bat
+scripts\seedon_remote_deploy_and_check.bat
 ```
 
 The deployer prints the overlay file count:
 
 ```text
-Deploy overlay: D:\Git\robotlearning\h1_mujoco\deploy_content (N files)
+Deploy overlay: D:\Git\robotlearning\seedon_mujoco\deploy_content (N files)
 ```
 
 Rules:

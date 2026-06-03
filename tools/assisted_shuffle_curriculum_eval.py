@@ -10,13 +10,13 @@ from pathlib import Path
 import mujoco
 import numpy as np
 
-from sedon_baseline.env import (
+from seedon_baseline.env import (
     ReferenceGaitSeed,
-    SedonStandingConfig,
-    SedonStandingEnv,
+    SeedonStandingConfig,
+    SeedonStandingEnv,
     load_reference_gait_seed,
 )
-from tools.sedon_debug_common import (
+from tools.seedon_debug_common import (
     DEBUG_OUT_DIR,
     DEFAULT_SCENE_PATH,
     FLOOR_GEOM,
@@ -28,7 +28,7 @@ from tools.sedon_debug_common import (
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SEED_PATH = REPO_ROOT / "configs" / "sedon" / "reference_march_pose_1_4_mirrored_seed.json"
+DEFAULT_SEED_PATH = REPO_ROOT / "configs" / "seedon" / "reference_march_pose_1_4_mirrored_seed.json"
 DEFAULT_OUT_CSV = DEBUG_OUT_DIR / "assisted_shuffle_curriculum_eval.csv"
 DEFAULT_ASSIST_FORCES = (10.0, 8.0, 6.0, 4.0, 2.0, 0.0)
 CONTACT_FORCE_THRESHOLD_N = 5.0
@@ -78,7 +78,7 @@ def _reference_target_at_step(seed: ReferenceGaitSeed, step: int) -> tuple[np.nd
     return last.joint_targets.copy(), last.support_mode
 
 
-def _foot_contact_forces(env: SedonStandingEnv) -> tuple[float, float]:
+def _foot_contact_forces(env: SeedonStandingEnv) -> tuple[float, float]:
     """Return left/right foot-floor contact normal forces."""
     left_force = 0.0
     right_force = 0.0
@@ -135,7 +135,7 @@ def _assist_force_y(support_hint: str, assist_force_n: float) -> float:
 
 
 def _step_pd_with_assist(
-    env: SedonStandingEnv,
+    env: SeedonStandingEnv,
     target: np.ndarray,
     support_hint: str,
     assist_force_n: float,
@@ -162,7 +162,7 @@ def _evaluate_assist_force(
     reference_scale: float,
 ) -> AssistedShuffleRow:
     """Evaluate one lateral assist magnitude."""
-    config = SedonStandingConfig(
+    config = SeedonStandingConfig(
         task_mode="reference_march",
         target_forward_velocity=0.0,
         march_forward_velocity=0.0,
@@ -174,7 +174,7 @@ def _evaluate_assist_force(
         march_require_both_contact=False,
         march_contact_none_terminate_steps=0,
     )
-    env = SedonStandingEnv(
+    env = SeedonStandingEnv(
         scene_path=scene_path,
         reset_noise_scale=0.0,
         reward_config=config,

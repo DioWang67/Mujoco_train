@@ -50,8 +50,8 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  {slug:<12} {project.display_name} ({eval_module})")
         print()
         print("Examples:")
-        print("  python eval.py --project sedon --episodes 1 --render")
-        print("  python eval.py --project sedon --episodes 1 --record")
+        print("  python eval.py --project seedon --episodes 1 --render")
+        print("  python eval.py --project seedon --episodes 1 --record")
         print("  python eval.py --project h1 --record")
         print("  python eval.py --list-projects")
         return 0

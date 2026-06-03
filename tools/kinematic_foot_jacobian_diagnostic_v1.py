@@ -10,8 +10,8 @@ from pathlib import Path
 import mujoco
 import numpy as np
 
-from sedon_baseline.env import SedonStandingEnv
-from tools.audit_sedon_shuffle_v0 import _load_config
+from seedon_baseline.env import SeedonStandingEnv
+from tools.audit_seedon_shuffle_v0 import _load_config
 from tools.blue_unload_mechanism_search import (
     DEFAULT_BASE_CONFIG,
     JOINT_NAMES,
@@ -33,11 +33,11 @@ from tools.blue_unload_mechanism_search import (
 DEFAULT_SOURCE_TOP = (
     REPO_ROOT
     / "artifacts"
-    / "sedon_debug"
+    / "seedon_debug"
     / "blue_unload_refine_v2"
     / "blue_unload_refine_v2_top20.csv"
 )
-DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "sedon_debug" / "kinematic_foot_jacobian_diagnostic_v1"
+DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "seedon_debug" / "kinematic_foot_jacobian_diagnostic_v1"
 R_HIP_YAW = 0
 L_HIP_YAW = 5
 
@@ -96,7 +96,7 @@ def _source_to_unload(row: dict[str, str]) -> UnloadCandidate:
     )
 
 
-def _set_joint_positions(env: SedonStandingEnv, joint_positions: np.ndarray) -> None:
+def _set_joint_positions(env: SeedonStandingEnv, joint_positions: np.ndarray) -> None:
     for joint_index, value in enumerate(joint_positions):
         joint_id = env._joint_ids[joint_index]
         env.data.qpos[env.model.jnt_qposadr[joint_id]] = float(value)
@@ -104,12 +104,12 @@ def _set_joint_positions(env: SedonStandingEnv, joint_positions: np.ndarray) -> 
     mujoco.mj_forward(env.model, env.data)
 
 
-def _whole_body_com(env: SedonStandingEnv) -> np.ndarray:
+def _whole_body_com(env: SeedonStandingEnv) -> np.ndarray:
     masses = env.model.body_mass.reshape(-1, 1)
     return np.sum(env.data.xpos * masses, axis=0) / max(float(np.sum(env.model.body_mass)), 1e-9)
 
 
-def _state(env: SedonStandingEnv, side: str) -> dict[str, np.ndarray | float]:
+def _state(env: SeedonStandingEnv, side: str) -> dict[str, np.ndarray | float]:
     foot_index = 0 if side == "right" else 1
     heights = env._foot_bottom_heights()
     return {
@@ -120,7 +120,7 @@ def _state(env: SedonStandingEnv, side: str) -> dict[str, np.ndarray | float]:
     }
 
 
-def _joint_margin(env: SedonStandingEnv, joint_positions: np.ndarray, delta: np.ndarray) -> float:
+def _joint_margin(env: SeedonStandingEnv, joint_positions: np.ndarray, delta: np.ndarray) -> float:
     margins: list[float] = []
     for joint_index, change in enumerate(delta):
         if abs(change) <= 0.0:
@@ -149,7 +149,7 @@ def _score(
 
 
 def _evaluate_delta(
-    env: SedonStandingEnv,
+    env: SeedonStandingEnv,
     *,
     source_candidate_id: str,
     side: str,
@@ -248,7 +248,7 @@ def _combo_delta(side: str, name: str, eps: float) -> np.ndarray:
 def run_diagnostic(args: argparse.Namespace) -> list[DiagnosticRow]:
     rows: list[DiagnosticRow] = []
     source_rows = _read_source_rows(args.source_top, args.source_top_k)
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(args.base_config))
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(args.base_config))
     try:
         env.reset(seed=args.seed)
         default_base_qpos = env.data.qpos.copy()

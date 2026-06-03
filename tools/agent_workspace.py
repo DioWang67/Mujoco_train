@@ -28,7 +28,7 @@ ALLOWED_TOP_LEVEL_DIRS: frozenset[str] = frozenset(
         "h1_baseline",
         "robot_learning",
         "scripts",
-        "sedon_baseline",
+        "seedon_baseline",
         "tests",
         "tools",
     }

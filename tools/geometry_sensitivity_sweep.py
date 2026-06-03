@@ -1,4 +1,4 @@
-"""Sweep temporary Sedon geometry variants for lateral preload sensitivity."""
+"""Sweep temporary Seedon geometry variants for lateral preload sensitivity."""
 
 from __future__ import annotations
 
@@ -10,8 +10,8 @@ from pathlib import Path
 import mujoco
 import numpy as np
 
-from sedon_baseline.env import JOINT_NAMES, SedonStandingEnv, load_sedon_config_from_env
-from tools.sedon_debug_common import (
+from seedon_baseline.env import JOINT_NAMES, SeedonStandingEnv, load_seedon_config_from_env
+from tools.seedon_debug_common import (
     DEBUG_OUT_DIR,
     DEFAULT_SCENE_PATH,
     FLOOR_GEOM,
@@ -62,7 +62,7 @@ def _smoothstep(phase: float) -> float:
     return phase * phase * (3.0 - 2.0 * phase)
 
 
-def _apply_foot_width_scale(env: SedonStandingEnv, scale: float) -> None:
+def _apply_foot_width_scale(env: SeedonStandingEnv, scale: float) -> None:
     """Scale lateral foot collision half-width in memory."""
     for name in (LEFT_FOOT_GEOM, RIGHT_FOOT_GEOM):
         foot_id = geom_id(env.model, name)
@@ -70,7 +70,7 @@ def _apply_foot_width_scale(env: SedonStandingEnv, scale: float) -> None:
         env.model.geom_rbound[foot_id] = float(np.linalg.norm(env.model.geom_size[foot_id]))
 
 
-def _apply_stance_width_scale(env: SedonStandingEnv, scale: float) -> None:
+def _apply_stance_width_scale(env: SeedonStandingEnv, scale: float) -> None:
     """Scale hip-yaw body lateral offsets in memory."""
     for side, body_name in HIP_YAW_BODY.items():
         body_id = env._body_id(body_name)
@@ -78,13 +78,13 @@ def _apply_stance_width_scale(env: SedonStandingEnv, scale: float) -> None:
         env.model.body_pos[body_id][1] = direction * abs(float(env.model.body_pos[body_id][1])) * scale
 
 
-def _apply_base_com_height_offset(env: SedonStandingEnv, offset: float) -> None:
+def _apply_base_com_height_offset(env: SeedonStandingEnv, offset: float) -> None:
     """Shift base inertial COM z in memory."""
     base_id = env._body_id("base_link")
     env.model.body_ipos[base_id][2] += offset
 
 
-def _build_target(env: SedonStandingEnv, alpha: float) -> np.ndarray:
+def _build_target(env: SeedonStandingEnv, alpha: float) -> np.ndarray:
     """Use the current dynamic_preload best candidate as a right-support target."""
     target = env._nominal_joint_qpos.copy()
     target[HIP_ROLL_INDEX["right"]] += 0.005 * alpha
@@ -92,7 +92,7 @@ def _build_target(env: SedonStandingEnv, alpha: float) -> np.ndarray:
     return target
 
 
-def _foot_forces(env: SedonStandingEnv) -> tuple[float, float, float]:
+def _foot_forces(env: SeedonStandingEnv) -> tuple[float, float, float]:
     """Return left/right world-z forces and max foot-floor penetration."""
     left = 0.0
     right = 0.0
@@ -117,7 +117,7 @@ def _foot_forces(env: SedonStandingEnv) -> tuple[float, float, float]:
     return left, right, max_penetration
 
 
-def _step_pd_with_lateral_assist(env: SedonStandingEnv, target: np.ndarray, assist_name: str) -> None:
+def _step_pd_with_lateral_assist(env: SeedonStandingEnv, target: np.ndarray, assist_name: str) -> None:
     """Step PD control while optionally applying a virtual lateral pelvis force."""
     assist_force = ASSIST_FORCE_N[assist_name]
     base_id = env._base_body_id
@@ -131,10 +131,10 @@ def _step_pd_with_lateral_assist(env: SedonStandingEnv, target: np.ndarray, assi
 
 def _evaluate_variant(scene_path: Path, variant: GeometryVariant) -> GeometrySensitivityRow:
     """Evaluate one temporary geometry variant."""
-    env = SedonStandingEnv(
+    env = SeedonStandingEnv(
         scene_path=require_scene(scene_path),
         reset_noise_scale=0.0,
-        reward_config=load_sedon_config_from_env(),
+        reward_config=load_seedon_config_from_env(),
     )
     _apply_foot_width_scale(env, variant.foot_width_scale)
     _apply_stance_width_scale(env, variant.stance_width_scale)

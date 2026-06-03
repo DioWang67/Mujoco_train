@@ -81,11 +81,11 @@ python -m tools.deploy_release --project-slug h1 --remote-host root@10.6.243.55 
 
 ## Automatic Windows deployment
 
-For day-to-day Sedon work on Windows, use the automated wrapper instead of
+For day-to-day Seedon work on Windows, use the automated wrapper instead of
 hand-running `scp` and `ssh`:
 
 ```bat
-scripts\sedon_remote_deploy_and_check.bat
+scripts\seedon_remote_deploy_and_check.bat
 ```
 
 It uses `.env.remote` for host, root, password, and deployment options. The
@@ -98,8 +98,8 @@ Minimal `.env.remote` shape:
 ```env
 REMOTE_HOST=root@10.6.243.55
 REMOTE_ROOT=/root/anaconda3/mujoco-train-system
-REMOTE_PROJECT_SLUG=sedon
-REMOTE_VERIFY_PROJECT=sedon
+REMOTE_PROJECT_SLUG=seedon
+REMOTE_VERIFY_PROJECT=seedon
 REMOTE_SOURCE_MODE=working-tree
 REMOTE_SSH_BACKEND=askpass
 REMOTE_PASSWORD=<remote password>
@@ -135,13 +135,13 @@ without changing deployment code.
 Example:
 
 ```text
-deploy_content/configs/sedon/foo.json
+deploy_content/configs/seedon/foo.json
 ```
 
 becomes:
 
 ```text
-/root/anaconda3/mujoco-train-system/code/releases/<release>/configs/sedon/foo.json
+/root/anaconda3/mujoco-train-system/code/releases/<release>/configs/seedon/foo.json
 ```
 
 `deploy_content/` is ignored by git except for its README and placeholder. Use

@@ -54,10 +54,10 @@ def test_iter_existing_extra_release_paths_includes_local_menagerie() -> None:
 
 
 def test_iter_private_release_paths_requires_explicit_opt_in() -> None:
-    assert iter_private_release_paths("sedon", include_private_assets=False) == []
+    assert iter_private_release_paths("seedon", include_private_assets=False) == []
 
 
 def test_iter_private_release_paths_reads_project_private_asset_dir() -> None:
-    private_paths = iter_private_release_paths("sedon", include_private_assets=True)
+    private_paths = iter_private_release_paths("seedon", include_private_assets=True)
 
-    assert any(path.parts[-2:] == ("private_assets", "sedon") for path in private_paths)
+    assert any(path.parts[-2:] == ("private_assets", "seedon") for path in private_paths)

@@ -19,7 +19,7 @@ from tools.micro_lift_mapping_search_v1 import (
 )
 
 
-DEFAULT_OUT_DIR = Path(__file__).resolve().parents[1] / "artifacts" / "sedon_debug" / "micro_lift_gain_calibration_v1"
+DEFAULT_OUT_DIR = Path(__file__).resolve().parents[1] / "artifacts" / "seedon_debug" / "micro_lift_gain_calibration_v1"
 
 
 def _parse_float_list(raw: str) -> list[float]:
@@ -94,7 +94,7 @@ def _gain_candidate(base: MicroLiftCandidate, gain: float, base_target_clearance
 
 def main(argv: list[str] | None = None) -> int:
     """Run gain calibration and classify the lift behavior."""
-    from tools.audit_sedon_shuffle_v0 import audit_shuffle
+    from tools.audit_seedon_shuffle_v0 import audit_shuffle
     from tools.micro_lift_mapping_search_v1 import audit_candidate, write_candidate_files
 
     args = build_parser().parse_args(argv)

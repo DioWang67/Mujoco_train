@@ -3,7 +3,7 @@ from pathlib import Path
 from robot_learning.training_config import (
     load_grasp_train_config,
     load_h1_train_config,
-    load_sedon_train_config,
+    load_seedon_train_config,
 )
 
 
@@ -25,8 +25,8 @@ def test_load_grasp_train_config_reads_expected_defaults() -> None:
     assert config.net_arch == [256, 256]
 
 
-def test_load_sedon_train_config_reads_expected_defaults() -> None:
-    config = load_sedon_train_config(Path.cwd())
+def test_load_seedon_train_config_reads_expected_defaults() -> None:
+    config = load_seedon_train_config(Path.cwd())
 
     assert config.n_envs_default == 4
     assert config.smoke_timesteps == 4096

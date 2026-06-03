@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "tool_version": "sedon-parameter-extractor-v1",
+  "tool_version": "seedon-parameter-extractor-v1",
   "extracted_at": "2026-06-01T06:42:42+00:00",
   "robot_name": "open_duck_mini",
   "source_xml": "references\\open_duck_mini\\source\\playground_open_duck_mini_v2\\xmls\\open_duck_mini_v2.xml",

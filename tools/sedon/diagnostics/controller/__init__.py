@@ -1,2 +1,0 @@
-"""Sedon controller-source diagnostics."""
-

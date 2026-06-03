@@ -20,20 +20,20 @@ configs/<slug>/train.json
 ```bash
 python train.py --project h1 --smoke
 python train.py --project grasp --smoke
-python train.py --project sedon --smoke
+python train.py --project seedon --smoke
 ```
 
 `project.json` supports these fields:
 
 ```json
 {
-  "slug": "sedon",
-  "display_name": "Sedon standing baseline",
-  "train_module": "sedon_baseline.train",
+  "slug": "seedon",
+  "display_name": "Seedon standing baseline",
+  "train_module": "seedon_baseline.train",
   "eval_module": null,
-  "job_name": "sedon",
+  "job_name": "seedon",
   "smoke_args": ["--smoke", "--n-envs", "1"],
-  "private_asset_dir": "private_assets/sedon"
+  "private_asset_dir": "private_assets/seedon"
 }
 ```
 
@@ -47,7 +47,7 @@ python train.py --project sedon --smoke
 configs/          Committable JSON configuration only.
 docs/             Runbooks, architecture notes, and review docs.
 grasp_baseline/   Grasp env, train entrypoint, tests, and small committed assets.
-sedon_baseline/   Sedon env, train entrypoint, and tests.
+seedon_baseline/   Seedon env, train entrypoint, and tests.
 tools/            Reusable Python CLIs.
 scripts/          Thin operator wrappers around Python tools or remote SSH flows.
 tests/            Cross-project unit tests.
@@ -67,7 +67,7 @@ h1_baseline/
 ```
 
 Do not create root-level robot files. New robot projects should use a package
-directory like `sedon_baseline/`.
+directory like `seedon_baseline/`.
 
 ## What Belongs In Shared Code
 
@@ -98,12 +98,12 @@ Those belong under ignored local storage:
 private_assets/<robot>/
 ```
 
-For Sedon, the expected private layout is:
+For Seedon, the expected private layout is:
 
 ```text
-private_assets/sedon/original_urdf_package/
-private_assets/sedon/mjcf_source/
-private_assets/sedon/training_scene.xml
+private_assets/seedon/original_urdf_package/
+private_assets/seedon/mjcf_source/
+private_assets/seedon/training_scene.xml
 ```
 
 Only commit reproducible tools and non-secret config. Do not commit company

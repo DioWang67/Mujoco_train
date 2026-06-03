@@ -22,11 +22,11 @@ from tools.blue_unload_mechanism_search import (
 DEFAULT_SOURCE_TOP10 = (
     REPO_ROOT
     / "artifacts"
-    / "sedon_debug"
+    / "seedon_debug"
     / "blue_unload_mechanism_search"
     / "blue_unload_mechanism_search_top10.csv"
 )
-DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "sedon_debug" / "blue_unload_refine_v2"
+DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "seedon_debug" / "blue_unload_refine_v2"
 
 
 @dataclass(frozen=True)

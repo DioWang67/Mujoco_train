@@ -1,4 +1,4 @@
-"""Attribute Sedon unload authority to individual control channels.
+"""Attribute Seedon unload authority to individual control channels.
 
 This tool runs the stable v2a unload controller and injects one small
 single-channel correction during UNLOAD. It is intentionally diagnostic:
@@ -16,10 +16,10 @@ from typing import Any, Callable
 
 import numpy as np
 
-from sedon_baseline.env import SedonStandingEnv
-from tools.audit_sedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
+from seedon_baseline.env import SeedonStandingEnv
+from tools.audit_seedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
 from tools.blue_forward_shuffle_v1 import DEFAULT_CONFIG, DEFAULT_MODEL, DEFAULT_VECNORM
-from tools.sedon_explicit_locomotion_controller_v2 import (
+from tools.seedon_explicit_locomotion_controller_v2 import (
     L_ANKLE,
     L_HIP_PITCH,
     L_HIP_ROLL,
@@ -34,7 +34,7 @@ from tools.sedon_explicit_locomotion_controller_v2 import (
     _support_force,
     _swing_force,
 )
-from tools.sedon_unload_controller_v2a import (
+from tools.seedon_unload_controller_v2a import (
     UnloadConfig,
     UnloadPhase,
     UnloadRuntime,
@@ -44,7 +44,7 @@ from tools.sedon_unload_controller_v2a import (
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "sedon_debug" / "unload_authority_attribution_v1"
+DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "seedon_debug" / "unload_authority_attribution_v1"
 
 
 @dataclass(frozen=True)
@@ -152,7 +152,7 @@ def _safe_name(channel: str, delta: float) -> str:
     return f"{channel}_{sign}{abs(delta):.4f}".replace(".", "p")
 
 
-def _row(step: int, env: SedonStandingEnv, runtime: UnloadRuntime, event: str, robot_weight: float) -> dict[str, Any]:
+def _row(step: int, env: SeedonStandingEnv, runtime: UnloadRuntime, event: str, robot_weight: float) -> dict[str, Any]:
     swing = _swing_force(env, runtime.swing_side)
     support = _support_force(env, runtime.swing_side)
     return {
@@ -283,7 +283,7 @@ def run_case(
 ) -> RolloutMetrics:
     """Run one attribution case and return aggregate metrics."""
 
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(config_path))
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(config_path))
     runtime = UnloadRuntime()
     rows: list[dict[str, Any]] = []
     case_name = "baseline" if channel is None else _safe_name(channel.name, delta)
@@ -335,7 +335,7 @@ def write_summary(path: Path, baseline: RolloutMetrics, rows: list[RolloutMetric
         reverse=True,
     )
     lines = [
-        "# Sedon Unload Authority Attribution V1",
+        "# Seedon Unload Authority Attribution V1",
         "",
         f"baseline_mean_swing_force_unload: {baseline.mean_swing_force_unload:.3f} N",
         f"baseline_min_swing_force_unload: {baseline.min_swing_force_unload:.3f} N",

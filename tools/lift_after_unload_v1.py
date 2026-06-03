@@ -11,8 +11,8 @@ from typing import Any
 
 import numpy as np
 
-from sedon_baseline.env import SedonStandingEnv
-from tools.audit_sedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
+from seedon_baseline.env import SeedonStandingEnv
+from tools.audit_seedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
 from tools.blue_unload_mechanism_search import (
     DEFAULT_BASE_CONFIG,
     JOINT_NAMES,
@@ -30,17 +30,17 @@ from tools.blue_unload_mechanism_search import (
     _right_unload_target,
     _zero,
 )
-from tools.render_sedon_policy_comparison import _make_side_camera, _save_mp4
+from tools.render_seedon_policy_comparison import _make_side_camera, _save_mp4
 
 
 DEFAULT_SOURCE_TOP = (
     REPO_ROOT
     / "artifacts"
-    / "sedon_debug"
+    / "seedon_debug"
     / "blue_unload_refine_v2"
     / "blue_unload_refine_v2_top20.csv"
 )
-DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "sedon_debug" / "lift_after_unload_v1"
+DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "seedon_debug" / "lift_after_unload_v1"
 LIFT_VECTOR = np.array([0.18, -0.36, 0.18], dtype=np.float64)
 
 
@@ -232,7 +232,7 @@ def build_seed(c: LiftCandidate, neutral_duration: int) -> dict[str, Any]:
     right_pre = max(1, c.right_window.start_local_step)
     left_pre = max(1, c.left_window.start_local_step)
     return {
-        "schema": "sedon_gait_seed.v1",
+        "schema": "seedon_gait_seed.v1",
         "target_type": "absolute",
         "description": "Generated lift-after-unload v1 reference.",
         "joint_names": JOINT_NAMES,
@@ -326,7 +326,7 @@ def audit_candidate(
     warmup_steps: int,
 ) -> LiftAudit:
     """Run dynamic PD audit for one lift-after-unload candidate."""
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(config_path))
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(config_path))
     total_weight = float(np.sum(env.model.body_mass) * 9.81)
     infos: list[dict[str, Any]] = []
     timeline: list[dict[str, Any]] = []
@@ -444,7 +444,7 @@ def render_candidate(
     """Render one lift candidate to MP4."""
     import mujoco
 
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(Path(row.config_path)))
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(Path(row.config_path)))
     renderer = mujoco.Renderer(env.model, height=height, width=width)
     camera = _make_side_camera()
     frames: list[np.ndarray] = []

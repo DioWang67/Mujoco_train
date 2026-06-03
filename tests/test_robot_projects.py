@@ -74,18 +74,18 @@ def test_load_robot_projects_reads_smoke_args_and_private_asset_dir(
     configs_root = tmp_path / "configs"
     _write_project_config(
         configs_root,
-        "sedon",
-        train_module="sedon_baseline.train",
+        "seedon",
+        train_module="seedon_baseline.train",
         extra={
             "smoke_args": ["--smoke", "--n-envs", "1"],
-            "private_asset_dir": "private_assets/sedon",
+            "private_asset_dir": "private_assets/seedon",
         },
     )
 
-    project = load_robot_projects(configs_root)["sedon"]
+    project = load_robot_projects(configs_root)["seedon"]
 
     assert project.smoke_args == ("--smoke", "--n-envs", "1")
-    assert project.private_asset_dir.name == "sedon"
+    assert project.private_asset_dir.name == "seedon"
 
 
 def test_load_robot_projects_rejects_unsafe_private_asset_dir(tmp_path: Path) -> None:

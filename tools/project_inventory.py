@@ -19,7 +19,7 @@ REPO_SECTIONS: tuple[tuple[str, str], ...] = (
     ("robot_learning", "Shared project discovery, config, path, and runtime helpers."),
     ("h1_baseline", "H1 walking environment, training, and evaluation code."),
     ("grasp_baseline", "Fixed-base grasp environment, assets, and training code."),
-    ("sedon_baseline", "Sedon environment, training, evaluation, and tests."),
+    ("seedon_baseline", "Seedon environment, training, evaluation, and tests."),
     ("tools", "Reusable Python CLIs for eval, diagnostics, release, and maintenance."),
     ("scripts", "Thin operator wrappers for Windows/Linux local and remote workflows."),
     ("tests", "Cross-project unit tests that should stay lightweight."),

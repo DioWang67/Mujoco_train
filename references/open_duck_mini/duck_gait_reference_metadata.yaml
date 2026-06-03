@@ -2,8 +2,8 @@
   "schema_version": 1,
   "tool_version": "duck-gait-reference-metadata-v1",
   "generated_at": "2026-06-01T07:28:40+00:00",
-  "purpose": "Identify local Duck gait/reference motion source metadata for Sedon Duck-like gait preparation.",
-  "search_root": "D:\\Git\\robotlearning\\h1_mujoco\\references\\open_duck_mini",
+  "purpose": "Identify local Duck gait/reference motion source metadata for Seedon Duck-like gait preparation.",
+  "search_root": "D:\\Git\\robotlearning\\seedon_mujoco\\references\\open_duck_mini",
   "summary": {
     "status": "NOT_FOUND",
     "files_scanned": 69,
@@ -37,7 +37,7 @@
       "reason": "No gait/reference keyword or supported motion data extension."
     },
     {
-      "path": "references/open_duck_mini/sedon_duck_joint_mapping.yaml",
+      "path": "references/open_duck_mini/seedon_duck_joint_mapping.yaml",
       "extension": ".yaml",
       "size_bytes": 5153,
       "classification": "not_candidate",

@@ -1,4 +1,4 @@
-"""Sweep Sedon reference lift variants under deterministic teacher PD tracking."""
+"""Sweep Seedon reference lift variants under deterministic teacher PD tracking."""
 
 from __future__ import annotations
 
@@ -12,15 +12,15 @@ from typing import Any
 
 import numpy as np
 
-from sedon_baseline.env import SedonStandingEnv
-from tools.audit_sedon_shuffle_v0 import _count_contact_none_bursts, _load_config
-from tools.render_sedon_policy_comparison import _make_side_camera, _save_mp4
+from seedon_baseline.env import SeedonStandingEnv
+from tools.audit_seedon_shuffle_v0 import _count_contact_none_bursts, _load_config
+from tools.render_seedon_policy_comparison import _make_side_camera, _save_mp4
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_BASE_CONFIG = REPO_ROOT / "configs" / "sedon" / "reference_teacher_pose_1_4_imitation.json"
-DEFAULT_BASE_SEED = REPO_ROOT / "configs" / "sedon" / "reference_march_pose_1_4_mirrored_seed.json"
-DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "sedon_debug" / "reference_lift_sweep"
+DEFAULT_BASE_CONFIG = REPO_ROOT / "configs" / "seedon" / "reference_teacher_pose_1_4_imitation.json"
+DEFAULT_BASE_SEED = REPO_ROOT / "configs" / "seedon" / "reference_march_pose_1_4_mirrored_seed.json"
+DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "seedon_debug" / "reference_lift_sweep"
 SWING_JOINT_INDEXES = {
     "right": (2, 3, 4),
     "left": (7, 8, 9),
@@ -152,7 +152,7 @@ def audit_reference_candidate(
         raise ValueError("audit_warmup_steps must be non-negative.")
 
     config = _load_config(config_path)
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=config)
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=config)
     infos: list[dict[str, Any]] = []
     total_weight = float(np.sum(env.model.body_mass) * 9.81)
     try:
@@ -321,7 +321,7 @@ def _render_reference_video(
     import mujoco
 
     config = _load_config(Path(result.config_path))
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=config)
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=config)
     renderer = mujoco.Renderer(env.model, height=height, width=width)
     camera = _make_side_camera()
     frames: list[np.ndarray] = []

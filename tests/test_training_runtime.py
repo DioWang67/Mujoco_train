@@ -32,16 +32,16 @@ def test_write_run_manifest_persists_expected_fields(tmp_path: Path) -> None:
     write_run_manifest(
         manifest_path,
         repo_root=Path.cwd(),
-        command=["train.py", "--project", "sedon"],
-        models_root="models/sedon",
-        logs_root="logs/sedon",
-        tb_root="logs/tb/sedon",
+        command=["train.py", "--project", "seedon"],
+        models_root="models/seedon",
+        logs_root="logs/seedon",
+        tb_root="logs/tb/seedon",
         managed_layout=False,
     )
 
     data = json.loads(manifest_path.read_text(encoding="utf-8"))
-    assert data["command"] == "train.py --project sedon"
-    assert data["models_root"] == "models/sedon"
+    assert data["command"] == "train.py --project seedon"
+    assert data["models_root"] == "models/seedon"
     assert data["managed_layout"] is False
     assert "created_at" in data
     assert "git_commit" in data

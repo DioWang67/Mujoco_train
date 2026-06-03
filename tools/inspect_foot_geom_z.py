@@ -1,4 +1,4 @@
-"""Inspect settled world z/contact state for Sedon foot-related geoms.
+"""Inspect settled world z/contact state for Seedon foot-related geoms.
 
 This Class C geometry diagnostic loads MJCF scenes directly with MuJoCo,
 settles them briefly with zero controls, and reports foot/toe/heel/sole/center
@@ -14,7 +14,7 @@ from pathlib import Path
 
 import mujoco
 
-from tools.sedon_debug_common import DEBUG_OUT_DIR, geom_name, require_scene
+from tools.seedon_debug_common import DEBUG_OUT_DIR, geom_name, require_scene
 
 
 DEFAULT_SCENES = (

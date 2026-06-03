@@ -11,8 +11,8 @@ from typing import Any
 import mujoco
 import numpy as np
 
-from sedon_baseline.env import SedonStandingEnv
-from tools.audit_sedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
+from seedon_baseline.env import SeedonStandingEnv
+from tools.audit_seedon_shuffle_v0 import _count_contact_none_bursts, _load_config, audit_shuffle
 from tools.blue_unload_mechanism_search import (
     DEFAULT_BASE_CONFIG,
     JOINT_NAMES,
@@ -35,11 +35,11 @@ from tools.blue_unload_mechanism_search import (
 DEFAULT_SOURCE_TOP = (
     REPO_ROOT
     / "artifacts"
-    / "sedon_debug"
+    / "seedon_debug"
     / "blue_unload_refine_v2"
     / "blue_unload_refine_v2_top20.csv"
 )
-DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "sedon_debug" / "explicit_contact_force_lift_controller_v1"
+DEFAULT_OUT_DIR = REPO_ROOT / "artifacts" / "seedon_debug" / "explicit_contact_force_lift_controller_v1"
 KINEMATIC_GAIN1_CLEARANCE_M = 0.00023308280933499043
 
 
@@ -183,7 +183,7 @@ def _feedback_unload_target(base: np.ndarray, swing_side: str, swing_force: floa
     return target
 
 
-def _force_state(env: SedonStandingEnv, swing_side: str) -> tuple[float, float]:
+def _force_state(env: SeedonStandingEnv, swing_side: str) -> tuple[float, float]:
     forces = env._foot_force_state()
     if swing_side == "right":
         return float(forces["right_force"]), float(forces["left_force"])
@@ -192,12 +192,12 @@ def _force_state(env: SedonStandingEnv, swing_side: str) -> tuple[float, float]:
     raise ValueError(f"Unsupported swing side: {swing_side}")
 
 
-def _contact_state(env: SedonStandingEnv) -> str:
+def _contact_state(env: SeedonStandingEnv) -> str:
     flags = env._floor_contact_flags()
     return env._contact_state(flags)
 
 
-def _foot_bottom(env: SedonStandingEnv, side: str) -> float:
+def _foot_bottom(env: SeedonStandingEnv, side: str) -> float:
     heights = env._foot_bottom_heights()
     if side == "right":
         return float(heights[0])
@@ -206,7 +206,7 @@ def _foot_bottom(env: SedonStandingEnv, side: str) -> float:
     raise ValueError(f"Unsupported side: {side}")
 
 
-def _clearance(env: SedonStandingEnv, swing_side: str) -> float:
+def _clearance(env: SeedonStandingEnv, swing_side: str) -> float:
     right_z, left_z = env._foot_bottom_heights()
     if swing_side == "right":
         return max(0.0, float(right_z - left_z))
@@ -215,14 +215,14 @@ def _clearance(env: SedonStandingEnv, swing_side: str) -> float:
     return 0.0
 
 
-def _ctrl_saturation(env: SedonStandingEnv) -> float:
+def _ctrl_saturation(env: SeedonStandingEnv) -> float:
     span = np.maximum(env._ctrl_range[:, 1] - env._ctrl_range[:, 0], 1e-9)
     lower = np.abs(env.data.ctrl - env._ctrl_range[:, 0])
     upper = np.abs(env.data.ctrl - env._ctrl_range[:, 1])
     return float(np.mean(np.minimum(lower, upper) <= 0.02 * span))
 
 
-def _force_saturation(env: SedonStandingEnv) -> float:
+def _force_saturation(env: SeedonStandingEnv) -> float:
     if not hasattr(env.model, "actuator_forcerange") or not hasattr(env.data, "actuator_force"):
         return 0.0
     force_range = np.asarray(env.model.actuator_forcerange, dtype=np.float64)
@@ -237,12 +237,12 @@ def _force_saturation(env: SedonStandingEnv) -> float:
     return float(np.mean(saturated))
 
 
-def _step_target(env: SedonStandingEnv, target: np.ndarray) -> None:
+def _step_target(env: SeedonStandingEnv, target: np.ndarray) -> None:
     env._do_pd_simulation(env._apply_safe_joint_target_clamps(np.asarray(target, dtype=np.float64)))
     env._gait_step += 1
 
 
-def _state_row(env: SedonStandingEnv, step: int, phase: str, swing_side: str) -> dict[str, Any]:
+def _state_row(env: SeedonStandingEnv, step: int, phase: str, swing_side: str) -> dict[str, Any]:
     swing_force, support_force = _force_state(env, swing_side)
     return {
         "step": step,
@@ -264,7 +264,7 @@ def _state_row(env: SedonStandingEnv, step: int, phase: str, swing_side: str) ->
 
 
 def _run_side(
-    env: SedonStandingEnv,
+    env: SeedonStandingEnv,
     *,
     unload: UnloadCandidate,
     swing_side: str,
@@ -341,7 +341,7 @@ def audit_candidate(
     seed: int,
     warmup_steps: int,
 ) -> ForceLiftAudit:
-    env = SedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(config_path))
+    env = SeedonStandingEnv(reset_noise_scale=0.0, reward_config=_load_config(config_path))
     total_weight = float(np.sum(env.model.body_mass) * 9.81)
     rows: list[dict[str, Any]] = []
     try:
