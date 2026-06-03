@@ -1,0 +1,202 @@
+{
+  "schema_version": 1,
+  "source_scene": "private_assets/sedon_v5_22/training_scene.xml",
+  "source": "stl_derived_prototype",
+  "valid_for": "contact_diagnostic_only",
+  "variants": [
+    {
+      "variant_id": "stl_fitted_box",
+      "scene_path": "artifacts/sedon_debug/v5_22_stl_derived_foot_collision_probe/variants/stl_fitted_box/training_scene_stl_fitted_box.xml",
+      "metadata": {
+        "source": "stl_derived_prototype",
+        "valid_for": "contact_diagnostic_only",
+        "does_not_modify_source_scene": true,
+        "does_not_use_raw_stl_as_final_collision": true,
+        "added_geoms": [
+          {
+            "side": "left",
+            "geom_name": "L_foot_contact_stl_fitted_box",
+            "type": "box",
+            "pos": "0.0199040212 -0.0201351447 -0.0823616961",
+            "size": "0.0626285039 0.0144559378 0.01"
+          },
+          {
+            "side": "right",
+            "geom_name": "R_foot_contact_stl_fitted_box",
+            "type": "box",
+            "pos": "0.0199040212 0.0200648566 -0.0823616961",
+            "size": "0.0626285039 0.0144559371 0.01"
+          }
+        ]
+      }
+    },
+    {
+      "variant_id": "stl_fitted_lowered_toe_box",
+      "scene_path": "artifacts/sedon_debug/v5_22_stl_derived_foot_collision_probe/variants/stl_fitted_lowered_toe_box/training_scene_stl_fitted_lowered_toe_box.xml",
+      "metadata": {
+        "source": "stl_derived_prototype",
+        "valid_for": "contact_diagnostic_only",
+        "does_not_modify_source_scene": true,
+        "does_not_use_raw_stl_as_final_collision": true,
+        "added_geoms": [
+          {
+            "side": "left",
+            "geom_name": "L_foot_contact_stl_fitted_lowered_toe_box_base",
+            "type": "box",
+            "pos": "0.0199040212 -0.0201351447 -0.0823616961",
+            "size": "0.0626285039 0.0144559378 0.01"
+          },
+          {
+            "side": "left",
+            "geom_name": "L_foot_contact_stl_fitted_lowered_toe_box_toe",
+            "type": "box",
+            "pos": "0.0587336936 -0.0201351447 -0.0893616961",
+            "size": "0.0237988315 0.0144559378 0.007"
+          },
+          {
+            "side": "right",
+            "geom_name": "R_foot_contact_stl_fitted_lowered_toe_box_base",
+            "type": "box",
+            "pos": "0.0199040212 0.0200648566 -0.0823616961",
+            "size": "0.0626285039 0.0144559371 0.01"
+          },
+          {
+            "side": "right",
+            "geom_name": "R_foot_contact_stl_fitted_lowered_toe_box_toe",
+            "type": "box",
+            "pos": "0.0587336936 0.0200648566 -0.0893616961",
+            "size": "0.0237988315 0.0144559371 0.007"
+          }
+        ]
+      }
+    },
+    {
+      "variant_id": "stl_fitted_rocker_capsules",
+      "scene_path": "artifacts/sedon_debug/v5_22_stl_derived_foot_collision_probe/variants/stl_fitted_rocker_capsules/training_scene_stl_fitted_rocker_capsules.xml",
+      "metadata": {
+        "source": "stl_derived_prototype",
+        "valid_for": "contact_diagnostic_only",
+        "does_not_modify_source_scene": true,
+        "does_not_use_raw_stl_as_final_collision": true,
+        "added_geoms": [
+          {
+            "side": "left",
+            "region": "heel",
+            "geom_name": "L_foot_contact_stl_fitted_rocker_capsules_heel",
+            "type": "capsule",
+            "fromto": [
+              -0.016420511081814762,
+              -0.032856369949877264,
+              -0.08086169606447219,
+              -0.016420511081814762,
+              -0.00741391945630312,
+              -0.08086169606447219
+            ],
+            "size": 0.0075
+          },
+          {
+            "side": "left",
+            "region": "center",
+            "geom_name": "L_foot_contact_stl_fitted_rocker_capsules_center",
+            "type": "capsule",
+            "fromto": [
+              0.01990402117371559,
+              -0.032856369949877264,
+              -0.0878616960644722,
+              0.01990402117371559,
+              -0.00741391945630312,
+              -0.0878616960644722
+            ],
+            "size": 0.0075
+          },
+          {
+            "side": "left",
+            "region": "toe",
+            "geom_name": "L_foot_contact_stl_fitted_rocker_capsules_toe",
+            "type": "capsule",
+            "fromto": [
+              0.056228553429245945,
+              -0.032856369949877264,
+              -0.08386169606447219,
+              0.056228553429245945,
+              -0.00741391945630312,
+              -0.08386169606447219
+            ],
+            "size": 0.0075
+          },
+          {
+            "side": "right",
+            "region": "heel",
+            "geom_name": "R_foot_contact_stl_fitted_rocker_capsules_heel",
+            "type": "capsule",
+            "fromto": [
+              -0.016420511081814762,
+              0.007343631992116571,
+              -0.08086169606447219,
+              -0.016420511081814762,
+              0.03278608125634491,
+              -0.08086169606447219
+            ],
+            "size": 0.0075
+          },
+          {
+            "side": "right",
+            "region": "center",
+            "geom_name": "R_foot_contact_stl_fitted_rocker_capsules_center",
+            "type": "capsule",
+            "fromto": [
+              0.01990402117371559,
+              0.007343631992116571,
+              -0.0878616960644722,
+              0.01990402117371559,
+              0.03278608125634491,
+              -0.0878616960644722
+            ],
+            "size": 0.0075
+          },
+          {
+            "side": "right",
+            "region": "toe",
+            "geom_name": "R_foot_contact_stl_fitted_rocker_capsules_toe",
+            "type": "capsule",
+            "fromto": [
+              0.056228553429245945,
+              0.007343631992116571,
+              -0.08386169606447219,
+              0.056228553429245945,
+              0.03278608125634491,
+              -0.08386169606447219
+            ],
+            "size": 0.0075
+          }
+        ]
+      }
+    },
+    {
+      "variant_id": "stl_fitted_continuous_bottom",
+      "scene_path": "artifacts/sedon_debug/v5_22_stl_derived_foot_collision_probe/variants/stl_fitted_continuous_bottom/training_scene_stl_fitted_continuous_bottom.xml",
+      "metadata": {
+        "source": "stl_derived_prototype",
+        "valid_for": "contact_diagnostic_only",
+        "does_not_modify_source_scene": true,
+        "does_not_use_raw_stl_as_final_collision": true,
+        "added_geoms": [
+          {
+            "side": "left",
+            "geom_name": "L_foot_contact_stl_fitted_continuous_bottom",
+            "type": "ellipsoid",
+            "pos": "0.0199040212 -0.0201351447 -0.0883616961",
+            "size": "0.0626285039 0.0137331409 0.008"
+          },
+          {
+            "side": "right",
+            "geom_name": "R_foot_contact_stl_fitted_continuous_bottom",
+            "type": "ellipsoid",
+            "pos": "0.0199040212 0.0200648566 -0.0883616961",
+            "size": "0.0626285039 0.0137331402 0.008"
+          }
+        ]
+      }
+    }
+  ]
+}

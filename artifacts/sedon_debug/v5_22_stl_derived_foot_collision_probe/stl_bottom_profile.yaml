@@ -1,0 +1,395 @@
+{
+  "schema_version": 1,
+  "source": "stl_derived_prototype",
+  "valid_for": "contact_diagnostic_only",
+  "profiles": {
+    "left": {
+      "side": "left",
+      "stl_path": "private_assets/sedon_v5_22/mjcf_source/L_link_ankle_pitch.STL",
+      "vertex_count": 126426,
+      "triangle_count": 42142,
+      "bbox": {
+        "min": [
+          -0.07308342307806015,
+          -0.052949998527765274,
+          -0.0923616960644722
+        ],
+        "max": [
+          0.12618429958820343,
+          0.020999830216169357,
+          0.05249856784939766
+        ],
+        "center": [
+          0.02655043825507164,
+          -0.01597508415579796,
+          -0.01993156410753727
+        ],
+        "dimensions": {
+          "x": 0.19926772266626358,
+          "y": 0.07394982874393463,
+          "z": 0.14486026391386986
+        },
+        "length_x": 0.19926772266626358,
+        "width_y": 0.07394982874393463,
+        "height_z": 0.14486026391386986,
+        "length": 0.19926772266626358,
+        "width": 0.07394982874393463,
+        "height": 0.14486026391386986
+      },
+      "bottom_candidate_percentile": 2.0,
+      "bottom_candidate_bbox": {
+        "min": [
+          -0.04272448271512985,
+          -0.034591082483530045,
+          -0.0923616960644722
+        ],
+        "max": [
+          0.08253252506256104,
+          -0.005679206922650337,
+          -0.0918864980340004
+        ],
+        "center": [
+          0.01990402117371559,
+          -0.02013514470309019,
+          -0.0921240970492363
+        ],
+        "dimensions": {
+          "x": 0.1252570077776909,
+          "y": 0.028911875560879707,
+          "z": 0.00047519803047180176
+        },
+        "length_x": 0.1252570077776909,
+        "width_y": 0.028911875560879707,
+        "height_z": 0.00047519803047180176,
+        "length": 0.1252570077776909,
+        "width": 0.028911875560879707,
+        "height": 0.00047519803047180176
+      },
+      "bottom_lowest_z_profile_along_local_x": [
+        {
+          "bin": 0,
+          "x_start": -0.07308342307806015,
+          "x_end": -0.056477779522538185,
+          "x_center": -0.06478060130029917,
+          "lowest_z": -0.08819083124399185,
+          "candidate_y_min": -0.020099999383091927,
+          "candidate_y_max": -0.020099999383091927,
+          "sample_count": 16407
+        },
+        {
+          "bin": 1,
+          "x_start": -0.056477779522538185,
+          "x_end": -0.03987213596701622,
+          "x_center": -0.0481749577447772,
+          "lowest_z": -0.09231565147638321,
+          "candidate_y_min": -0.020099999383091927,
+          "candidate_y_max": -0.020099999383091927,
+          "sample_count": 11952
+        },
+        {
+          "bin": 2,
+          "x_start": -0.03987213596701622,
+          "x_end": -0.023266492411494255,
+          "x_center": -0.03156931418925524,
+          "lowest_z": -0.09236166626214981,
+          "candidate_y_min": -0.022596435621380806,
+          "candidate_y_max": -0.01616235263645649,
+          "sample_count": 8288
+        },
+        {
+          "bin": 3,
+          "x_start": -0.023266492411494255,
+          "x_end": -0.00666084885597229,
+          "x_center": -0.014963670633733273,
+          "lowest_z": -0.09236166626214981,
+          "candidate_y_min": -0.020099999383091927,
+          "candidate_y_max": -0.020099999383091927,
+          "sample_count": 10642
+        },
+        {
+          "bin": 4,
+          "x_start": -0.00666084885597229,
+          "x_end": 0.009944794699549675,
+          "x_center": 0.0016419729217886925,
+          "lowest_z": -0.09236166626214981,
+          "candidate_y_min": -0.020099999383091927,
+          "candidate_y_max": -0.020099999383091927,
+          "sample_count": 10314
+        },
+        {
+          "bin": 5,
+          "x_start": 0.009944794699549675,
+          "x_end": 0.02655043825507164,
+          "x_center": 0.018247616477310658,
+          "lowest_z": -0.09236166626214981,
+          "candidate_y_min": -0.020099999383091927,
+          "candidate_y_max": -0.020099999383091927,
+          "sample_count": 11417
+        },
+        {
+          "bin": 6,
+          "x_start": 0.02655043825507164,
+          "x_end": 0.043156081810593605,
+          "x_center": 0.03485326003283262,
+          "lowest_z": -0.09236166626214981,
+          "candidate_y_min": -0.020099999383091927,
+          "candidate_y_max": -0.020099999383091927,
+          "sample_count": 6784
+        },
+        {
+          "bin": 7,
+          "x_start": 0.043156081810593605,
+          "x_end": 0.05976172536611557,
+          "x_center": 0.05145890358835459,
+          "lowest_z": -0.09236166626214981,
+          "candidate_y_min": -0.020099999383091927,
+          "candidate_y_max": -0.020099999383091927,
+          "sample_count": 8694
+        },
+        {
+          "bin": 8,
+          "x_start": 0.05976172536611557,
+          "x_end": 0.07636736892163754,
+          "x_center": 0.06806454714387655,
+          "lowest_z": -0.0923616960644722,
+          "candidate_y_min": -0.020099999383091927,
+          "candidate_y_max": -0.020099999383091927,
+          "sample_count": 17994
+        },
+        {
+          "bin": 9,
+          "x_start": 0.07636736892163754,
+          "x_end": 0.0929730124771595,
+          "x_center": 0.08467019069939852,
+          "lowest_z": -0.09224153310060501,
+          "candidate_y_min": -0.020099999383091927,
+          "candidate_y_max": -0.020099999383091927,
+          "sample_count": 16006
+        },
+        {
+          "bin": 10,
+          "x_start": 0.0929730124771595,
+          "x_end": 0.10957865603268147,
+          "x_center": 0.10127583425492048,
+          "lowest_z": -0.09106893092393875,
+          "candidate_y_min": -0.020099999383091927,
+          "candidate_y_max": -0.020099999383091927,
+          "sample_count": 6539
+        },
+        {
+          "bin": 11,
+          "x_start": 0.10957865603268147,
+          "x_end": 0.12618429958820343,
+          "x_center": 0.11788147781044245,
+          "lowest_z": -0.08667580038309097,
+          "candidate_y_min": -0.02010001428425312,
+          "candidate_y_max": -0.02010001428425312,
+          "sample_count": 1389
+        }
+      ],
+      "bottom_lowest_z_range": 0.005685895681381226,
+      "bottom_shape_candidate": "curved_candidate",
+      "source": "stl_derived_prototype",
+      "valid_for": "contact_diagnostic_only",
+      "limitations": [
+        "STL orientation is assumed to use local z as vertical; source=assumption, confidence=low.",
+        "Ankle-pitch STL is a visual candidate, not a bottom-specific CAD surface.",
+        "Lowest-z percentile can include bevels or non-contact visual triangles."
+      ]
+    },
+    "right": {
+      "side": "right",
+      "stl_path": "private_assets/sedon_v5_22/mjcf_source/R_link_ankle_pitch.STL",
+      "vertex_count": 126978,
+      "triangle_count": 42326,
+      "bbox": {
+        "min": [
+          -0.07308342307806015,
+          -0.020999830216169357,
+          -0.0923616960644722
+        ],
+        "max": [
+          0.12618429958820343,
+          0.052949998527765274,
+          0.05249858275055885
+        ],
+        "center": [
+          0.02655043825507164,
+          0.01597508415579796,
+          -0.019931556656956673
+        ],
+        "dimensions": {
+          "x": 0.19926772266626358,
+          "y": 0.07394982874393463,
+          "z": 0.14486027881503105
+        },
+        "length_x": 0.19926772266626358,
+        "width_y": 0.07394982874393463,
+        "height_z": 0.14486027881503105,
+        "length": 0.19926772266626358,
+        "width": 0.07394982874393463,
+        "height": 0.14486027881503105
+      },
+      "bottom_candidate_percentile": 2.0,
+      "bottom_candidate_bbox": {
+        "min": [
+          -0.04272448271512985,
+          0.00560891954228282,
+          -0.0923616960644722
+        ],
+        "max": [
+          0.08253252506256104,
+          0.034520793706178665,
+          -0.09187180548906326
+        ],
+        "center": [
+          0.01990402117371559,
+          0.020064856624230742,
+          -0.09211675077676773
+        ],
+        "dimensions": {
+          "x": 0.1252570077776909,
+          "y": 0.028911874163895845,
+          "z": 0.0004898905754089355
+        },
+        "length_x": 0.1252570077776909,
+        "width_y": 0.028911874163895845,
+        "height_z": 0.0004898905754089355,
+        "length": 0.1252570077776909,
+        "width": 0.028911874163895845,
+        "height": 0.0004898905754089355
+      },
+      "bottom_lowest_z_profile_along_local_x": [
+        {
+          "bin": 0,
+          "x_start": -0.07308342307806015,
+          "x_end": -0.056477779522538185,
+          "x_center": -0.06478060130029917,
+          "lowest_z": -0.08819083124399185,
+          "candidate_y_min": 0.020100001245737076,
+          "candidate_y_max": 0.020100001245737076,
+          "sample_count": 16064
+        },
+        {
+          "bin": 1,
+          "x_start": -0.056477779522538185,
+          "x_end": -0.03987213596701622,
+          "x_center": -0.0481749577447772,
+          "lowest_z": -0.09231565147638321,
+          "candidate_y_min": 0.020100001245737076,
+          "candidate_y_max": 0.020100001245737076,
+          "sample_count": 11762
+        },
+        {
+          "bin": 2,
+          "x_start": -0.03987213596701622,
+          "x_end": -0.023266492411494255,
+          "x_center": -0.03156931418925524,
+          "lowest_z": -0.09236166626214981,
+          "candidate_y_min": 0.017603565007448196,
+          "candidate_y_max": 0.024037647992372513,
+          "sample_count": 8353
+        },
+        {
+          "bin": 3,
+          "x_start": -0.023266492411494255,
+          "x_end": -0.00666084885597229,
+          "x_center": -0.014963670633733273,
+          "lowest_z": -0.09236166626214981,
+          "candidate_y_min": 0.020100001245737076,
+          "candidate_y_max": 0.020100001245737076,
+          "sample_count": 10661
+        },
+        {
+          "bin": 4,
+          "x_start": -0.00666084885597229,
+          "x_end": 0.009944794699549675,
+          "x_center": 0.0016419729217886925,
+          "lowest_z": -0.09236166626214981,
+          "candidate_y_min": 0.020100001245737076,
+          "candidate_y_max": 0.020100001245737076,
+          "sample_count": 10797
+        },
+        {
+          "bin": 5,
+          "x_start": 0.009944794699549675,
+          "x_end": 0.02655043825507164,
+          "x_center": 0.018247616477310658,
+          "lowest_z": -0.09236166626214981,
+          "candidate_y_min": 0.020100001245737076,
+          "candidate_y_max": 0.020100001245737076,
+          "sample_count": 11539
+        },
+        {
+          "bin": 6,
+          "x_start": 0.02655043825507164,
+          "x_end": 0.043156081810593605,
+          "x_center": 0.03485326003283262,
+          "lowest_z": -0.09236166626214981,
+          "candidate_y_min": 0.020100001245737076,
+          "candidate_y_max": 0.020100001245737076,
+          "sample_count": 6746
+        },
+        {
+          "bin": 7,
+          "x_start": 0.043156081810593605,
+          "x_end": 0.05976172536611557,
+          "x_center": 0.05145890358835459,
+          "lowest_z": -0.09236166626214981,
+          "candidate_y_min": 0.020100001245737076,
+          "candidate_y_max": 0.020100001245737076,
+          "sample_count": 8934
+        },
+        {
+          "bin": 8,
+          "x_start": 0.05976172536611557,
+          "x_end": 0.07636736892163754,
+          "x_center": 0.06806454714387655,
+          "lowest_z": -0.0923616960644722,
+          "candidate_y_min": 0.020100001245737076,
+          "candidate_y_max": 0.020100001245737076,
+          "sample_count": 18151
+        },
+        {
+          "bin": 9,
+          "x_start": 0.07636736892163754,
+          "x_end": 0.0929730124771595,
+          "x_center": 0.08467019069939852,
+          "lowest_z": -0.09224153310060501,
+          "candidate_y_min": 0.020100001245737076,
+          "candidate_y_max": 0.020100001245737076,
+          "sample_count": 15952
+        },
+        {
+          "bin": 10,
+          "x_start": 0.0929730124771595,
+          "x_end": 0.10957865603268147,
+          "x_center": 0.10127583425492048,
+          "lowest_z": -0.09106893092393875,
+          "candidate_y_min": 0.020100001245737076,
+          "candidate_y_max": 0.020100001245737076,
+          "sample_count": 6630
+        },
+        {
+          "bin": 11,
+          "x_start": 0.10957865603268147,
+          "x_end": 0.12618429958820343,
+          "x_center": 0.11788147781044245,
+          "lowest_z": -0.08667580038309097,
+          "candidate_y_min": 0.020099986344575882,
+          "candidate_y_max": 0.020099986344575882,
+          "sample_count": 1389
+        }
+      ],
+      "bottom_lowest_z_range": 0.005685895681381226,
+      "bottom_shape_candidate": "curved_candidate",
+      "source": "stl_derived_prototype",
+      "valid_for": "contact_diagnostic_only",
+      "limitations": [
+        "STL orientation is assumed to use local z as vertical; source=assumption, confidence=low.",
+        "Ankle-pitch STL is a visual candidate, not a bottom-specific CAD surface.",
+        "Lowest-z percentile can include bevels or non-contact visual triangles."
+      ]
+    }
+  }
+}
